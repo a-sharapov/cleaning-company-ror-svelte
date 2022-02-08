@@ -14,4 +14,10 @@ class ApplicationController < ActionController::API
   def param_to_search(param)
     return CGI.unescape(param.to_s)
   end
+
+  def bearer_token
+    pattern = /^Bearer /
+    header  = request.headers['Authorization']
+    header.gsub(pattern, '') if header && header.match(pattern)
+  end
 end

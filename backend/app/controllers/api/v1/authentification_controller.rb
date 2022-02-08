@@ -24,13 +24,18 @@ class Api::V1::AuthentificationController < ApplicationController
   
   def logout
     user_data = AuthentificationTokenService.decode_token(bearer_token)
-    user = User.find_by(:login => user_data.first["login"])
+    if user_data
+      user = User.find_by(:login => user_data.first["login"])
 
-    if (user && user.token.present? && user.unset(:token) )
-      message = {message: "User successfully logged out"}
-      render json: message, status: :ok
+      if (user && user.token.present? && user.unset(:token) )
+        message = {message: "User successfully logged out"}
+        render json: message, status: :ok
+      else
+        message = {message: "Something went wrong or user is not logged in"}
+        render json: message, status: :unauthorized
+      end
     else
-      message = {message: "Something went wrong or user is not logged in"}
+      message = {message: "Unauthorized access attempted"}
       render json: message, status: :unauthorized
     end
   end
@@ -44,11 +49,4 @@ class Api::V1::AuthentificationController < ApplicationController
     @login = param_to_search(user_auth_parameters[:login])
     @user = User.find_by(:login => @login)
   end
-
-  def bearer_token
-    pattern = /^Bearer /
-    header  = request.headers['Authorization']
-    header.gsub(pattern, '') if header && header.match(pattern)
-  end
-  
 end
