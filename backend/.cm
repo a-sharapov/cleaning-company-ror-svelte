@@ -1,0 +1,2 @@
+rails new . --skip-active-record --skip-bundle --api --no-sprocket --skip-test --skip-system-test
+rails g mongoid:config

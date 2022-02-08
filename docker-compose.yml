@@ -1,0 +1,82 @@
+version: '3.0'
+
+networks:
+  cleaning-service:
+    driver: bridge
+
+services:
+  mongo:
+    container_name: cleaning-service-db
+    image: mongo:latest
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: cl34n!Sv
+    ports:
+      - "27017:27017"
+    volumes:
+      - "mongodb:/var/lib/mongodb/data"
+    networks:
+      - cleaning-service
+
+  nginx:
+    container_name: cleaning-service-proxy
+    build:
+      context: .
+      dockerfile: ./docker/nginx/Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: on-failure
+    networks:
+      - cleaning-service
+
+  backend:
+    container_name: cleaning-service-backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      CHOKIDAR_USEPOLLING: "true" # for hotreload
+      RAILS_ENV: development
+    volumes:
+      - ./backend:/usr/src/backend # for hotreload
+    depends_on:
+      - mongo
+    links:
+      - mongo
+    command: bundle exec rails s -p 5000 -b '0.0.0.0' #ToDo change to real used command
+    restart: on-failure
+    networks:
+      - cleaning-service
+
+  frontend:
+    container_name: cleaning-service-frontend
+    build:
+      context: ./frontend
+      dockerfile: ./Dockerfile
+    environment:
+      CHOKIDAR_USEPOLLING: "true"
+      DANGEROUSLY_DISABLE_HOST_CHECK: "true"
+    volumes:
+      - ./frontend:/usr/src/frontend
+      - /usr/src/frontend/node_modules
+    links:
+      - backend
+    command: npm run dev --host 0.0.0.0 #node build
+    networks:
+      - cleaning-service
+    expose:
+      - 3000
+      - 24678
+    ports:
+      - "3000:3000"
+      - "24678:24678"
+    stdin_open: true
+    restart: on-failure
+    depends_on:
+      - backend
+
+volumes:
+  mongodb:
