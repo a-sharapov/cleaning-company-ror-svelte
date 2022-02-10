@@ -11,7 +11,8 @@ class User
   field :phone, type: String
   field :address, type: Object
   field :password_digest, type: String
-  field :token, type: String
+  field :tokens, type: Array
+  field :confirmed, type: Boolean
 
   validates :login,     presence: true, 
                         uniqueness: true, 

@@ -1,14 +1,18 @@
 Rails.application.routes.draw do
   namespace :api do
+    get '/', to: "v1/api#index"
+    get 'v1', to: "v1/api#endpoints"
+
     namespace :v1 do
-      get "get_user", action: :get_user, controller: :users
-      get "get_users", action: :get_users, controller: :users
-      post "create_user", action: :create_user, controller: :users
-      put "update_user", action: :update_user, controller: :users
-      delete "delete_user", action: :delete_user, controller: :users
+      get "users", to: "users#index"
+      post "users", to: "users#new"
+      get "users/:id", to: "users#show"
+      put "users/:id", to: "users#update"
+      delete "users/:id", to: "users#destroy"
       
-      post "login", action: :login, controller: :authentification
-      get "logout", action: :logout, controller: :authentification
+      post "auth/login", to: "authentification#login"
+      post "auth/logout", to: "authentification#logout"
+      get "auth/refresh", to: "authentification#refresh"
     end
   end
 end

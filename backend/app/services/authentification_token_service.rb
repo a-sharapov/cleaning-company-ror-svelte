@@ -3,12 +3,16 @@ class AuthentificationTokenService
   ALGORITHM_TYPE = "HS256"
 
   class << self
-    def create_token(user)
+    def create_token(user, type)
       return false unless user.present?
+      expires_in = (Time.now + 60*15).to_i if type.eql?(:access)
+      expires_in = (Time.now + 3600*8).to_i if type.eql?(:refresh)
+
       payload = { 
         login: user.login,
         role: user.role,
-        expires_in: (Time.now + 3600*8).to_i
+        confirmed: user.confirmed,
+        expires_in: expires_in,
       }
 
       JWT.encode(payload, HMAC_SECRET, ALGORITHM_TYPE)
@@ -20,7 +24,7 @@ class AuthentificationTokenService
     end
 
     def update_token(user)
-      #updated_token = create_token(user)
+      return self.create_token(user)
     end
   end
 end
