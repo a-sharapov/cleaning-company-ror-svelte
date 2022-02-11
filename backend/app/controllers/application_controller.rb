@@ -1,7 +1,7 @@
 class ApplicationController < ActionController::API
 
   protected
-  def except_data(data, parameters = [:password_digest, :_id])
+  def except_data(data, parameters = [:password_digest, :_id, :tokens])
     return data.as_json({except: parameters}).reverse_merge({id: data._id.to_s})
   end
 

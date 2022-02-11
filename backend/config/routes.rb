@@ -11,7 +11,7 @@ Rails.application.routes.draw do
       delete "users/:id", to: "users#destroy"
       
       post "auth/login", to: "authentification#login"
-      post "auth/logout", to: "authentification#logout"
+      delete "auth/logout", to: "authentification#logout"
       get "auth/refresh", to: "authentification#refresh"
     end
   end

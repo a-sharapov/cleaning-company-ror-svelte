@@ -17,7 +17,7 @@ class Api::V1::UsersController < ApplicationController
     users = User.all_of(@search_query).limit(@limit).offset(@offset).asc(:id)
     if users.any?
       data = users.map do |user|
-        except_data(user, [:password_digest, :_id, :token])
+        except_data(user)
       end
       records = users.count
       pages = (records.to_f/@limit).ceil
