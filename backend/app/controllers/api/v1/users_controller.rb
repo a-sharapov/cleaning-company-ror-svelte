@@ -1,6 +1,6 @@
 class Api::V1::UsersController < ApplicationController
   before_action :set_paging, only: [:index] 
-  before_action :get_user_by_id, only: [:show, :update, :destroy] 
+  before_action :get_user, only: [:show, :update, :destroy] 
   before_action :set_users_search_query, only: [:index] 
   before_action :get_tokens, only: [:update, :destroy] 
 
@@ -53,9 +53,9 @@ class Api::V1::UsersController < ApplicationController
       check_auth!
       raise ApiError.new(ApiError::MESSAGES[:api][:wrong_request], :unprocessable_entity) unless user_update_parameters.present?
       raise ApiError.new(ApiError::MESSAGES[:user][:not_exist], :not_found) unless @user
+      check_access!(@user)
       raise ApiError.new(ApiError::MESSAGES[:user][:not_update], :unprocessable_entity, @user.errors.full_messages) unless @user.valid?
-      raise ApiError.new(ApiError::MESSAGES[:user][:not_update], :not_acceptable) unless @user.update(user_update_parameters)
-      
+      raise ApiError.new(ApiError::MESSAGES[:user][:not_update], :not_acceptable) unless @user.update(user_update_parameters)      
       render_user_data(@user)
     rescue ApiError => e
       render_api_error(e)
@@ -66,6 +66,7 @@ class Api::V1::UsersController < ApplicationController
     begin
       check_auth!
       raise ApiError.new(ApiError::MESSAGES[:user][:not_exist], :not_found) unless @user
+      check_access!(@user)
       raise ApiError.new(ApiError::MESSAGES[:user][:not_remove], :unprocessable_entity) unless @user.destroy()
       
       render json: {message: ApiError::MESSAGES[:user][:deleted]}, status: :ok and return
@@ -84,20 +85,20 @@ class Api::V1::UsersController < ApplicationController
   end
 
   def user_update_parameters 
-    params.permit(:id, :login, :description, :email, :phone, :password, address: [:zip, :country, :city, :state, :street])
+    params.permit(:login, :description, :email, :phone, :password, address: [:zip, :country, :city, :state, :street])
   end
   
-  def get_user_by_id
-    @user_id = params[:id]
-    @user = User.find(@user_id)
+  def get_user
+    @user_login = params[:login]
+    @user = User.find_by(login: @user_login)
   end
 
   def set_users_search_query
     @search_query = {}
 
     case true
-      when !params[:id].nil?
-        @search_query[:id] = param_to_search(params[:id])
+    when !params[:id].nil?
+      @search_query[:activation_code] = /.*#{param_to_search(params[:id])}.*/
       when !params[:login].nil?
         @search_query[:login] = /.*#{param_to_search(params[:login])}.*/
       when !params[:email].nil?

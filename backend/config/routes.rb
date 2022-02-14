@@ -6,9 +6,9 @@ Rails.application.routes.draw do
     namespace :v1 do
       get "users", to: "users#index"
       post "users", to: "users#new"
-      get "users/:id", to: "users#show"
-      put "users/:id", to: "users#update"
-      delete "users/:id", to: "users#destroy"
+      get "users/:login", to: "users#show"
+      put "users/:login", to: "users#update"
+      delete "users/:login", to: "users#destroy"
       
       post "auth", to: "authentification#login"
       delete "auth", to: "authentification#logout"

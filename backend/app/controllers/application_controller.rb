@@ -3,7 +3,7 @@ class ApplicationController < ActionController::API
 
   protected
   def except_data!(data, parameters = [:password_digest, :_id, :tokens, :activation_code])
-    return data.as_json({except: parameters}).reverse_merge({id: data._id.to_s})
+    return data.as_json({except: parameters}).reverse_merge({id: data.activation_code.to_s})
   end
 
   def set_paging
@@ -43,5 +43,9 @@ class ApplicationController < ActionController::API
       raise ApiError.new(ApiError::MESSAGES[:auth][:unauthorized_access], :unauthorized) unless AuthentificationTokenService.decode_token(get_tokens[:access_token])
       raise ApiError.new(ApiError::MESSAGES[:auth][:unauthorized_access], :unauthorized) if AuthentificationTokenService.expired?(get_tokens[:access_token])
     end
+  end
+
+  def check_access!(user)
+    raise ApiError.new(ApiError::MESSAGES[:auth][:unauthorized_access], :unauthorized) unless user.role.eql?("manager") || user.login.eql?(AuthentificationTokenService.decode_token(get_tokens[:access_token]).first["login"])
   end
 end
