@@ -1,5 +1,5 @@
 class ApplicationController < ActionController::API
-  
+
   protected
   def except_data!(data, parameters = [:password_digest, :_id, :tokens, :activation_code])
     return data.as_json({except: parameters}).reverse_merge({id: data._id.to_s})
@@ -62,5 +62,9 @@ class ApplicationController < ActionController::API
     return {
         access_token: access_token.to_s, 
     }
+  end
+
+  def render_api_error(message, type)
+    render json: {error: message}, status: type and return
   end
 end

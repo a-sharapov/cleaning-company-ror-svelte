@@ -22,7 +22,7 @@ class Api::V1::UsersController < ApplicationController
         data: data, 
       }, status: :ok and return
     rescue ApiError => e
-      render json: {error: e.message}, status: e.type and return
+      render_api_error(e.message, e.type)
     end
   end
 
@@ -31,7 +31,7 @@ class Api::V1::UsersController < ApplicationController
       raise ApiError.new(ApiError::MESSAGES[:user][:not_exist], :not_found) unless @user
       render json: except_data!(@user), status: :ok and return
     rescue ApiError => e
-      render json: {error: e.message}, status: e.type and return
+      render_api_error(e.message, e.type)
     end
   end
 
@@ -47,7 +47,7 @@ class Api::V1::UsersController < ApplicationController
 
       render json: except_data!(user), status: :ok and return
     rescue ApiError => e
-      render json: {error: e.message}, status: e.type and return
+      render_api_error(e.message, e.type)
     end
   end
 
@@ -59,7 +59,7 @@ class Api::V1::UsersController < ApplicationController
       
       render json: except_data!(@user), status: :ok and return
     rescue ApiError => e
-      render json: {error: e.message}, status: e.type and return
+      render_api_error(e.message, e.type)
     end
   end
 
@@ -70,7 +70,7 @@ class Api::V1::UsersController < ApplicationController
       
       render json: {message: ApiError::MESSAGES[:user][:deleted]}, status: :ok and return
     rescue ApiError => e
-      render json: {error: e.message}, status: e.type and return
+      render_api_error(e.message, e.type)
     end
   end
 
