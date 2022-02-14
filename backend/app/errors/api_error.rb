@@ -10,6 +10,7 @@ class ApiError < StandardError
       not_update: "Could not update current user",
       not_remove: "Could not remove current user",
       deleted: "The user has been removed from the system",
+      new_password: "Password was updated and sent to email address successfully",
     },
     token: {
       not_set: "Tokens invalid or not setted",
@@ -35,9 +36,11 @@ class ApiError < StandardError
   }
 
   attr_reader :type
+  attr_reader :assets
 
-  def initialize(message = "Error!", type = :unprocessable_entity)
+  def initialize(message = "Error!", type = :unprocessable_entity, assets = nil)
     super(message)
     @type = type
+    @assets = assets
   end
 end

@@ -22,30 +22,26 @@ class ApplicationController < ActionController::API
     header.gsub(pattern, '') if header && header.match(pattern)
   end
 
-  def decode_bearer_token!
-    @access_token_data = AuthentificationTokenService.decode_token(bearer_token)
-  end
-
-  def render_api_error(message, type)
-    render json: {error: message}, status: type and return
+  def render_api_error(e)
+    message = {message: e.message}
+    message = {message: e.message, errors: e.assets} unless e.assets.nil?
+    render json: message, status: e.type and return
   end
   
   def get_tokens
-    false unless cookies["refresh_token"].present? || cookies["refresh_token"].nil?
-    false unless bearer_token.present? || bearer_token.nil?
-    refresh_token = cookies["refresh_token"]
-    access_token = bearer_token
-
-    {
-      access_token: access_token,
-      refresh_token: refresh_token,
+    return false unless cookies["refresh_token"].present?
+    return false unless bearer_token.present?
+    return {
+      access_token: bearer_token,
+      refresh_token: cookies["refresh_token"],
     }
   end
 
-  def expired?(token)
-    token_data = AuthentificationTokenService.decode_token(token)
-    false if !token_data.present? || token_data.empty? || token_data.nil?
-    false if Time.now.to_i >= token_data.first["expires_in"].to_i
-    true
+  def check_auth!
+    begin
+      raise ApiError.new(ApiError::MESSAGES[:token][:not_set], :unprocessable_entity) unless get_tokens
+      raise ApiError.new(ApiError::MESSAGES[:auth][:unauthorized_access], :unauthorized) unless AuthentificationTokenService.decode_token(get_tokens[:access_token])
+      raise ApiError.new(ApiError::MESSAGES[:auth][:unauthorized_access], :unauthorized) if AuthentificationTokenService.expired?(get_tokens[:access_token])
+    end
   end
 end

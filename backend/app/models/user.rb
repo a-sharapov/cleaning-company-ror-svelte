@@ -14,6 +14,8 @@ class User
   field :tokens, type: Array
   field :confirmed, type: Boolean, default: false
   field :activation_code, type: String
+  field :created_at, type: DateTime
+  field :updated_at, type: DateTime
 
   validates :login,     presence: true, 
                         uniqueness: true, 
@@ -66,5 +68,10 @@ class User
   def prepare_data
     self.email = email.downcase unless email.blank?
     self.activation_code = SecureRandom.uuid
+    if self.created_at.present?
+      self.updated_at = Time.now
+    else
+      self.created_at = Time.now
+    end
   end
 end

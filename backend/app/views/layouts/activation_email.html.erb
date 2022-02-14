@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
+  </head>
+  <body>
+    <table width="100%" height="100%" border="0" style="border-spacing: 0; font-family: Arial, Open Sans, sans-serif;">
+      <tr style="margin: 0" bgcolor="#dedede">
+        <td width="20%"></td>
+        <td width="60%" style="padding: 40px 0;">
+          <table width="100%" style="box-shadow: 0 0 10px rgba(0,0,0,.2); border-spacing: 0; font-family: sans-serif;" cellpadding="15" border="0">
+            <tr style="color: #fff; text-shadow: 0 1px 0 #000">
+              <td style="padding: 40px 80px; text-align: center; font-size: 12px; color: #6a6a6a; text-shadow: 0 1px 0 #ccc;" bgcolor="#eee">
+                <p align="center">
+                  <strong>Марафеткина!</strong>
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 40px; color: #333; font-size: 16px" bgcolor="#fff">
+                <h1>Привет, <%=@login%></h1>
+                <p>Вы были зарегестрированы на нашем сайте <%=@register_date.strftime('%e.%m.%y in %H:%M')%>.</p>
+                <p>Чтобы пользоваться сервисом в полном обьёме вам необходимо активировать ваш аккаунт перейдя по ссылке ниже:</p>
+                <p>
+                  <span style="display: inline-block; font-size: 16px; padding: 5px 15px; border: 2px dotted #ccc" align="center"><a href="<%=@url%>"><%=@code%></a></span>
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 30px 80px 60px; text-align: center; border-top: 10px solid #000; font-size: 14px; color: #b6b6b6" bgcolor="#333333">
+                <p style="font-size: 10px; color: #ccc;">Это сообщение было сгенерированно автоматически, нет нужды на наго отвечать.</p>
+              </td>
+            </tr>
+          </table>
+        </td>
+        <td width="20%"></td>
+      </tr>
+    </table>
+  </body>
+</html>

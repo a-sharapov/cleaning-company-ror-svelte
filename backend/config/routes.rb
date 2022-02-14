@@ -13,6 +13,7 @@ Rails.application.routes.draw do
       post "auth", to: "authentification#login"
       delete "auth", to: "authentification#logout"
       put "auth", to: "authentification#refresh"
+      put "restore/:login", to: "authentification#unlock"
       get "confirm", to: "authentification#confirm"
     end
   end
