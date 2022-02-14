@@ -1,105 +1,100 @@
 class Api::V1::AuthentificationController < ApplicationController
   before_action :get_user_by_login, only: [:login]
+  before_action :decode_bearer_token!, only: [:logout]
+  before_action :token_expired?, only: [:confirm]
 
   include ActionController::Cookies
-
-  AUTHENTIFICATION_MESSAGES = {
-    login_in: "Successfully logged in",
-    logged_out: "User successfully logged out",
-    user_not_exist: "User does not exist",
-    unauthorized_access: "Unauthorized access attempted",
-    password_incorrect: "Password incorrect",
-    missmatching: "Missmatched token",
-    already_confirmed: "User has already confirmed their account",
-    not_confirmed: "User has not confirmed their account",
-    not_login: "Not logged in",
-  }
 
   def login
     if @user
       if @user.authenticate(user_login_parameters[:password])
-        token_data = @user.as_json.merge({ip: user_login_parameters[:ip_address]})
-        refresh_token = AuthentificationTokenService.create_token(token_data, :refresh)
-        access_token = AuthentificationTokenService.create_token(token_data, :access)
-
-        if @user.tokens.present?
-          @user.set(tokens: @user.tokens << refresh_token) 
-        else
-          @user.set(tokens: [refresh_token])
-        end
-
-        cookies["refresh_token"] = { value: refresh_token, httponly: true }
         response = {
-          message: AUTHENTIFICATION_MESSAGES[:login_in], 
-          user: except_data(@user).merge(
-            {
-              access_token: access_token.to_s, 
-            }
+          message: ApiError::MESSAGES[:auth][:login_in], 
+          user: except_data!(@user).merge(
+            # Добаваить метрику об устройстве...
+            issue_tokens(@user)
           )
         }
         render json: response, status: :ok
       else
-        message = {message: AUTHENTIFICATION_MESSAGES[:password_incorrect]}
+        message = {message: ApiError::MESSAGES[:auth][:password_incorrect]}
         render json: message, status: :unprocessable_entity
       end  
     else 
-      message = {message: AUTHENTIFICATION_MESSAGES[:user_not_exist]}
-      render json: message, status: :unprocessable_entity
+      message = {message: ApiError::MESSAGES[:auth][:user_not_exist]}
+      render json: message, status: :not_found
     end
   end
   
   def logout
-    user_data = AuthentificationTokenService.decode_token(bearer_token)
-    if user_data
-      user = User.find_by(:login => user_data.first["login"])
-      if (user && !user.tokens.empty? && user.tokens.find(cookies["refresh_token"]).any?)
-        @user.set(tokens: @user.tokens.as_json.filter{ |t| t.eql? cookies["refresh_token"] })
-        message = {message: AUTHENTIFICATION_MESSAGES[:logged_out]}
+    if @user_data
+      user = User.find_by(login: @user_data.first["login"])
+      if (user && !user.tokens.empty? && user.tokens.filter{|t| t == cookies["refresh_token"]}.length > 0)
+        user.set(tokens: user.tokens.as_json.filter{ |t| t != cookies["refresh_token"] })
+        message = {message: ApiError::MESSAGES[:auth][:logged_out]}
         render json: message, status: :ok
       else
-        message = {message: AUTHENTIFICATION_MESSAGES[:missmatching]}
-        render json: message, status: :unauthorized
+        message = {message: ApiError::MESSAGES[:auth][:missmatching]}
+        render json: message, status: :not_acceptable
       end
     else
-      message = {message: AUTHENTIFICATION_MESSAGES[:unauthorized_access]}
+      message = {message: ApiError::MESSAGES[:auth][:unauthorized_access]}
       render json: message, status: :unauthorized
     end
   end
 
-  def refresh
-    
-
-  end
-
   def confirm
-    user_data = AuthentificationTokenService.decode_token(bearer_token)
-    if user_data
-      user = User.find_by(:login => user_data.first["login"])
+      user = User.find_by(:login => user_confirmation_params[:code])
       if user
-        if user.confirmed.eql?(false) && user.set(confirmed: true)
-          message = {message: AUTHENTIFICATION_MESSAGES[:missmatching]}
-          render json: message, status: :ok
+        if user.confirmed.eql?(false) || !user.confirmed.present?
+          if user.set(confirmed: true) 
+            message = {message: ApiError::MESSAGES[:auth][:confirmed]}
+            render json: message, status: :ok
+          else
+            message = {message: ApiError::MESSAGES[:auth][:not_confirmed]}
+            render json: message, status: :not_modified
+          end
         else
-          message = {message: AUTHENTIFICATION_MESSAGES[:not_confirmed]}
-          render json: message, status: :unprocessable_entity
+          message = {message: ApiError::MESSAGES[:auth][:already_confirmed]}
+          render json: message, status: :ok  
         end
       else
-        message = {message: AUTHENTIFICATION_MESSAGES[:missmatching]}
-        render json: message, status: :unauthorized
+        message = {message: ApiError::MESSAGES[:auth][:unauthorized_access]}
+        render json: message, status: :unprocessable_entity
+      end
+  end
+
+  def refresh
+    if @user_data
+      user = User.find_by(login: @user_data.first["login"])
+      
+      if (user && !user.tokens.empty? && user.tokens.find(cookies["refresh_token"]).any?)
+        user.set(tokens: user.tokens.as_json.filter{ |t| t != cookies["refresh_token"] })
+        response = {
+          message: ApiError::MESSAGES[:auth][:login_in], 
+          user: except_data!(@user).merge(
+            # Добаваить метрику об устройстве...
+            issue_tokens(@user)
+          )
+        }
+        render json: response, status: :ok
+      else
+        message = {message: ApiError::MESSAGES[:auth][:missmatching]}
+        render json: message, status: :not_acceptable
       end
     else
-      message = {message: AUTHENTIFICATION_MESSAGES[:unauthorized_access]}
+      message = {message: ApiError::MESSAGES[:auth][:unauthorized_access]}
       render json: message, status: :unauthorized
     end
   end
 
   private
-  def user_login_parameters
-    params.permit(:login, :password, :remember_me, :ip_address)
+  def user_confirmation_params
+    params.permit(:code)
   end
 
-  def user_logout_parameters
-    params.permit(:refresh_token)
+  def user_login_parameters
+    params.permit(:login, :password, :remember_me)
   end
   
   def get_user_by_login

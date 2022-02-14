@@ -5,12 +5,11 @@ class AuthentificationTokenService
   class << self
     def create_token(data, type)
       return false unless data.present?
-      expires_in = (Time.now + 3600).to_i if type.eql?(:access)
-      expires_in = (Time.now + 86400*7).to_i if type.eql?(:refresh)
+      expires_in = (Time.now + 15.minutes).to_i if type.eql?(:access)
+      expires_in = (Time.now + 7.day).to_i if type.eql?(:refresh)
 
       refresh_data = {
         login: data[:login],
-        ip: data[:ip],
         expires_in: expires_in,
       }
 
@@ -22,11 +21,11 @@ class AuthentificationTokenService
 
     def decode_token(token)
       return false if token.nil? || token.empty?
-      return JWT.decode(token, HMAC_SECRET)
-    end
-
-    def update_token(user)
-      return self.create_token(user)
+      begin
+        return JWT.decode(token, HMAC_SECRET)
+      rescue
+        return false
+      end
     end
   end
 end

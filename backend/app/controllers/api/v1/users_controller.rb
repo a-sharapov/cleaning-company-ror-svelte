@@ -4,24 +4,15 @@ class Api::V1::UsersController < ApplicationController
   before_action :get_user_by_id, only: [:show, :update, :destroy]
   before_action :set_users_search_query, only: [:index]
 
-  USER_MESSAGES = {
-    not_exist: "User does not exist",
-    not_found: "Has no one user founded yet",
-    not_create: "Could not create a new user",
-    not_update: "Could not update current user",
-    not_remove: "Could not remove current user",
-    deleted: "The user has been removed from the system",
-  }
-
   def index
-    users = User.all_of(@search_query).limit(@limit).offset(@offset).asc(:id)
-    if users.any?
+    begin
+      users = User.all_of(@search_query).limit(@limit).offset(@offset).asc(:id)
+      raise ApiError.new(ApiError::MESSAGES[:user][:not_found], :not_found) unless users.any?
       data = users.map do |user|
-        except_data(user)
+        except_data!(user)
       end
       records = users.count
       pages = (records.to_f/@limit).ceil
-      
       render json: {
         query: @search_query, 
         limit: @limit, 
@@ -29,59 +20,57 @@ class Api::V1::UsersController < ApplicationController
         current_page: @page, 
         total_pages: pages, 
         data: data, 
-        }, status: :ok
-    else
-      message = {message: USER_MESSAGES[:not_found]}
-      render json: message, status: :unprocessable_entity
+      }, status: :ok and return
+    rescue ApiError => e
+      render json: {error: e.message}, status: e.type and return
     end
   end
 
   def show 
-    if @user 
-      render json: except_data(@user), status: :ok
-    else 
-      message = {message: USER_MESSAGES[:not_exist]}
-      render json: message, status: :unprocessable_entity
+    begin
+      raise ApiError.new(ApiError::MESSAGES[:user][:not_exist], :not_found) unless @user
+      render json: except_data!(@user), status: :ok and return
+    rescue ApiError => e
+      render json: {error: e.message}, status: e.type and return
     end
   end
 
   def new
-    user = User.new(user_create_parameters)
+    begin
+      user = User.new(user_create_parameters)
+      raise ApiError.new(ApiError::MESSAGES[:user][:not_create], :unprocessable_entity) unless user.valid? && user.save()
+      def submit_handler
+        :use_telegram if user.phone.present? && !user.phone.nil?
+        :use_email
+      end
+      # отправить письмо или сообщение пользователю
 
-    if user.valid? && user.save()
-      render json: except_data(user), status: :ok
-    else
-      message = {message: USER_MESSAGES[:not_create], error: user.errors}
-      render json: message, status: :unprocessable_entity
+      render json: except_data!(user), status: :ok and return
+    rescue ApiError => e
+      render json: {error: e.message}, status: e.type and return
     end
   end
 
   def update
-    if @user 
-      if @user.valid? && @user.update(user_update_parameters)
-        render json: except_data(@user), status: :ok  
-      else 
-        message = {message: USER_MESSAGES[:not_update], error: @user.errors}
-        render json: message, status: :unprocessable_entity
-      end
-    else
-      message = {message: USER_MESSAGES[:not_exist]}
-      render json: message, status: :unprocessable_entity
+    begin
+      raise ApiError.new(ApiError::MESSAGES[:user][:not_exist], :not_found) unless @user
+      raise ApiError.new(@user.errors, :unprocessable_entity) unless @user.valid?
+      raise ApiError.new(ApiError::MESSAGES[:user][:not_update], :not_acceptable) unless @user.update(user_update_parameters)
+      
+      render json: except_data!(@user), status: :ok and return
+    rescue ApiError => e
+      render json: {error: e.message}, status: e.type and return
     end
   end
 
   def destroy
-    if @user 
-      if @user.destroy()
-        message = {message: USER_MESSAGES[:deleted]}
-        render json: message, status: :ok  
-      else 
-        message = {message: USER_MESSAGES[:not_remove]}
-        render json: message, status: :unprocessable_entity
-      end
-    else 
-      message = {message: USER_MESSAGES[:not_exist]}
-      render json: message, status: :unprocessable_entity
+    begin
+      raise ApiError.new(ApiError::MESSAGES[:user][:not_exist], :not_found) unless @user
+      raise ApiError.new(ApiError::MESSAGES[:user][:not_remove], :unprocessable_entity) unless @user.destroy()
+      
+      render json: {message: ApiError::MESSAGES[:user][:deleted]}, status: :ok and return
+    rescue ApiError => e
+      render json: {error: e.message}, status: e.type and return
     end
   end
 

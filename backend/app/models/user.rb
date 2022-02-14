@@ -5,14 +5,15 @@ class User
   before_save :prepare_data
 
   field :login, type: String
-  field :role, type: String
+  field :role, type: String, default: "client"
   field :description, type: String
   field :email, type: String
   field :phone, type: String
   field :address, type: Object
   field :password_digest, type: String
   field :tokens, type: Array
-  field :confirmed, type: Boolean
+  field :confirmed, type: Boolean, default: false
+  field :activation_code, type: String
 
   validates :login,     presence: true, 
                         uniqueness: true, 
@@ -64,5 +65,6 @@ class User
 
   def prepare_data
     self.email = email.downcase unless email.blank?
+    self.activation_code = SecureRandom.uuid
   end
 end

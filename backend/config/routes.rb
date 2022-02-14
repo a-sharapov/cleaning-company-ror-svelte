@@ -10,9 +10,10 @@ Rails.application.routes.draw do
       put "users/:id", to: "users#update"
       delete "users/:id", to: "users#destroy"
       
-      post "auth/login", to: "authentification#login"
-      delete "auth/logout", to: "authentification#logout"
-      get "auth/refresh", to: "authentification#refresh"
+      post "auth", to: "authentification#login"
+      delete "auth", to: "authentification#logout"
+      put "auth", to: "authentification#refresh"
+      post "auth/confirm", to: "authentification#confirm"
     end
   end
 end
