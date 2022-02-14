@@ -1,94 +1,103 @@
 class Api::V1::AuthentificationController < ApplicationController
   before_action :get_user_by_login, only: [:login]
-  before_action :decode_bearer_token!, only: [:logout]
-  before_action :token_expired?, only: [:confirm]
+  before_action :set_metrics, only: [:login, :refresh, :confirm]
+  before_action :decode_bearer_token!, only: [:logout, :refresh]
+  before_action :get_tokens, only: [:refresh]
 
   include ActionController::Cookies
 
   def login
-    if @user
-      if @user.authenticate(user_login_parameters[:password])
-        response = {
-          message: ApiError::MESSAGES[:auth][:login_in], 
-          user: except_data!(@user).merge(
-            # Добаваить метрику об устройстве...
-            issue_tokens(@user)
-          )
-        }
-        render json: response, status: :ok
-      else
-        message = {message: ApiError::MESSAGES[:auth][:password_incorrect]}
-        render json: message, status: :unprocessable_entity
-      end  
-    else 
-      message = {message: ApiError::MESSAGES[:auth][:user_not_exist]}
-      render json: message, status: :not_found
+    begin
+      raise ApiError.new(ApiError::MESSAGES[:api][:wrong_request], :unprocessable_entity) if !user_login_parameters.present?
+      raise ApiError.new(ApiError::MESSAGES[:user][:not_exist], :not_found) unless @user
+      raise ApiError.new(ApiError::MESSAGES[:auth][:need_confirmation], :conflict) if @user.confirmed.eql?(false)
+      raise ApiError.new(ApiError::MESSAGES[:auth][:password_incorrect], :unauthorized) unless @user.authenticate(user_login_parameters[:password])
+      tokens_pair = AuthentificationTokenService.issue_tokens(@user, @metrics)
+      cookies["refresh_token"] = { value: tokens_pair[:refresh_token], httponly: true }
+      response = {
+        message: ApiError::MESSAGES[:auth][:login_in], 
+        user: except_data!(@user).merge(
+          access_token: tokens_pair[:access_token]
+        )
+      }
+      render json: response, status: :ok
+    rescue ApiError => e
+      render_api_error(e.message, e.type)
     end
   end
   
   def logout
-    if @user_data
-      user = User.find_by(login: @user_data.first["login"])
-      if (user && !user.tokens.empty? && user.tokens.filter{|t| t == cookies["refresh_token"]}.length > 0)
-        user.set(tokens: user.tokens.as_json.filter{ |t| t != cookies["refresh_token"] })
-        message = {message: ApiError::MESSAGES[:auth][:logged_out]}
-        render json: message, status: :ok
-      else
-        message = {message: ApiError::MESSAGES[:auth][:missmatching]}
-        render json: message, status: :not_acceptable
-      end
-    else
-      message = {message: ApiError::MESSAGES[:auth][:unauthorized_access]}
-      render json: message, status: :unauthorized
+    begin
+      raise ApiError.new(ApiError::MESSAGES[:auth][:unauthorized_access], :unauthorized) unless @access_token_data
+      user = User.find_by(login: @access_token_data.first["login"])
+      raise ApiError.new(ApiError::MESSAGES[:user][:not_exist], :not_found) unless user
+      raise ApiError.new(ApiError::MESSAGES[:token][:missmatching], :not_acceptable) unless !user.tokens.empty? && user.tokens.filter{|t| t == cookies["refresh_token"]}.length > 0
+      raise ApiError.new(ApiError::MESSAGES[:auth][:not_logout], :unprocessable_entity) unless user.set(tokens: user.tokens.as_json.filter{ |t| t != cookies["refresh_token"] })
+      
+      message = {message: ApiError::MESSAGES[:auth][:logged_out]}
+      render json: message, status: :ok
+    rescue ApiError => e
+      render_api_error(e.message, e.type)
     end
   end
 
   def confirm
-      user = User.find_by(:login => user_confirmation_params[:code])
-      if user
-        if user.confirmed.eql?(false) || !user.confirmed.present?
-          if user.set(confirmed: true) 
-            message = {message: ApiError::MESSAGES[:auth][:confirmed]}
-            render json: message, status: :ok
-          else
-            message = {message: ApiError::MESSAGES[:auth][:not_confirmed]}
-            render json: message, status: :not_modified
-          end
-        else
-          message = {message: ApiError::MESSAGES[:auth][:already_confirmed]}
-          render json: message, status: :ok  
-        end
-      else
-        message = {message: ApiError::MESSAGES[:auth][:unauthorized_access]}
-        render json: message, status: :unprocessable_entity
-      end
+    begin
+      raise ApiError.new(ApiError::MESSAGES[:api][:wrong_request], :unprocessable_entity) if !user_confirmation_params[:code].present? || user_confirmation_params[:code].nil?
+      user = User.find_by(:activation_code => user_confirmation_params[:code])
+      raise ApiError.new(ApiError::MESSAGES[:user][:not_exist], :not_found) unless user
+      raise ApiError.new(ApiError::MESSAGES[:auth][:already_confirmed], :ok) if user.confirmed.present? && user.confirmed.eql?(true)
+      raise ApiError.new(ApiError::MESSAGES[:auth][:not_confirmed], :unprocessable_entity) unless user.set(confirmed: true) 
+      tokens_pair = AuthentificationTokenService.issue_tokens(user, @metrics)
+      cookies["refresh_token"] = { value: tokens_pair[:refresh_token], httponly: true }
+
+      response = {
+        message: ApiError::MESSAGES[:auth][:confirmed], 
+        user: except_data!(user).merge(
+          access_token: tokens_pair[:access_token]
+        )
+      }
+      render json: response, status: :ok
+    rescue ApiError => e
+      render_api_error(e.message, e.type)
+    end
   end
 
   def refresh
-    if @user_data
-      user = User.find_by(login: @user_data.first["login"])
-      
-      if (user && !user.tokens.empty? && user.tokens.find(cookies["refresh_token"]).any?)
-        user.set(tokens: user.tokens.as_json.filter{ |t| t != cookies["refresh_token"] })
-        response = {
-          message: ApiError::MESSAGES[:auth][:login_in], 
-          user: except_data!(@user).merge(
-            # Добаваить метрику об устройстве...
-            issue_tokens(@user)
-          )
-        }
-        render json: response, status: :ok
-      else
-        message = {message: ApiError::MESSAGES[:auth][:missmatching]}
-        render json: message, status: :not_acceptable
-      end
-    else
-      message = {message: ApiError::MESSAGES[:auth][:unauthorized_access]}
-      render json: message, status: :unauthorized
+    begin
+      raise ApiError.new(ApiError::MESSAGES[:token][:not_set], :unprocessable_entity) unless get_tokens
+      raise ApiError.new(ApiError::MESSAGES[:auth][:unauthorized_access], :unauthorized) unless @access_token_data || !expired?(get_tokens[:access_token])
+      user = User.find_by(login: @access_token_data.first["login"])
+      raise ApiError.new(ApiError::MESSAGES[:user][:not_exist], :not_found) unless user 
+      raise ApiError.new(ApiError::MESSAGES[:auth][:unauthorized_access], :unauthorized) unless user.tokens.any? && user.tokens.find(get_tokens[:refresh_token]).any?
+      raise ApiError.new(ApiError::MESSAGES[:auth][:not_update], :unprocessable_entity) unless user.set(tokens: user.tokens.as_json.filter{ |t| t != get_tokens[:refresh_token] })
+      tokens_pair = AuthentificationTokenService.issue_tokens(user, @metrics)
+      cookies["refresh_token"] = { value: tokens_pair[:refresh_token], httponly: true }
+
+      response = {
+        message: ApiError::MESSAGES[:auth][:update], 
+        user: except_data!(user).merge(
+          access_token: tokens_pair[:access_token]
+        )
+      }
+      render json: response, status: :ok
+    rescue ApiError => e
+      render_api_error(e.message, e.type)
     end
   end
 
   private
+  def set_metrics
+    if request.remote_ip.nil? && request.user_agent.nil?
+      @metrics = nil
+    else 
+      @metrics = {
+        ip: request.remote_ip,
+        agent: request.user_agent,
+      }
+    end
+  end
+
   def user_confirmation_params
     params.permit(:code)
   end

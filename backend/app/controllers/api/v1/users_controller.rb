@@ -37,6 +37,7 @@ class Api::V1::UsersController < ApplicationController
 
   def new
     begin
+      raise ApiError.new(ApiError::MESSAGES[:api][:wrong_request], :unprocessable_entity) unless user_create_parameters.present?
       user = User.new(user_create_parameters)
       raise ApiError.new(ApiError::MESSAGES[:user][:not_create], :unprocessable_entity) unless user.valid? && user.save()
       def submit_handler
@@ -44,8 +45,7 @@ class Api::V1::UsersController < ApplicationController
         :use_email
       end
       # отправить письмо или сообщение пользователю
-
-      render json: except_data!(user), status: :ok and return
+      render_user_data(user)
     rescue ApiError => e
       render_api_error(e.message, e.type)
     end
@@ -53,11 +53,12 @@ class Api::V1::UsersController < ApplicationController
 
   def update
     begin
+      raise ApiError.new(ApiError::MESSAGES[:api][:wrong_request], :unprocessable_entity) unless user_update_parameters.present?
       raise ApiError.new(ApiError::MESSAGES[:user][:not_exist], :not_found) unless @user
       raise ApiError.new(@user.errors, :unprocessable_entity) unless @user.valid?
       raise ApiError.new(ApiError::MESSAGES[:user][:not_update], :not_acceptable) unless @user.update(user_update_parameters)
       
-      render json: except_data!(@user), status: :ok and return
+      render_user_data(@user)
     rescue ApiError => e
       render_api_error(e.message, e.type)
     end
@@ -75,6 +76,10 @@ class Api::V1::UsersController < ApplicationController
   end
 
   private
+  def render_user_data(user)
+    render json: except_data!(user), status: :ok and return
+  end
+
   def user_create_parameters 
     params.permit(:login, :role, :email, :phone, :password)
   end
