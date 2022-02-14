@@ -2,8 +2,8 @@ class ApplicationController < ActionController::API
   include ActionController::Cookies
 
   protected
-  def except_data!(data, parameters = [:password_digest, :_id, :tokens, :activation_code])
-    return data.as_json({except: parameters}).reverse_merge({id: data.activation_code.to_s})
+  def except_data!(data, parameters = [:_id, :password_digest, :tokens, :activation_code])
+    return data.as_json({except: parameters}) #.reverse_merge({id: data.activation_code.to_s})
   end
 
   def set_paging

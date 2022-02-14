@@ -97,8 +97,6 @@ class Api::V1::UsersController < ApplicationController
     @search_query = {}
 
     case true
-    when !params[:id].nil?
-      @search_query[:activation_code] = /.*#{param_to_search(params[:id])}.*/
       when !params[:login].nil?
         @search_query[:login] = /.*#{param_to_search(params[:login])}.*/
       when !params[:email].nil?
