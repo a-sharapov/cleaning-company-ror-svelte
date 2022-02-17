@@ -7,10 +7,10 @@ class Api::V1::AuthentificationController < ApplicationController
 
   def login
     begin
-      raise ApiError.new(ApiError::MESSAGES[:api][:wrong_request], :unprocessable_entity) if !user_login_parameters.present?
-      raise ApiError.new(ApiError::MESSAGES[:user][:not_exist], :not_found) unless @user
-      raise ApiError.new(ApiError::MESSAGES[:auth][:need_confirmation], :conflict) if @user.confirmed.eql?(false)
-      raise ApiError.new(ApiError::MESSAGES[:auth][:password_incorrect], :unauthorized) unless @user.authenticate(user_login_parameters[:password])
+      escape_with!(:api, :wrong_request, :unprocessable_entity) unless user_login_parameters.present?
+      escape_with!(:user, :not_exist, :not_found) unless @user
+      escape_with!(:auth, :need_confirmation, :conflict) unless @user.confirmed.eql?(true)
+      escape_with!(:auth, :password_incorrect, :not_acceptable) unless @user.authenticate(user_login_parameters[:password])
       
       tokens_pair = AuthentificationTokenService.issue_tokens(@user, @metrics)
       cookies["refresh_token"] = { value: tokens_pair[:refresh_token], httponly: true }
@@ -29,11 +29,14 @@ class Api::V1::AuthentificationController < ApplicationController
   def logout
     begin
       check_auth!
-      raise ApiError.new(ApiError::MESSAGES[:auth][:unauthorized_access], :unauthorized) unless AuthentificationTokenService.decode_token(get_tokens[:access_token])
-      user = User.find_by(login: AuthentificationTokenService.decode_token(get_tokens[:access_token]).first["login"])
-      raise ApiError.new(ApiError::MESSAGES[:user][:not_exist], :not_found) unless user
-      raise ApiError.new(ApiError::MESSAGES[:token][:missmatching], :not_acceptable) unless !user.tokens.empty? && user.tokens.filter{|t| t == get_tokens[:refresh_token]}.length > 0
-      raise ApiError.new(ApiError::MESSAGES[:auth][:not_logout], :unprocessable_entity) unless user.set(tokens: user.tokens.as_json.filter{ |t| t != get_tokens[:refresh_token] })
+      access_token = get_tokens[:access_token]
+      refresh_token = get_tokens[:refresh_token]
+      escape_with!(:auth, :unauthorized_access, :unauthorized) unless access_token_data = AuthentificationTokenService.decode_token(access_token)
+      user = User.find_by(login: access_token_data.first["login"])
+      escape_with!(:user, :not_exist, :not_found) unless user
+      check_access!(user)
+      escape_with!(:token, :missmatching, :not_acceptable) unless !user.tokens.empty? && user.tokens.filter{|t| t == refresh_token}.length > 0
+      escape_with!(:auth, :not_logout, :unprocessable_entity) unless user.set(tokens: user.tokens.as_json.filter{ |t| t != refresh_token })
       
       AuthentificationTokenService.clear_expired_tokens(user)
       message = {message: ApiError::MESSAGES[:auth][:logged_out]}
@@ -45,11 +48,11 @@ class Api::V1::AuthentificationController < ApplicationController
 
   def confirm
     begin
-      raise ApiError.new(ApiError::MESSAGES[:api][:wrong_request], :unprocessable_entity) if !user_confirmation_params[:code].present? || user_confirmation_params[:code].nil?
+      escape_with!(:api, :wrong_request, :unprocessable_entity) if !user_confirmation_params[:code].present? || user_confirmation_params[:code].nil?
       user = User.find_by(:activation_code => user_confirmation_params[:code])
-      raise ApiError.new(ApiError::MESSAGES[:user][:not_exist], :not_found) unless user
-      raise ApiError.new(ApiError::MESSAGES[:auth][:already_confirmed], :ok) if user.confirmed.present? && user.confirmed.eql?(true)
-      raise ApiError.new(ApiError::MESSAGES[:auth][:not_confirmed], :unprocessable_entity) unless user.set(confirmed: true) 
+      escape_with!(:user, :not_exist, :not_found) unless user
+      escape_with!(:auth, :already_confirmed, :ok) if user.confirmed.eql?(true)
+      escape_with!(:auth, :not_confirmed, :unprocessable_entity) unless user.set(confirmed: true) 
       tokens_pair = AuthentificationTokenService.issue_tokens(user, @metrics)
       cookies["refresh_token"] = { value: tokens_pair[:refresh_token], httponly: true }
 
@@ -68,11 +71,14 @@ class Api::V1::AuthentificationController < ApplicationController
   def refresh
     begin
       check_auth!
-      raise ApiError.new(ApiError::MESSAGES[:auth][:unauthorized_access], :unauthorized) unless AuthentificationTokenService.decode_token(get_tokens[:access_token])
-      user = User.find_by(login: AuthentificationTokenService.decode_token(get_tokens[:access_token]).first["login"])
-      raise ApiError.new(ApiError::MESSAGES[:user][:not_exist], :not_found) unless user 
-      raise ApiError.new(ApiError::MESSAGES[:auth][:unauthorized_access], :unauthorized) unless user.tokens.any? && user.tokens.find(get_tokens[:refresh_token]).any?
-      raise ApiError.new(ApiError::MESSAGES[:auth][:not_update], :unprocessable_entity) unless user.set(tokens: user.tokens.as_json.filter{ |t| t != get_tokens[:refresh_token] })
+      access_token = get_tokens[:access_token]
+      refresh_token = get_tokens[:refresh_token]
+      escape_with!(:auth, :unauthorized_access, :unauthorized) unless access_token_data = AuthentificationTokenService.decode_token(access_token)
+      user = User.find_by(login: access_token_data.first["login"])
+      check_access!(user)
+      escape_with!(:user, :not_exist, :not_found) unless user 
+      escape_with!(:auth, :unauthorized_access, :unauthorized) unless user.tokens.any? && user.tokens.find(refresh_token).any?
+      escape_with!(:auth, :not_update, :unprocessable_entity) unless user.set(tokens: user.tokens.as_json.filter{ |t| t != refresh_token })
       tokens_pair = AuthentificationTokenService.issue_tokens(user, @metrics)
       cookies["refresh_token"] = { value: tokens_pair[:refresh_token], httponly: true }
 
@@ -91,10 +97,10 @@ class Api::V1::AuthentificationController < ApplicationController
   def unlock
     begin
       user = User.find_by(login: params[:login])
-      raise ApiError.new(ApiError::MESSAGES[:user][:not_exist], :not_found) unless user 
+      escape_with!(:user, :not_exist, :not_found) unless user 
       o = [('a'..'z'), ('A'..'Z')].map(&:to_a).flatten
       new_password = (0...12).map { o[rand(o.length)] }.join
-      raise ApiError.new(ApiError::MESSAGES[:auth][:not_update], :unprocessable_entity) unless user.update(password: new_password)
+      escape_with!(:auth, :not_update, :unprocessable_entity) unless user.update(password: new_password)
       ApplicationMailer.with(user: user, password: new_password).new_password.deliver_later
       render json: ApiError::MESSAGES[:user][:new_password], status: :ok
     rescue ApiError => e

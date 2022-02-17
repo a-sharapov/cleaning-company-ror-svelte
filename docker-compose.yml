@@ -28,6 +28,7 @@ services:
       - "80:80"
     depends_on:
       - backend
+      - frontend
     restart: on-failure
     networks:
       - cleaning-service
@@ -38,10 +39,10 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     environment:
-      CHOKIDAR_USEPOLLING: "true" # for hotreload
+      CHOKIDAR_USEPOLLING: "true"
       RAILS_ENV: development
     volumes:
-      - ./backend:/usr/src/backend # for hotreload
+      - ./backend:/usr/src/backend
     depends_on:
       - mongo
     links:
@@ -64,7 +65,7 @@ services:
       - /usr/src/frontend/node_modules
     links:
       - backend
-    command: npm run dev --host 0.0.0.0 #node build
+    command: npm run dev --host 0.0.0.0 #ToDo change to real used command
     networks:
       - cleaning-service
     expose:

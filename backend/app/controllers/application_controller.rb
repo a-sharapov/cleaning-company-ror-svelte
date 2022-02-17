@@ -22,6 +22,10 @@ class ApplicationController < ActionController::API
     header.gsub(pattern, '') if header && header.match(pattern)
   end
 
+  def escape_with!(block, message, type, assets = nil)
+    raise ApiError.new(ApiError::MESSAGES[block][message], type, assets)
+  end
+
   def render_api_error(e)
     message = {message: e.message}
     message = {message: e.message, errors: e.assets} unless e.assets.nil?
@@ -38,14 +42,12 @@ class ApplicationController < ActionController::API
   end
 
   def check_auth!
-    begin
-      raise ApiError.new(ApiError::MESSAGES[:token][:not_set], :unprocessable_entity) unless get_tokens
-      raise ApiError.new(ApiError::MESSAGES[:auth][:unauthorized_access], :unauthorized) unless AuthentificationTokenService.decode_token(get_tokens[:access_token])
-      raise ApiError.new(ApiError::MESSAGES[:auth][:unauthorized_access], :unauthorized) if AuthentificationTokenService.expired?(get_tokens[:access_token])
-    end
+    escape_with!(:token, :not_set, :unprocessable_entity) unless get_tokens
+    escape_with!(:auth, :unauthorized_access, :unauthorized) unless AuthentificationTokenService.decode_token(get_tokens[:access_token])
+    escape_with!(:auth, :unauthorized_access, :unauthorized) if AuthentificationTokenService.expired?(get_tokens[:access_token])
   end
 
   def check_access!(user)
-    raise ApiError.new(ApiError::MESSAGES[:auth][:unauthorized_access], :unauthorized) unless user.role.eql?("manager") || user.login.eql?(AuthentificationTokenService.decode_token(get_tokens[:access_token]).first["login"])
+    escape_with!(:auth, :unauthorized_access, :unauthorized) unless user.role.eql?("manager") || user.login.eql?(AuthentificationTokenService.decode_token(get_tokens[:access_token]).first["login"])
   end
 end

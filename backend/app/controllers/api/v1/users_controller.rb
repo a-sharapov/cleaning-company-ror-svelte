@@ -7,7 +7,7 @@ class Api::V1::UsersController < ApplicationController
   def index
     begin
       users = User.all_of(@search_query).limit(@limit).offset(@offset).asc(:id)
-      raise ApiError.new(ApiError::MESSAGES[:user][:not_found], :not_found) unless users.any?
+      escape_with!(:user, :not_exist, :not_found) unless users.any?
       data = users.map do |user|
         except_data!(user)
       end
@@ -28,7 +28,7 @@ class Api::V1::UsersController < ApplicationController
 
   def show 
     begin
-      raise ApiError.new(ApiError::MESSAGES[:user][:not_exist], :not_found) unless @user
+      escape_with!(:user, :not_exist, :not_found) unless @user
       render json: except_data!(@user), status: :ok and return
     rescue ApiError => e
       render_api_error(e)
@@ -37,9 +37,9 @@ class Api::V1::UsersController < ApplicationController
 
   def new
     begin
-      raise ApiError.new(ApiError::MESSAGES[:api][:wrong_request], :unprocessable_entity) unless user_create_parameters.present?
+      escape_with!(:api, :wrong_request, :unprocessable_entity) unless user_create_parameters.present?
       user = User.new(user_create_parameters)
-      raise ApiError.new(ApiError::MESSAGES[:user][:not_create], :unprocessable_entity, user.errors.full_messages) unless user.valid? && user.save()
+      escape_with!(:user, :not_create, :unprocessable_entity, user.errors.full_messages) unless user.valid? && user.save()
       
       notify_handler(user)
       render_user_data(user)
@@ -51,11 +51,11 @@ class Api::V1::UsersController < ApplicationController
   def update
     begin
       check_auth!
-      raise ApiError.new(ApiError::MESSAGES[:api][:wrong_request], :unprocessable_entity) unless user_update_parameters.present?
-      raise ApiError.new(ApiError::MESSAGES[:user][:not_exist], :not_found) unless @user
+      escape_with!(:api, :wrong_request, :unprocessable_entity) unless user_update_parameters.present?
+      escape_with!(:user, :not_exist, :not_found) unless @user
       check_access!(@user)
-      raise ApiError.new(ApiError::MESSAGES[:user][:not_update], :unprocessable_entity, @user.errors.full_messages) unless @user.valid?
-      raise ApiError.new(ApiError::MESSAGES[:user][:not_update], :not_acceptable) unless @user.update(user_update_parameters)      
+      escape_with!(:user, :not_update, :unprocessable_entity, @user.errors.full_messages) unless @user.valid?
+      escape_with!(:user, :not_update, :not_acceptable) unless @user.update(user_update_parameters)      
       render_user_data(@user)
     rescue ApiError => e
       render_api_error(e)
@@ -65,9 +65,9 @@ class Api::V1::UsersController < ApplicationController
   def destroy
     begin
       check_auth!
-      raise ApiError.new(ApiError::MESSAGES[:user][:not_exist], :not_found) unless @user
+      escape_with!(:user, :not_exist, :not_found) unless @user
       check_access!(@user)
-      raise ApiError.new(ApiError::MESSAGES[:user][:not_remove], :unprocessable_entity) unless @user.destroy()
+      escape_with!(:user, :not_remove, :unprocessable_entity) unless @user.destroy()
       
       render json: {message: ApiError::MESSAGES[:user][:deleted]}, status: :ok and return
     rescue ApiError => e
