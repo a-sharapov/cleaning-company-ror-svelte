@@ -43,7 +43,8 @@ class Api::V1::UsersController < ApplicationController
       user.activation_code = activation_code
       escape_with!(:user, :invalid_request, :unprocessable_entity, user.errors.full_messages) unless user.valid?
       escape_with!(:user, :not_create, :unprocessable_entity, user.errors.full_messages) unless user.save
-      escape_with!(:api, :activation_send_failure, :precondition_failed, user.activation_code) unless notify_handler(user.as_json, :activation_email)
+      #escape_with!(:api, :activation_send_failure, :precondition_failed, user.activation_code) unless notify_handler(user.as_json, :activation_email)
+      TwilioNotifyService.send(user.as_json, :activation_email)
       render_user_data(user)
     rescue ApiError => e
       render_api_error(e)
