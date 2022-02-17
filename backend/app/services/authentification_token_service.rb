@@ -1,5 +1,5 @@
 class AuthentificationTokenService
-  HMAC_SECRET = "cl34nING!"
+  HMAC_SECRET = ENV['SECRET_KEY']
   ALGORITHM_TYPE = "HS256"
 
   class << self

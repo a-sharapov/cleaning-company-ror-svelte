@@ -29,13 +29,12 @@ Rails.application.configure do
   config.action_mailer.raise_delivery_errors = true
   config.action_mailer.delivery_method = :smtp
   config.action_mailer.smtp_settings = {
-    address: "smtp.yandex.ru",
-    port: 587, #465,
-    #domain: "a-sharapov.com",
+    address: ENV['SMTP_HOST'],
+    port: ENV['SMTP_PORT'],
     authentication: "plain",
     enable_starttls_auto: true,
-    user_name: "web@a-sharapov.com",
-    password: "odgxlojtsldzunpz",
+    user_name: ENV['SMTP_LOGIN'],
+    password: ENV['SMTP_SECRET'],
     open_timeout: 180,
     read_timeout: 180
   }
