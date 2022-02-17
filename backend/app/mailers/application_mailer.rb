@@ -1,19 +1,17 @@
 class ApplicationMailer < ActionMailer::Base
-  default from: 'noreply@marafetkina.space'
+  default from: 'web@a-sharapov.com'
   layout 'mailer'
 
   def activation_email
-    @user = params[:user]
-    @login = @user.login
-    @code = @user.activation_code
-    @register_date = @user.created_at
+    @data = params[:data]
+    @email, @login, @code = @data["email"].to_s, @data["login"].to_s, @data["activation_code"].to_s
     @url  = 'http://localhost/activation?code=' + @code
-    mail(to: @user.email, subject: 'Activation link')
+    mail(to: @email, subject: 'Activation link')
   end
 
   def new_password
-    @user = params[:user]
-    @password = params[:password]
-    mail(to: @user.email, subject: 'New password')
+    @data = params[:data]
+    @email, @login, @password = @data["email"].to_s, @data["login"].to_s, @data[:new_password]
+    mail(to: @email, subject: 'New password')
   end
 end

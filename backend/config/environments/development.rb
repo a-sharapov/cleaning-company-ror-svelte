@@ -26,8 +26,19 @@ Rails.application.configure do
   end
 
   # Don't care if the mailer can't send.
-  config.action_mailer.raise_delivery_errors = false
-
+  config.action_mailer.raise_delivery_errors = true
+  config.action_mailer.delivery_method = :smtp
+  config.action_mailer.smtp_settings = {
+    address: "smtp.yandex.ru",
+    port: 587, #465,
+    #domain: "a-sharapov.com",
+    authentication: "plain",
+    enable_starttls_auto: true,
+    user_name: "web@a-sharapov.com",
+    password: "odgxlojtsldzunpz",
+    open_timeout: 180,
+    read_timeout: 180
+  }
   config.action_mailer.perform_caching = false
 
   # Print deprecation notices to the Rails logger.

@@ -39,9 +39,11 @@ class Api::V1::UsersController < ApplicationController
     begin
       escape_with!(:api, :wrong_request, :unprocessable_entity) unless user_create_parameters.present?
       user = User.new(user_create_parameters)
-      escape_with!(:user, :not_create, :unprocessable_entity, user.errors.full_messages) unless user.valid? && user.save()
-      
-      notify_handler(user)
+      activation_code = SecureRandom.uuid
+      user.activation_code = activation_code
+      escape_with!(:user, :invalid_request, :unprocessable_entity, user.errors.full_messages) unless user.valid?
+      escape_with!(:user, :not_create, :unprocessable_entity, user.errors.full_messages) unless user.save
+      escape_with!(:api, :activation_send_failure, :precondition_failed, user.activation_code) unless notify_handler(user.as_json, :activation_email)
       render_user_data(user)
     rescue ApiError => e
       render_api_error(e)
@@ -67,7 +69,7 @@ class Api::V1::UsersController < ApplicationController
       check_auth!
       escape_with!(:user, :not_exist, :not_found) unless @user
       check_access!(@user)
-      escape_with!(:user, :not_remove, :unprocessable_entity) unless @user.destroy()
+      escape_with!(:user, :not_remove, :unprocessable_entity) unless @user.destroy
       
       render json: {message: ApiError::MESSAGES[:user][:deleted]}, status: :ok and return
     rescue ApiError => e
@@ -103,15 +105,6 @@ class Api::V1::UsersController < ApplicationController
         @search_query[:email] = /.*#{param_to_search(params[:email])}.*/
       when !params[:phone].nil?
         @search_query[:phone] = /.*#{param_to_search(params[:phone])}.*/
-    end
-  end
-  
-  def notify_handler(user)
-    if user.phone.present? && !user.phone.nil?
-      #telegram bot                                                                   
-    end
-    if user.email.present? && !user.email.nil?
-      ApplicationMailer.with(user: user).activation_email.deliver_later
     end
   end
 end

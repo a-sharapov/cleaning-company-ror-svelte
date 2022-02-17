@@ -67,7 +67,6 @@ class User
 
   def prepare_data
     self.email = email.downcase unless email.blank?
-    self.activation_code = SecureRandom.uuid
     if self.created_at.present?
       self.updated_at = Time.now
     else

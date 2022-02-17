@@ -2,6 +2,8 @@ class ApiError < StandardError
   MESSAGES = {
     api: {
       wrong_request: "Wrong request, check parameters",
+      activation_send_failure: "Could not send activation code, you must confirm account directly",
+      new_password_send_failure: "Could not send new password... Please try again later",
     },
     user: {
       not_exist: "User does not exist",
@@ -11,6 +13,7 @@ class ApiError < StandardError
       not_remove: "Could not remove current user",
       deleted: "The user has been removed from the system",
       new_password: "Password was updated and sent to email address successfully",
+      invalid_request: "Please check entered data and try again",
     },
     token: {
       not_set: "Tokens invalid or not setted",

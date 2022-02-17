@@ -98,11 +98,12 @@ class Api::V1::AuthentificationController < ApplicationController
     begin
       user = User.find_by(login: params[:login])
       escape_with!(:user, :not_exist, :not_found) unless user 
-      o = [('a'..'z'), ('A'..'Z')].map(&:to_a).flatten
-      new_password = (0...12).map { o[rand(o.length)] }.join
+      new_password = generate_new_password
+      data = user.as_json.merge({new_password: new_password})
+      escape_with!(:api, :new_password_send_failure, :precondition_failed) unless notify_handler(data, :new_password)
       escape_with!(:auth, :not_update, :unprocessable_entity) unless user.update(password: new_password)
-      ApplicationMailer.with(user: user, password: new_password).new_password.deliver_later
-      render json: ApiError::MESSAGES[:user][:new_password], status: :ok
+
+      render json: {message: ApiError::MESSAGES[:user][:new_password]}, status: :ok
     rescue ApiError => e
       render_api_error(e)
     end

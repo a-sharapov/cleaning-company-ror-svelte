@@ -3,7 +3,7 @@ class ApplicationController < ActionController::API
 
   protected
   def except_data!(data, parameters = [:_id, :password_digest, :tokens, :activation_code])
-    return data.as_json({except: parameters}) #.reverse_merge({id: data.activation_code.to_s})
+    return data.as_json({except: parameters})
   end
 
   def set_paging
@@ -49,5 +49,24 @@ class ApplicationController < ActionController::API
 
   def check_access!(user)
     escape_with!(:auth, :unauthorized_access, :unauthorized) unless user.role.eql?("manager") || user.login.eql?(AuthentificationTokenService.decode_token(get_tokens[:access_token]).first["login"])
+  end
+
+  def generate_new_password
+    o = [('a'..'z'), ('A'..'Z')].map(&:to_a).flatten
+    return (0...12).map { o[rand(o.length)] }.join
+  end
+  
+  def notify_handler(data, type, deliver = :deliver_now)
+    begin
+      if data["phone"].present? && !data["phone"].phone.nil?
+        # telegram bot
+      end
+      if data["email"].present? && !data["email"].nil?
+        ApplicationMailer.with(data: data).method(type).call.method(deliver).call
+      end
+      return true
+    rescue
+      return false
+    end
   end
 end
