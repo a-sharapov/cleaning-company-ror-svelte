@@ -12,7 +12,7 @@ class ApiError < StandardError
       not_update: "Could not update current user",
       not_remove: "Could not remove current user",
       deleted: "The user has been removed from the system",
-      new_password: "Password was updated and sent to email address successfully",
+      new_password: "Password has been updated, please check your e-mail",
       invalid_request: "Please check entered data and try again",
     },
     token: {

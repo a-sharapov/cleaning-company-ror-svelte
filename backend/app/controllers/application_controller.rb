@@ -1,5 +1,6 @@
 class ApplicationController < ActionController::API
   include ActionController::Cookies
+  require "twilio-ruby"
 
   protected
   def except_data!(data, parameters = [:_id, :password_digest, :tokens, :activation_code])
@@ -59,7 +60,8 @@ class ApplicationController < ActionController::API
   def notify_handler(data, type, deliver = :deliver_now)
     begin
       if data["phone"].present? && !data["phone"].phone.nil?
-        # telegram bot
+        
+        # SMS twilio
       end
       if data["email"].present? && !data["email"].nil?
         ApplicationMailer.with(data: data).method(type).call.method(deliver).call
