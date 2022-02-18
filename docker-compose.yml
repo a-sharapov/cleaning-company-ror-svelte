@@ -26,12 +26,15 @@ services:
       dockerfile: ./docker/nginx/Dockerfile
     ports:
       - "80:80"
+      - "443:443"
     depends_on:
       - backend
       - frontend
     restart: on-failure
     networks:
       - cleaning-service
+    volumes:
+      - ./certs:/etc/nginx/certs
 
   backend:
     container_name: cleaning-service-backend

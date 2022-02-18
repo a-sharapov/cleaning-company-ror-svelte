@@ -13,6 +13,9 @@ class User
   field :password_digest, type: String
   field :tokens, type: Array
   field :confirmed, type: Boolean, default: false
+  field :blocked_until, type: DateTime
+  field :wrong_attempts_count, type: Integer, default: 0
+  field :banned, type: Boolean, default: false
   field :activation_code, type: String
   field :created_at, type: DateTime
   field :updated_at, type: DateTime
@@ -67,6 +70,7 @@ class User
 
   def prepare_data
     self.email = email.downcase unless email.blank?
+    self.blocked_until = Time.now
     if self.created_at.present?
       self.updated_at = Time.now
     else

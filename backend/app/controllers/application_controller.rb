@@ -2,7 +2,7 @@ class ApplicationController < ActionController::API
   include ActionController::Cookies
 
   protected
-  def except_data!(data, parameters = [:_id, :password_digest, :tokens, :activation_code])
+  def except_data!(data, parameters = [:_id, :password_digest, :tokens, :activation_code, :wrong_attempts_count])
     return data.as_json({except: parameters})
   end
 
@@ -47,8 +47,12 @@ class ApplicationController < ActionController::API
     escape_with!(:auth, :unauthorized_access, :unauthorized) if AuthentificationTokenService.expired?(get_tokens[:access_token])
   end
 
+  def is_manager?(user)
+    user.role.eql?("manager")
+  end
+
   def check_access!(user)
-    escape_with!(:auth, :unauthorized_access, :unauthorized) unless user.role.eql?("manager") || user.login.eql?(AuthentificationTokenService.decode_token(get_tokens[:access_token]).first["login"])
+    escape_with!(:auth, :unauthorized_access, :unauthorized) unless is_manager?(user) || user.login.eql?(AuthentificationTokenService.decode_token(get_tokens[:access_token]).first["login"])
   end
 
   def generate_new_password

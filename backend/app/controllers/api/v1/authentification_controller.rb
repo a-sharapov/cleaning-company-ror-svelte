@@ -7,10 +7,24 @@ class Api::V1::AuthentificationController < ApplicationController
 
   def login
     begin
+      @wrong_attempts_count = ENV["WRONG_ATTEMPTS_COUNT"] ? ENV["WRONG_ATTEMPTS_COUNT"].to_i : 3
       escape_with!(:api, :wrong_request, :unprocessable_entity) unless user_login_parameters.present?
       escape_with!(:user, :not_exist, :not_found) unless @user
       escape_with!(:auth, :need_confirmation, :conflict) unless @user.confirmed.eql?(true)
-      escape_with!(:auth, :password_incorrect, :not_acceptable) unless @user.authenticate(user_login_parameters[:password])
+
+      unless @user.wrong_attempts_count.to_i < @wrong_attempts_count
+        @user.update(blocked_until: Time.now + 1.hour)
+        escape_with!(:auth, :blocked_until, :forbidden)
+      end
+      unless @user.authenticate(user_login_parameters[:password])
+        @user.update(wrong_attempts_count: @user.wrong_attempts_count.to_i + 1)
+        remaining_attempts = @wrong_attempts_count - @user.wrong_attempts_count.to_i + 1
+        escape_with!(:auth, :password_incorrect, :not_acceptable, "You can try again #{remaining_attempts} times")
+      end
+
+      if @user.authenticate(user_login_parameters[:password]) && @user.blocked_until < Time.now
+        @user.update(wrong_attempts_count: 0)
+      end
       
       tokens_pair = AuthentificationTokenService.issue_tokens(@user, @metrics)
       cookies["refresh_token"] = { value: tokens_pair[:refresh_token], httponly: true }
@@ -96,13 +110,13 @@ class Api::V1::AuthentificationController < ApplicationController
 
   def unlock
     begin
-      user = User.find_by(login: params[:login])
+      user = User.find_by(activation_code: params[:code])
       escape_with!(:user, :not_exist, :not_found) unless user 
       new_password = generate_new_password
       data = user.as_json.merge({new_password: new_password})
       escape_with!(:api, :new_password_send_failure, :precondition_failed) unless notify_handler(data, :new_password)
       escape_with!(:auth, :not_update, :unprocessable_entity) unless user.update(password: new_password)
-
+      user.update({wrong_attempts_count: 0, blocked_until: Time.now})
       render json: {message: ApiError::MESSAGES[:user][:new_password]}, status: :ok
     rescue ApiError => e
       render_api_error(e)
