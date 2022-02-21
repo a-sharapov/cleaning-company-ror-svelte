@@ -5,6 +5,9 @@ class ApiError < StandardError
       activation_send_failure: "Could not send activation code, you must confirm account directly",
       new_password_send_failure: "Could not send new password... Please try again later",
     },
+    management: {
+      banned: "User has already been banned",
+    },
     user: {
       not_exist: "User does not exist",
       not_found: "Has no one user founded yet",

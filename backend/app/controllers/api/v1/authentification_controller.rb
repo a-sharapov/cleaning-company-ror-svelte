@@ -11,6 +11,7 @@ class Api::V1::AuthentificationController < ApplicationController
       escape_with!(:api, :wrong_request, :unprocessable_entity) unless user_login_parameters.present?
       escape_with!(:user, :not_exist, :not_found) unless @user
       escape_with!(:auth, :need_confirmation, :conflict) unless @user.confirmed.eql?(true)
+      escape_if_in_blacklist(@user)
 
       unless @user.wrong_attempts_count.to_i < @wrong_attempts_count
         @user.update(blocked_until: Time.now + 1.hour)
@@ -64,6 +65,7 @@ class Api::V1::AuthentificationController < ApplicationController
     begin
       escape_with!(:api, :wrong_request, :unprocessable_entity) if !user_confirmation_params[:code].present? || user_confirmation_params[:code].nil?
       user = User.find_by(:activation_code => user_confirmation_params[:code])
+      escape_if_in_blacklist(user)
       escape_with!(:user, :not_exist, :not_found) unless user
       escape_with!(:auth, :already_confirmed, :ok) if user.confirmed.eql?(true)
       escape_with!(:auth, :not_confirmed, :unprocessable_entity) unless user.set(confirmed: true) 
@@ -112,6 +114,7 @@ class Api::V1::AuthentificationController < ApplicationController
     begin
       user = User.find_by(activation_code: params[:code])
       escape_with!(:user, :not_exist, :not_found) unless user 
+      escape_if_in_blacklist(user)
       new_password = generate_new_password
       data = user.as_json.merge({new_password: new_password})
       escape_with!(:api, :new_password_send_failure, :precondition_failed) unless notify_handler(data, :new_password)

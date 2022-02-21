@@ -28,6 +28,5 @@ class CleaningEvent
 
   def prepare_data
     self.created_at = Time.now
-    self.description = description.normalize.to_s unless description.blank?
   end
 end

@@ -1,8 +1,8 @@
 class User
   include Mongoid::Document
   include ActiveModel::SecurePassword
-  embeds_one :blacklist, as: :baninfo
-  embeds_one :company_profile, as: :profile
+  has_one :blacklist
+  has_one :company_profile
   
   before_save :prepare_data
 
@@ -71,7 +71,6 @@ class User
 
   def prepare_data
     self.email = email.downcase unless email.blank?
-    self.description = description.normalize.to_s unless description.blank?
     self.blocked_until = Time.now
     if self.created_at.present?
       self.updated_at = Time.now

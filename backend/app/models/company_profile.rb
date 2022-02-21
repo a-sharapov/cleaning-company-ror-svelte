@@ -1,6 +1,6 @@
 class CompanyProfile
   include Mongoid::Document
-  embedded_in :user
+  belongs_to :user
   has_many :review, validate: false
   has_many :cleaning_event, validate: false
 
@@ -19,6 +19,5 @@ class CompanyProfile
   validates :prices, presence: true
 
   def prepare_data
-    self.description = description.normalize.to_s unless description.blank?
   end
 end

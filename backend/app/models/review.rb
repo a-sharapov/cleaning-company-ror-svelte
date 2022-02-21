@@ -14,7 +14,6 @@ class Review
   validates :assessment, presence: true
   
   def prepare_data
-    self.description = description.normalize.to_s unless description.blank?
     self.created_at = Time.now
   end
 end

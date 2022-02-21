@@ -55,9 +55,13 @@ class ApplicationController < ActionController::API
 
   def check_access!(user)
     begin
-      escape_with!(:auth, :service_unavailable, :service_unavailable, user.blacklist.description.to_s) if user.banned.eql?(true)
+      escape_if_in_blacklist(user)
       escape_with!(:auth, :forbidden, :forbidden) unless is_manager?(user) || user.login.eql?(AuthentificationTokenService.decode_token(get_tokens[:access_token]).first["login"])
     end
+  end
+
+  def escape_if_in_blacklist(user)
+    escape_with!(:management, :banned, :forbidden, user.blacklist.description.to_s) if user.banned.eql?(true)
   end
 
   def generate_new_password
