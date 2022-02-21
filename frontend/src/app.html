@@ -1,14 +1,21 @@
 <!DOCTYPE html>
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="%svelte.assets%/css/global.css" type="text/css" />
-		%svelte.head%
-		<link rel="icon" href="%svelte.assets%/favicon.png" />
-		<meta name="description" content="" />
-	</head>
-	<body>
-		<main id="app">%svelte.body%</main>
-	</body>
+<html>
+
+<head>
+	<base href="/">
+	<meta charset="utf-8" />
+	<meta http-equiv="Cache-Control" content="max-age=3600, must-revalidate" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+	<meta name="googlebot" content="NOODP" />
+	<link rel="stylesheet" href="%svelte.assets%/css/global.css" type="text/css" />
+	<link rel="icon" href="%svelte.assets%/favicon.png" />
+	%svelte.head%
+</head>
+
+<body>
+	<main id="app">%svelte.body%</main>
+</body>
+
 </html>
