@@ -4,7 +4,6 @@ class Blacklist
   
   before_save :prepare_data
 
-  field :login, type: String
   field :description, type: String
   field :created_at, type: DateTime
   field :banned_until, type: DateTime

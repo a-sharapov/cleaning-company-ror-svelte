@@ -3,14 +3,15 @@ class Api::V1::ManageController < ApplicationController
   def index
      begin
       hasAccess?
-      
+      render json: {
+        message: "Access granted", 
+      }, status: :ok and return
      rescue ApiError => e
       render_api_error(e)
      end
   end
   
   private
-
   def hasAccess?
     get_tokens
     check_auth!

@@ -3,8 +3,6 @@ class User
   include ActiveModel::SecurePassword
   embeds_one :blacklist, as: :baninfo
   embeds_one :company_profile, as: :profile
-  has_many :review, validate: false
-  has_many :cleaning_event, validate: false
   
   before_save :prepare_data
 
