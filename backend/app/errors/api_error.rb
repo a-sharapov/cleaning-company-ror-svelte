@@ -16,8 +16,8 @@ class ApiError < StandardError
       invalid_request: "Please check entered data and try again",
     },
     token: {
-      not_set: "Tokens invalid or not setted",
-      token_expired: "Token expired or invalid",
+      not_set: "Tokens are invalid or not setted",
+      token_expired: "Token has expired or invalid",
       missmatching: "Missmatched or invalid token",
     },
     auth: {

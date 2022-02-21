@@ -15,6 +15,8 @@ Rails.application.routes.draw do
       put "auth", to: "authentification#refresh"
       put "restore/:code", to: "authentification#unlock"
       get "confirm", to: "authentification#confirm"
+
+      get "manager", to: "manage#index"
     end
   end
 end
