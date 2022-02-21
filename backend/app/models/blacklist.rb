@@ -1,0 +1,20 @@
+class Blacklist
+  include Mongoid::Document
+  belongs_to :user
+  
+  before_save :prepare_data
+
+  field :login, type: String
+  field :description, type: String
+  field :created_at, type: DateTime
+  field :banned_until, type: DateTime
+
+  validates :login, presence: true
+  validates :description, presence: true
+  validates :banned_until, presence: true
+
+  def prepare_data
+    self.description = description.normalize.to_s unless description.blank?
+    self.created_at = Time.now
+  end
+end

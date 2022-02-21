@@ -1,6 +1,10 @@
 class User
   include Mongoid::Document
   include ActiveModel::SecurePassword
+  has_one :blacklist, dependent: :destroy, foreign_key: "login", class_name: "Blacklist"
+  has_one :company_profile, dependent: :destroy, foreign_key: "login", class_name: "CompanyProfile"
+  has_many :reviews, foreign_key: "login", class_name: "Review"
+  has_many :events, dependent: :destroy, foreign_key: "login", class_name: "Event"
 
   before_save :prepare_data
 
@@ -30,7 +34,7 @@ class User
                         format: {with: /\A(?=.{8,})(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[[:^alnum:]])/x, message: "Password must contain at least one digit, one character, one alphabetic character"},
                         if: :password_not_present? || changes[:password_digest]
 
-  validates :role,      inclusion: {in: %w(client company), message: "User only must be a client or company"}
+  validates :role,      inclusion: {in: %w(client company), message: "User should be a client or company"}
 
   validates :email,     presence: false, 
                         uniqueness: true, 
@@ -70,6 +74,7 @@ class User
 
   def prepare_data
     self.email = email.downcase unless email.blank?
+    self.description = description.normalize.to_s unless description.blank?
     self.blocked_until = Time.now
     if self.created_at.present?
       self.updated_at = Time.now
