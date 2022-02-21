@@ -36,6 +36,8 @@ class ApiError < StandardError
       not_login: "Not logged in",
       not_logout: "Not logged out",
       blocked_until: "You account has been locked for 1 hour",
+      forbidden: "You are not allowed to access this data",
+      service_unavailable: "",
     }
   }
 

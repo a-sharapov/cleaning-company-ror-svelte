@@ -1,6 +1,5 @@
-class Event
+class CleaningEvent
   include Mongoid::Document
-
   belongs_to :user
   belongs_to :company_profile
 
@@ -14,17 +13,17 @@ class Event
   field :description, type: String
   field :status, type: String, default: "new"
   field :schedule, type: String
-  field :service_types, type: Array
+  field :services, type: Array
   field :is_regular, type: Boolean, default: false
   field :created_at, type: DateTime
   field :planed_at, type: DateTime
   filed :assets, type: Object
 
   validates :company_name, presence: true
-  validates :type, presence: true, inclusion: {in: %w(new confirmed canceled), message: "Type of event should be new, confirmed or canceled"}
+  validates :type, inclusion: {in: %w(new confirmed canceled), message: "Type of event should be new, confirmed or canceled"}
   validates :address, presence: true
   validates :schedule, presence: true
-  validates :service_types, presence: true
+  validates :services, presence: true
   validates :is_regular, presence: true
   validates :planed_at, presence: true
 

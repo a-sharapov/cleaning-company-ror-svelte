@@ -1,7 +1,7 @@
 class Review
   include Mongoid::Document
-  belongs_to :company_profile
   belongs_to :user
+  belongs_to :company_profile
 
   field :login, type: String, default: "Anonymous"
   field :company_name, type: String

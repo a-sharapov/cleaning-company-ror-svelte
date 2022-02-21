@@ -1,12 +1,11 @@
 class CompanyProfile
   include Mongoid::Document
-  belongs_to :user
-  has_many :reviews, dependent: :destroy, foreign_key: "company_name", class_name: "Review"
-  has_many :events, foreign_key: "company_name", class_name: "Event"
+  embedded_in :user
+  has_many :review, validate: false
+  has_many :cleaning_event, validate: false
 
   before_save :prepare_data
 
-  field :login, type: String
   field :logotype, type: String
   field :company_name, type: String
   field :description, type: String
@@ -14,7 +13,6 @@ class CompanyProfile
   field :service_types, type: Array
   field :prices, type: Object
 
-  validates :login, presence: true
   validates :company_name, presence: true
   validates :address, presence: true
   validates :service_types, presence: true

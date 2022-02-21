@@ -1,6 +1,6 @@
 class Blacklist
   include Mongoid::Document
-  belongs_to :user
+  embedded_in :user
   
   before_save :prepare_data
 
@@ -9,7 +9,6 @@ class Blacklist
   field :created_at, type: DateTime
   field :banned_until, type: DateTime
 
-  validates :login, presence: true
   validates :description, presence: true
   validates :banned_until, presence: true
 

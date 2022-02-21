@@ -1,11 +1,11 @@
 class User
   include Mongoid::Document
   include ActiveModel::SecurePassword
-  has_one :blacklist, dependent: :destroy, foreign_key: "login", class_name: "Blacklist"
-  has_one :company_profile, dependent: :destroy, foreign_key: "login", class_name: "CompanyProfile"
-  has_many :reviews, foreign_key: "login", class_name: "Review"
-  has_many :events, dependent: :destroy, foreign_key: "login", class_name: "Event"
-
+  embeds_one :blacklist, as: :baninfo
+  embeds_one :company_profile, as: :profile
+  has_many :review, validate: false
+  has_many :cleaning_event, validate: false
+  
   before_save :prepare_data
 
   field :login, type: String
@@ -42,8 +42,7 @@ class User
                         format: {with: /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\z/i, message: "Email must begin match with template name@domain.zone"}, 
                         if: :email_present?
 
-  validates :phone,     presence: false, 
-                        uniqueness: true, 
+  validates :phone,     uniqueness: true, 
                         numericality: true, 
                         length: {minimum: 10, maximum: 15}, 
                         presence: {message: "Only positive number without spaces are allowed"}, 

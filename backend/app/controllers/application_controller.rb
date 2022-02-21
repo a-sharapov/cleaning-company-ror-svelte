@@ -28,7 +28,7 @@ class ApplicationController < ActionController::API
 
   def render_api_error(e)
     message = {message: e.message}
-    message = {message: e.message, errors: e.assets} unless e.assets.nil?
+    message = {message: e.message, assets: e.assets} unless e.assets.nil?
     render json: message, status: e.type and return
   end
   
@@ -55,8 +55,8 @@ class ApplicationController < ActionController::API
 
   def check_access!(user)
     begin
-      escape_with!(:auth, :unauthorized_access, :unauthorized) if user.banned.eql?(true)
-      escape_with!(:auth, :unauthorized_access, :unauthorized) unless is_manager?(user) || user.login.eql?(AuthentificationTokenService.decode_token(get_tokens[:access_token]).first["login"])
+      escape_with!(:auth, :service_unavailable, :service_unavailable, user.blacklist.description.to_s) if user.banned.eql?(true)
+      escape_with!(:auth, :forbidden, :forbidden) unless is_manager?(user) || user.login.eql?(AuthentificationTokenService.decode_token(get_tokens[:access_token]).first["login"])
     end
   end
 
