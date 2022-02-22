@@ -41,8 +41,27 @@ class Api::V1::ManagementController < ApplicationController
       render_api_error(e)
     end
   end
+
+  def add
+    begin
+      key = add_parameters[:key]
+      escape_with!(:auth, :unauthorized_access, :unauthorized) unless key.eql?(ENV["SECRET_KEY"])
+      user = User.find_by(login: ban_parameters[:login])
+      escape_with!(:user, :not_exist, :not_found) unless user
+      escape_with!(:management, :banned, :not_acceptable) unless user.banned.eql?(false)
+      escape_with!(:user, :not_update, :unprocessable_entity) unless user.set(role: "manager")
+      render json: {message: "User #{user.login} has been added to admin list"}, status: :ok and return
+    rescue ApiError => e
+      render_api_error(e)
+    end
+  end
+  
   
   private
+  def add_parameters
+    params.permit(:login, :key)
+  end
+
   def ban_parameters
     params.permit(:login, :description)
   end

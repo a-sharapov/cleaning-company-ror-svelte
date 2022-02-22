@@ -26,6 +26,7 @@ Rails.application.routes.draw do
       get "confirm", to: "authentification#confirm"
 
       get "manager", to: "management#index"
+      get "manager/add/:login", to: "management#add"
       put "manager/ban/:login", to: "management#ban"
     end
   end
