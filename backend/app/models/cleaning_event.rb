@@ -1,6 +1,9 @@
 class CleaningEvent
   include Mongoid::Document
+  include Mongoid::Timestamps
+  
   belongs_to :company_profile
+  has_many :attachments
 
   before_save :prepare_data
 
@@ -14,9 +17,8 @@ class CleaningEvent
   field :schedule, type: String
   field :services, type: Array
   field :is_regular, type: Boolean, default: false
-  field :created_at, type: DateTime
   field :planed_at, type: DateTime
-  filed :assets, type: Object
+  field :assets, type: Object
 
   validates :company_name, presence: true
   validates :type, inclusion: {in: %w(new confirmed canceled), message: "Type of event should be new, confirmed or canceled"}
@@ -25,8 +27,4 @@ class CleaningEvent
   validates :services, presence: true
   validates :is_regular, presence: true
   validates :planed_at, presence: true
-
-  def prepare_data
-    self.created_at = Time.now
-  end
 end

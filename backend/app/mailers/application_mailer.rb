@@ -14,4 +14,16 @@ class ApplicationMailer < ActionMailer::Base
     @email, @login, @password = @data["email"].to_s, @data["login"].to_s, @data[:new_password].to_s
     mail(to: @email, subject: 'New password')
   end
+
+  def banned
+    @data = params[:data]
+    @email, @login, @reason = @data["email"].to_s, @data["login"].to_s, @data["reason"].to_s
+    mail(to: @email, subject: 'Your account has ben suspended')
+  end
+
+  def unbanned
+    @data = params[:data]
+    @email, @login, @reason = @data["email"].to_s, @data["login"].to_s, @data["reason"].to_s
+    mail(to: @email, subject: 'Your account has ben activated')
+  end
 end

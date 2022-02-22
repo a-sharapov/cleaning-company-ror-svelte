@@ -7,7 +7,7 @@ class Api::V1::UsersController < ApplicationController
   def index
     begin
       users = User.all_of(@search_query).limit(@limit).offset(@offset).asc(:id)
-      escape_with!(:user, :not_exist, :not_found) unless users.any?
+      escape_with!(:user, :not_found, :not_found) unless users.any?
       data = users.map do |user|
         except_data!(user)
       end

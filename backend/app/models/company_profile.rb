@@ -1,12 +1,14 @@
 class CompanyProfile
   include Mongoid::Document
+  include Mongoid::Paperclip
+  include Mongoid::Timestamps
+  
   belongs_to :user
   has_many :review, validate: false
   has_many :cleaning_event, validate: false
 
   before_save :prepare_data
 
-  field :logotype, type: String
   field :company_name, type: String
   field :description, type: String
   field :address, type: Object
@@ -18,6 +20,5 @@ class CompanyProfile
   validates :service_types, presence: true
   validates :prices, presence: true
 
-  def prepare_data
-  end
+  has_mongoid_attached_file :logotype
 end

@@ -14,6 +14,8 @@ gem 'jbuilder', '~> 2.7'
 # Use Active Model has_secure_password
 gem 'bcrypt', '~> 3.1.7'
 gem 'mongoid', '~> 7.3.3'
+gem 'mongoid_rails_migrations', '~> 1.4'
+gem "mongoid-paperclip"
 #gem 'friendly_id', '~> 5.4.0'
 gem 'jwt', '~> 2.3.0'
 gem 'twilio-ruby', '~> 5.64'

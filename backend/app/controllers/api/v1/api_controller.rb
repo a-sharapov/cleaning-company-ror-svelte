@@ -1,14 +1,13 @@
 class Api::V1::ApiController < ApplicationController
 
   API_MESSAGES = {
-    service_name: "Cleaning portal",
+    service_name: ENV["SERVICE_NAME"],
     working: "API server currently working...",
     version: "1.0"
   }
   
   def index
     render :template => "api-hello", :locals => {:content => API_MESSAGES}
-    #render json: {message: API_MESSAGES[:working] }, status: :ok
   end
 
   def endpoints 
@@ -18,6 +17,9 @@ class Api::V1::ApiController < ApplicationController
       "available_endpoints": [
         "users",
         "auth",
+        "companies",
+        "assets",
+        "manager"
       ]
     }
     render json: message, status: :ok

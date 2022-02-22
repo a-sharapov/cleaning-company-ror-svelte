@@ -1,8 +1,11 @@
 class User
   include Mongoid::Document
+  include Mongoid::Paperclip
+  include Mongoid::Timestamps
   include ActiveModel::SecurePassword
+
   has_one :blacklist
-  has_one :company_profile
+  has_one :company_profile, dependent: :destroy
   
   before_save :prepare_data
 
@@ -19,8 +22,6 @@ class User
   field :wrong_attempts_count, type: Integer, default: 0
   field :banned, type: Boolean, default: false
   field :activation_code, type: String
-  field :created_at, type: DateTime
-  field :updated_at, type: DateTime
 
   validates :login,     presence: true, 
                         uniqueness: true, 
@@ -49,7 +50,8 @@ class User
   validate :mail_and_phone_unpresent?
 
   has_secure_password
-
+  has_mongoid_attached_file :avatar
+  
   private
   def password_not_present?
     password.nil? && !self.password_digest.present?
@@ -72,10 +74,5 @@ class User
   def prepare_data
     self.email = email.downcase unless email.blank?
     self.blocked_until = Time.now
-    if self.created_at.present?
-      self.updated_at = Time.now
-    else
-      self.created_at = Time.now
-    end
   end
 end
