@@ -17,13 +17,13 @@ class ApplicationMailer < ActionMailer::Base
 
   def banned
     @data = params[:data]
-    @email, @login, @reason = @data["email"].to_s, @data["login"].to_s, @data["reason"].to_s
+    @email, @login, @reason = @data["email"].to_s, @data["login"].to_s, @data[:reason].to_s
     mail(to: @email, subject: 'Your account has ben suspended')
   end
 
   def unbanned
     @data = params[:data]
-    @email, @login, @reason = @data["email"].to_s, @data["login"].to_s, @data["reason"].to_s
+    @email, @login, @reason = @data["email"].to_s, @data["login"].to_s, @data[:reason].to_s
     mail(to: @email, subject: 'Your account has ben activated')
   end
 end

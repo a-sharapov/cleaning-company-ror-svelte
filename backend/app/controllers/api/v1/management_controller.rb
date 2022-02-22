@@ -13,10 +13,11 @@ class Api::V1::ManagementController < ApplicationController
 
   def ban
     begin
+      hasAccess?
       user = User.find_by(login: ban_parameters[:login])
       escape_with!(:user, :not_exist, :not_found) unless user
       escape_with!(:management, :banned, :not_acceptable) unless user.banned.eql?(false)
-      escape_with!(:user, :not_update, :not_acceptable) unless user.set(banned: !user.banned.to_bool)
+      escape_with!(:user, :not_update, :not_acceptable) unless user.set(banned: !user.banned)
       banned = Blacklist.new(ban_parameters)
       banned.user = user
       escape_with!(:user, :invalid_request, :unprocessable_entity, banned.errors.full_messages) unless banned.valid?
@@ -31,7 +32,7 @@ class Api::V1::ManagementController < ApplicationController
         notify_type = :unbanned
         message = "User #{user.login} has been unbanned" 
       end
-      escape_with!(:api, :notification_send_failure, :precondition_failed, user.activation_code) unless notify_handler(user.as_json.merge(reason: banned.description), notify_type)
+      escape_with!(:api, :notification_send_failure, :precondition_failed, user.activation_code) unless notify_handler(user.as_json.merge({reason: banned.description}), notify_type)
 
       render json: {
         message: message,

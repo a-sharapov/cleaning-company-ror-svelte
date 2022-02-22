@@ -5,8 +5,6 @@ class CleaningEvent
   belongs_to :company_profile
   has_many :attachments
 
-  before_save :prepare_data
-
   field :event_code, type: String
   field :customer, type: String, default: "Anonymous"
   field :company_name, type: String

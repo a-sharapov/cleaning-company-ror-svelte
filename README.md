@@ -7,6 +7,7 @@
 Переменные для запуска приложения должны быть размещены в файле **./backend/.env**
 
 > #Необходимые параметры:\
+  SERVICE_NAME="Cleaning portal"\
   HOST_NAME="localhost"\
   SECRET_KEY="SecretKey"\
   WRONG_ATTEMPTS_COUNT=3\

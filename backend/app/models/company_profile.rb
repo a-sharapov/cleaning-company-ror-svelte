@@ -7,8 +7,6 @@ class CompanyProfile
   has_many :review, validate: false
   has_many :cleaning_event, validate: false
 
-  before_save :prepare_data
-
   field :company_name, type: String
   field :description, type: String
   field :address, type: Object
