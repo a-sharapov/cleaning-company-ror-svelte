@@ -10,7 +10,7 @@ class Api::V1::AuthentificationController < ApplicationController
       @wrong_attempts_count = ENV["WRONG_ATTEMPTS_COUNT"] ? ENV["WRONG_ATTEMPTS_COUNT"].to_i : 3
       escape_with!(:api, :wrong_request, :unprocessable_entity) unless user_login_parameters.present?
       escape_with!(:user, :not_exist, :not_found) unless @user
-      escape_with!(:auth, :need_confirmation, :conflict) unless @user.confirmed.eql?(true)
+      escape_with!(:auth, :need_confirmation, :conflict) unless @user.confirmed
       escape_if_in_blacklist(@user)
 
       unless @user.wrong_attempts_count.to_i < @wrong_attempts_count

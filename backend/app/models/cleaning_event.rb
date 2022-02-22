@@ -3,11 +3,11 @@ class CleaningEvent
   include Mongoid::Timestamps
   
   belongs_to :company_profile
+  belongs_to :user
   has_many :attachments
 
   field :event_code, type: String
   field :customer, type: String, default: "Anonymous"
-  field :company_name, type: String
   field :type, type: String
   field :address, type: Object
   field :description, type: String

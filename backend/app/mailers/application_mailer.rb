@@ -5,7 +5,7 @@ class ApplicationMailer < ActionMailer::Base
   def activation_email
     @data = params[:data]
     @hostname, @email, @login, @code = ENV["HOST_NAME"], @data["email"].to_s, @data["login"].to_s, @data["activation_code"].to_s
-    @url  = 'http://#{@hostname}/activation?code=' + @code
+    @url  = "http://#{@hostname}/activation?code=" + @code
     mail(to: @email, subject: 'Activation link')
   end
 
