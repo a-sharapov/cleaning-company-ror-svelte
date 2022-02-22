@@ -26,7 +26,7 @@
 
 После успещного запуска приложение будет доступна по адресам:
 
-> localhost - frontend
+> localhost - frontend\
 > localhost/api - backend
 
 Точки входа:
