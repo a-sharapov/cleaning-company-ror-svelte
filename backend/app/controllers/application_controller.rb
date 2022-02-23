@@ -44,8 +44,9 @@ class ApplicationController < ActionController::API
   def check_auth!
     begin
       escape_with!(:token, :not_set, :unprocessable_entity) unless get_tokens
-      escape_with!(:auth, :unauthorized_access, :unauthorized) unless AuthentificationTokenService.decode_token(get_tokens[:access_token])
-      escape_with!(:auth, :unauthorized_access, :unauthorized) if AuthentificationTokenService.expired?(get_tokens[:access_token])
+      access_token = get_tokens[:access_token]
+      escape_with!(:auth, :unauthorized_access, :unauthorized) unless AuthentificationTokenService.decode_token(access_token)
+      escape_with!(:auth, :unauthorized_access, :unauthorized) if AuthentificationTokenService.expired?(access_token)
     end
   end
 

@@ -47,16 +47,11 @@ class AuthentificationTokenService
 
     def expired?(token) 
       token_data = self.decode_token(token)
-      if token_data.present?
-        true if Time.now.to_i >= token_data.first["expires_in"].to_i
-      end
-      false
+      return Time.now.to_i > token_data.first["expires_in"].to_i
     end
 
     def clear_expired_tokens(user) 
-      if user.tokens.present?
-        user.set(tokens: user.tokens.as_json.filter{ |t| self.expired?(t) })
-      end
+      user.set(tokens: user.tokens.as_json.filter{ |t| self.expired?(t) }) if user.tokens.present?
     end
   end
 end
