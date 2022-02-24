@@ -9,6 +9,7 @@ class Review
   field :description, type: String
   field :assessment, type: Integer, default: 5
   field :assets, type: Object
+  field :slug, type: String, default: ->{ SecureRandom.uuid.to_s }
 
   validates :description, presence: true
   validates :company_name, presence: true

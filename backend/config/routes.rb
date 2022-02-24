@@ -5,7 +5,7 @@ Rails.application.routes.draw do
 
     namespace :v1 do
       get "assets/init", to: "assets#init"
-      get "assets/:url", to: "assets#index"
+      get "assets/:slug", to: "assets#index"
 
       get "users", to: "users#index"
       post "users", to: "users#new"
@@ -15,9 +15,9 @@ Rails.application.routes.draw do
 
       get "companies", to: "company_profile#index"
       post "companies", to: "company_profile#new"
-      post "companies/:company_name", to: "company_profile#show"
-      put "companies/:company_name", to: "company_profile#update"
-      delete "companies/:company_name", to: "company_profile#destroy"
+      get "companies/:slug", to: "company_profile#show"
+      put "companies/:slug", to: "company_profile#update"
+      delete "companies/:slug", to: "company_profile#destroy"
       
       post "auth", to: "authentification#login"
       delete "auth", to: "authentification#logout"

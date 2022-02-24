@@ -207,6 +207,7 @@ GEM
     thor (1.2.1)
     thread_safe (0.3.6)
     timeout (0.2.0)
+    translit (0.1.5)
     twilio-ruby (5.64.0)
       faraday (>= 0.9, < 2.0)
       jwt (>= 1.5, <= 2.5)
@@ -238,6 +239,7 @@ DEPENDENCIES
   rails (~> 6.0.4, >= 6.0.4.4)
   spring
   spring-watcher-listen (~> 2.0.0)
+  translit
   twilio-ruby (~> 5.64)
   tzinfo-data
 

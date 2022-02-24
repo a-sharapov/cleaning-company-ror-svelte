@@ -2,7 +2,7 @@ class Api::V1::AssetsController < ApplicationController
 
   def index
     begin 
-      assets = Assets.find_by(url: params[:url])
+      assets = Assets.find_by(slug: params[:slug])
       escape_with!(:assets, :not_found, :not_found) unless assets
       render json: except_data!(assets), status: :ok and return
     rescue ApiError => e

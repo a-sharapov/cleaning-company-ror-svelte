@@ -4,7 +4,7 @@ class Assets
 
   field :type, type: String
   field :content, type: Object
-  field :url, type: String, default: ->{ type.parameterize }
+  field :slug, type: String, default: ->{ type.parameterize }
 
   validates :type, presence: true
   validates :content, presence: true

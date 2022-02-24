@@ -2,7 +2,7 @@ class ApplicationController < ActionController::API
   include ActionController::Cookies
 
   protected
-  def except_data!(data, parameters = [:_id, :password_digest, :tokens, :activation_code, :wrong_attempts_count, :blocked_until, :url])
+  def except_data!(data, parameters = [:_id, :password_digest, :tokens, :activation_code, :wrong_attempts_count, :blocked_until, :user_id])
     return data.as_json({except: parameters})
   end
 
@@ -51,7 +51,7 @@ class ApplicationController < ActionController::API
   end
 
   def user_from_token
-    AuthentificationTokenService.decode_token(get_tokens[:access_token])
+    AuthentificationTokenService.decode_token(get_tokens[:access_token]).first["login"]
   end
 
   def is_manager?(user)

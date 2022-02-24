@@ -5,8 +5,7 @@ class AuthentificationTokenService
   class << self
     def create_token(data, type, metrics = nil)
       return false unless data.present?
-      expires_in = (Time.now + 15.minutes).to_i if type.eql?(:access)
-      expires_in = (Time.now + 7.days).to_i if type.eql?(:refresh)
+      expires_in = type.eql?(:refresh) ? (Time.now + 7.days).to_i : (Time.now + 15.minutes).to_i
 
       refresh_data = {
         login: data[:login],
@@ -51,7 +50,7 @@ class AuthentificationTokenService
     end
 
     def clear_expired_tokens(user) 
-      user.set(tokens: user.tokens.as_json.filter{ |t| self.expired?(t) }) if user.tokens.present?
+      user.set(tokens: user.tokens.as_json.filter{ |token| !self.expired?(token) }) if user.tokens.present?
     end
   end
 end

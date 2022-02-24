@@ -54,7 +54,7 @@ class Api::V1::AuthentificationController < ApplicationController
       escape_with!(:auth, :not_logout, :unprocessable_entity) unless user.set(tokens: user.tokens.as_json.filter{ |t| t != refresh_token })
       
       AuthentificationTokenService.clear_expired_tokens(user)
-      message = {message: ApiError::MESSAGES[:auth][:logged_out]}
+      message = {message: "User successfully logged out"}
       render json: message, status: :ok
     rescue ApiError => e
       render_api_error(e)
@@ -65,12 +65,12 @@ class Api::V1::AuthentificationController < ApplicationController
     begin
       escape_with!(:api, :wrong_request, :unprocessable_entity) if !user_confirmation_params[:code].present? || user_confirmation_params[:code].nil?
       user = User.find_by(:activation_code => user_confirmation_params[:code])
-      escape_if_in_blacklist(user)
       escape_with!(:user, :not_exist, :not_found) unless user
       escape_with!(:auth, :already_confirmed, :ok) if user.confirmed.eql?(true)
+      escape_if_in_blacklist(user)
       escape_with!(:auth, :not_confirmed, :unprocessable_entity) unless user.set(confirmed: true) 
       tokens_pair = AuthentificationTokenService.issue_tokens(user, @metrics)
-      cookies["refresh_token"] = { value: tokens_pair[:refresh_token], httponly: true }
+      set_refresh_token(tokens_pair[:refresh_token])
 
       response = {
         message: ApiError::MESSAGES[:auth][:confirmed], 
@@ -96,8 +96,7 @@ class Api::V1::AuthentificationController < ApplicationController
       escape_with!(:auth, :unauthorized_access, :unauthorized) unless user.tokens.any? && user.tokens.find(refresh_token).any?
       escape_with!(:auth, :not_update, :unprocessable_entity) unless user.set(tokens: user.tokens.as_json.filter{ |t| t != refresh_token })
       tokens_pair = AuthentificationTokenService.issue_tokens(user, @metrics)
-      cookies["refresh_token"] = { value: tokens_pair[:refresh_token], httponly: true }
-
+      set_refresh_token(tokens_pair[:refresh_token])
       response = {
         message: ApiError::MESSAGES[:auth][:update], 
         user: except_data!(user).merge(
@@ -136,6 +135,10 @@ class Api::V1::AuthentificationController < ApplicationController
         agent: request.user_agent,
       }
     end
+  end
+
+  def set_refresh_token(token)
+    cookies["refresh_token"] = { value: token, httponly: true }
   end
 
   def user_confirmation_params

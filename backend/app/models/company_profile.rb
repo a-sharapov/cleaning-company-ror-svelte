@@ -10,13 +10,12 @@ class CompanyProfile
   field :company_name, type: String
   field :description, type: String
   field :address, type: Object
-  field :service_types, type: Array
-  field :prices, type: Object
+  field :service_types, type: Array, default: []
+  field :prices, type: Object, default: {}
+  field :slug, type: String, default: ->{ Translit.convert(self.company_name, :english).parameterize }
 
   validates :company_name, presence: true
   validates :address, presence: true
-  validates :service_types, presence: true
-  validates :prices, presence: true
 
   has_mongoid_attached_file :logotype
 end

@@ -1,6 +1,6 @@
 class Api::V1::CompanyProfileController < ApplicationController
   before_action :set_paging, only: [:index] 
-  before_action :get_company_profile, only: [:show, :update, :destroy] 
+  before_action :get_company_profile, only: [:show, :update] 
   before_action :set_profiles_search_query, only: [:index] 
   before_action :get_tokens, only: [:new, :update, :destroy] 
 
@@ -26,23 +26,26 @@ class Api::V1::CompanyProfileController < ApplicationController
     end
   end
 
+  def show
+    begin
+      escape_with!(:profiles, :not_exist, :not_found) unless @profile
+      render_profile_data(@profile)
+    rescue ApiError => e
+      render_api_error(e)
+    end
+  end
+
   def new
     begin
       check_auth!
       user = User.find_by(login: user_from_token)
       escape_if_in_blacklist(user)
       check_access!(user)
+      escape_with!(:profiles, :already_exist, :conflict) if CompanyProfile.find_by(user_id: user.id)
       profile = CompanyProfile.new(company_profile_parameters)
       profile.user = user
-      
-    rescue ApiError => e
-      render_api_error(e)
-    end
-  end
-
-  def show
-    begin
-      
+      escape_with!(:api, :invalid_request, :unprocessable_entity, profile.errors.full_messages) unless profile.valid? && profile.update(company_profile_parameters)
+      render_profile_data(profile)
     rescue ApiError => e
       render_api_error(e)
     end
@@ -50,19 +53,17 @@ class Api::V1::CompanyProfileController < ApplicationController
 
   def update
     begin
-      
+      check_auth!
+      user = User.find_by(login: user_from_token)
+      escape_if_in_blacklist(user)
+      check_access!(user)
+      escape_with!(:profiles, :not_exist, :not_found) unless @profile
+      escape_with!(:api, :invalid_request, :unprocessable_entity, @profile.errors.full_messages) unless @profile.valid? && @profile.update(company_profile_parameters)
+      render_profile_data(@profile)
     rescue ApiError => e
       render_api_error(e)
     end
   end
-
-  # def destroy
-  #   begin
-  #   // destroyed with user 
-  #   rescue ApiError => e
-  #     render_api_error(e)
-  #   end
-  # end
 
   private
   def company_profile_parameters
@@ -81,9 +82,13 @@ class Api::V1::CompanyProfileController < ApplicationController
       )
   end
 
+  def render_profile_data(profile)
+    render json: {message: except_data!(profile)}, status: :ok and return
+  end
+
   def get_company_profile
-    @company_name = params[:company_name]
-    @profile = CompanyProfile.find_by(company_name: @company_name)
+    @slug = params[:slug]
+    @profile = CompanyProfile.find_by(slug: @slug)
   end
 
   def set_profiles_search_query

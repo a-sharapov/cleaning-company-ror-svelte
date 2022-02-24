@@ -5,6 +5,7 @@ class ApiError < StandardError
       notification_send_failure: "Could not send notification, but action was successfully completed",
       activation_send_failure: "Could not send activation code, you must confirm account directly",
       new_password_send_failure: "Could not send new password... Please try again later",
+      invalid_request: "Please check entered data and try again",
     },
     management: {
       banned: "User has already been banned",
@@ -21,11 +22,11 @@ class ApiError < StandardError
       not_remove: "Could not remove current user",
       deleted: "The user has been removed from the system",
       new_password: "Password has been updated, please check your SMS/email",
-      invalid_request: "Please check entered data and try again",
     },
     profiles: {
       not_exist: "Profile for company does not exist",
       not_found: "Has no one company profile founded yet",
+      already_exist: "Profile for your company has already exist, you can update it",
     },
     token: {
       not_set: "Tokens are invalid or not setted",
@@ -36,7 +37,6 @@ class ApiError < StandardError
       update: "Session update completed successfully",
       not_update: "Could not update session token",
       login_in: "Successfully logged in",
-      logged_out: "User successfully logged out",
       session_updated: "Session has been updated",
       user_not_exist: "User does not exist",
       unauthorized_access: "Unauthorized access attempted",
@@ -49,7 +49,7 @@ class ApiError < StandardError
       not_logout: "Not logged out",
       blocked_until: "You account has been locked for 1 hour",
       forbidden: "You are not allowed to access this data",
-      service_unavailable: "",
+      service_unavailable: "Service is temporarily unavailable",
     }
   }
 
