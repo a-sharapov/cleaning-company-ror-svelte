@@ -3,10 +3,8 @@ class CleaningEvent
   include Mongoid::Timestamps
   
   belongs_to :company_profile
-  belongs_to :user
   has_many :attachments
 
-  field :event_code, type: String
   field :customer, type: String, default: "Anonymous"
   field :type, type: String
   field :address, type: Object
@@ -17,6 +15,7 @@ class CleaningEvent
   field :is_regular, type: Boolean, default: false
   field :planed_at, type: DateTime
   field :assets, type: Object
+  field :slug, type: String, default: ->{ SecureRandom.uuid.to_s }
 
   validates :company_name, presence: true
   validates :type, inclusion: {in: %w(new confirmed canceled), message: "Type of event should be new, confirmed or canceled"}

@@ -2,7 +2,16 @@ class ApplicationController < ActionController::API
   include ActionController::Cookies
 
   protected
-  def except_data!(data, parameters = [:_id, :password_digest, :tokens, :activation_code, :wrong_attempts_count, :blocked_until, :user_id])
+  def except_data!(data, parameters = [
+    :_id, 
+    :password_digest, 
+    :tokens, 
+    :activation_code, 
+    :wrong_attempts_count, 
+    :blocked_until, 
+    :user_id, 
+    :company_profile_id, 
+    ])
     return data.as_json({except: parameters})
   end
 
@@ -30,6 +39,10 @@ class ApplicationController < ActionController::API
     message = {message: e.message}
     message = {message: e.message, assets: e.assets} unless e.assets.nil?
     render json: message, status: e.type and return
+  end
+
+  def render_data(data)
+    render json: except_data!(data), status: :ok and return
   end
   
   def get_tokens
@@ -85,6 +98,22 @@ class ApplicationController < ActionController::API
       return true
     rescue
       return false
+    end
+  end
+
+  def except_all(data)
+    data.map do |e|
+      except_data!(e)
+    end
+  end
+
+  def prepare_user!
+    begin
+      check_auth!
+      user = User.find_by(login: user_from_token)
+      escape_with!(:user, :not_exist, :not_found) unless user
+      check_access!(user)
+      return user
     end
   end
 end

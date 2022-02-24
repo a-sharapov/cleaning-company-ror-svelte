@@ -26,7 +26,12 @@ class ApiError < StandardError
     profiles: {
       not_exist: "Profile for company does not exist",
       not_found: "Has no one company profile founded yet",
-      already_exist: "Profile for your company has already exist, you can update it",
+      already_exist: "Profile for your company already exist, you can update it",
+    },
+    reviews: {
+      not_exist: "Review does not exist",
+      not_found: "Has no one review founded yet",
+      already_exist: "Your review for this company already exist",
     },
     token: {
       not_set: "Tokens are invalid or not setted",

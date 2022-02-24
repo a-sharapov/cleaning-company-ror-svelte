@@ -8,9 +8,7 @@ class Api::V1::UsersController < ApplicationController
     begin
       users = User.all_of(@search_query).limit(@limit).offset(@offset).asc(:id)
       escape_with!(:user, :not_found, :not_found) unless users.any?
-      data = users.map do |user|
-        except_data!(user)
-      end
+      data = except_all(users)
       records = users.count
       pages = (records.to_f/@limit).ceil
       render json: {
@@ -44,7 +42,7 @@ class Api::V1::UsersController < ApplicationController
       escape_with!(:api, :invalid_request, :unprocessable_entity, user.errors.full_messages) unless user.valid?
       escape_with!(:user, :not_create, :unprocessable_entity, user.errors.full_messages) unless user.save
       escape_with!(:api, :activation_send_failure, :precondition_failed, user.activation_code) unless notify_handler(user.as_json, :activation_email)
-      render_user_data(user)
+      render_data(user)
     rescue ApiError => e
       render_api_error(e)
     end
@@ -78,10 +76,6 @@ class Api::V1::UsersController < ApplicationController
   end
 
   private
-  def render_user_data(user)
-    render json: except_data!(user), status: :ok and return
-  end
-
   def user_create_parameters 
     params.permit(:login, :role, :email, :phone, :password)
   end

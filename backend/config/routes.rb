@@ -9,15 +9,19 @@ Rails.application.routes.draw do
 
       get "users", to: "users#index"
       post "users", to: "users#new"
-      get "users/:login", to: "users#show"
-      put "users/:login", to: "users#update"
-      delete "users/:login", to: "users#destroy"
+      get "user/:login", to: "users#show"
+      put "user/:login", to: "users#update"
+      delete "user/:login", to: "users#destroy"
 
       get "companies", to: "company_profile#index"
       post "companies", to: "company_profile#new"
-      get "companies/:slug", to: "company_profile#show"
-      put "companies/:slug", to: "company_profile#update"
-      delete "companies/:slug", to: "company_profile#destroy"
+      get "company/:slug", to: "company_profile#show"
+      put "company/:slug", to: "company_profile#update"
+
+      get "reviews", to: "review#index"
+      post "reviews", to: "review#new"
+      get "review/:slug", to: "review#show"
+      put "review/:slug", to: "review#update"
       
       post "auth", to: "authentification#login"
       delete "auth", to: "authentification#logout"

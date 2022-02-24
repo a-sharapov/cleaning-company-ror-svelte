@@ -8,9 +8,7 @@ class Api::V1::CompanyProfileController < ApplicationController
     begin
       profiles = CompanyProfile.all_of(@search_query).limit(@limit).offset(@offset).asc(:id)
       escape_with!(:profiles, :not_found, :not_found) unless profiles.any?
-      data = profiles.map do |profile|
-        except_data!(profile)
-      end
+      data = except_all(profiles)
       records = profiles.count
       pages = (records.to_f/@limit).ceil
       render json: {
@@ -29,7 +27,7 @@ class Api::V1::CompanyProfileController < ApplicationController
   def show
     begin
       escape_with!(:profiles, :not_exist, :not_found) unless @profile
-      render_profile_data(@profile)
+      render_data(@profile)
     rescue ApiError => e
       render_api_error(e)
     end
@@ -37,15 +35,12 @@ class Api::V1::CompanyProfileController < ApplicationController
 
   def new
     begin
-      check_auth!
-      user = User.find_by(login: user_from_token)
-      escape_if_in_blacklist(user)
-      check_access!(user)
+      user = prepare_user!
       escape_with!(:profiles, :already_exist, :conflict) if CompanyProfile.find_by(user_id: user.id)
       profile = CompanyProfile.new(company_profile_parameters)
       profile.user = user
       escape_with!(:api, :invalid_request, :unprocessable_entity, profile.errors.full_messages) unless profile.valid? && profile.update(company_profile_parameters)
-      render_profile_data(profile)
+      render_data(profile)
     rescue ApiError => e
       render_api_error(e)
     end
@@ -53,13 +48,10 @@ class Api::V1::CompanyProfileController < ApplicationController
 
   def update
     begin
-      check_auth!
-      user = User.find_by(login: user_from_token)
-      escape_if_in_blacklist(user)
-      check_access!(user)
+      user = prepare_user!
       escape_with!(:profiles, :not_exist, :not_found) unless @profile
       escape_with!(:api, :invalid_request, :unprocessable_entity, @profile.errors.full_messages) unless @profile.valid? && @profile.update(company_profile_parameters)
-      render_profile_data(@profile)
+      render_data(@profile)
     rescue ApiError => e
       render_api_error(e)
     end
@@ -78,12 +70,9 @@ class Api::V1::CompanyProfileController < ApplicationController
         :country, 
         :city, 
         :state, 
-        :street] 
-      )
-  end
-
-  def render_profile_data(profile)
-    render json: {message: except_data!(profile)}, status: :ok and return
+        :street
+      ]
+    )
   end
 
   def get_company_profile
