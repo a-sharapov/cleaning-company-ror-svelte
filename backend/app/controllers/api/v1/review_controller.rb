@@ -2,7 +2,7 @@ class Api::V1::ReviewController < ApplicationController
   before_action :set_paging, only: [:index] 
   before_action :set_reviews_search_query, only: [:index] 
   before_action :get_tokens, only: [:update] 
-  before_action :get_review, only: [:show, :update]  
+  before_action :get_review, only: [:show, :update] 
 
   def index
     begin
@@ -36,14 +36,14 @@ class Api::V1::ReviewController < ApplicationController
   def new
     begin
       user = prepare_user!
-      escape_with!(:reviews, :already_exist, :conflict) if Review.find_by(user_id: user.id)
+      escape_with!(:reviews, :already_exist, :conflict) if Review.find_by(customer: user.login)
       review = Review.new(review_parameters)
-      review.customer = user.login
+      review.customer = user ? user.login : "Anonymous"
       company = CompanyProfile.find_by(company_name: review_parameters[:company_name])
       escape_with!(:profiles, :not_exist, :not_found, review.errors.full_messages) unless company
       review.company_profile = company
       escape_with!(:reviews, :already_exist, :conflict) if Review.find_by(customer: user.login, company_name: review_parameters[:company_name])
-      escape_with!(:api, :invalid_request, :unprocessable_entity, review.errors.full_messages) unless review.valid? && review.update(review_parameters)
+      escape_with!(:api, :invalid_request, :unprocessable_entity, review.errors.full_messages) unless review.valid? && review.save()
       render_data(review)
     rescue ApiError => e
       render_api_error(e)

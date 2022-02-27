@@ -46,7 +46,7 @@ class Api::V1::ManagementController < ApplicationController
     begin
       key = add_parameters[:key]
       escape_with!(:auth, :unauthorized_access, :unauthorized) unless key.eql?(ENV["SECRET_KEY"])
-      user = User.find_by(login: ban_parameters[:login])
+      user = User.find_by(login: add_parameters[:login])
       escape_with!(:user, :not_exist, :not_found) unless user
       escape_with!(:management, :banned, :not_acceptable) unless user.banned.eql?(false)
       escape_with!(:user, :not_update, :unprocessable_entity) unless user.set(role: "manager")

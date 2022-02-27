@@ -8,4 +8,5 @@ class Assets
 
   validates :type, presence: true
   validates :content, presence: true
+  validates :slug, uniqueness: true
 end

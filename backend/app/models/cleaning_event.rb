@@ -3,7 +3,7 @@ class CleaningEvent
   include Mongoid::Timestamps
   
   belongs_to :company_profile
-  has_many :attachments
+  has_many :attachments, dependent: :destroy, validate: false
 
   field :customer, type: String, default: "Anonymous"
   field :type, type: String
@@ -24,4 +24,5 @@ class CleaningEvent
   validates :services, presence: true
   validates :is_regular, presence: true
   validates :planed_at, presence: true
+  validates :slug, uniqueness: true
 end

@@ -22,6 +22,12 @@ Rails.application.routes.draw do
       post "reviews", to: "review#new"
       get "review/:slug", to: "review#show"
       put "review/:slug", to: "review#update"
+
+      get "events", to: "cleaning_event#index"
+      post "events", to: "cleaning_event#new"
+      get "event/:slug", to: "cleaning_event#show"
+      put "event/:slug", to: "cleaning_event#update"
+      delete "event/:slug", to: "cleaning_event#destroy"
       
       post "auth", to: "authentification#login"
       delete "auth", to: "authentification#logout"

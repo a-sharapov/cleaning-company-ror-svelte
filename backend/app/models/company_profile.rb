@@ -16,6 +16,7 @@ class CompanyProfile
 
   validates :company_name, presence: true
   validates :address, presence: true
+  validates :slug, uniqueness: true
 
   has_mongoid_attached_file :logotype
 end

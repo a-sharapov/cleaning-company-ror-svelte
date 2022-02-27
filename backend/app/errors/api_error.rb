@@ -33,6 +33,16 @@ class ApiError < StandardError
       not_found: "Has no one review founded yet",
       already_exist: "Your review for this company already exist",
     },
+    events: {
+      not_exist: "Event does not exist",
+      not_found: "Has no one event founded yet",
+      already_exist: "Event already exist",
+      not_remove: "Could not remove event",
+      deleted: "Event has been deleted",
+    },
+    attachments: {
+      not_found: "Attachment for update has not been found",
+    }, 
     token: {
       not_set: "Tokens are invalid or not setted",
       token_expired: "Token has expired or invalid",

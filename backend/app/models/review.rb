@@ -14,4 +14,5 @@ class Review
   validates :description, presence: true
   validates :company_name, presence: true
   validates :assessment, presence: true
+  validates :slug, uniqueness: true
 end
