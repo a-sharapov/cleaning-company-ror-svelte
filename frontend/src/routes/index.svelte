@@ -1,26 +1,20 @@
 <script>
-  import SEO from "$lib/components/Seo/index.svelte"
-  import Header from "$lib/components/Chunks/Header.svelte"
-  import Footer from "$lib/components/Chunks/Footer.svelte"
+  import Head from "$lib/components/Seo/Head.svelte" 
   import Article from "$lib/components/Chunks/Article.svelte"
+
+  let title = "Главная страница"
+  let metaDescription = ""
+  let metaKeywords = ""
 </script>
 
-<SEO title={"Главная страница"} metaDescription={"SEO описание"} metaKeywords={"SEO ключи"} />
+<Head title={title} metaDescription={metaDescription} metaKeywords={metaKeywords} />
 
-<Header>
-  <h1 slot="header-content">Svelte frontend</h1>
-</Header>
 <Article>
+  <h1>Svelte frontend</h1>
   <aside slot="sidebar">
     Sidebar
   </aside>
   <section slot="content">
     Article content
   </section>
-  
 </Article>
-<Footer>
-  <svelte:fragment slot="footer-content">
-    Footer content
-  </svelte:fragment>
-</Footer>
