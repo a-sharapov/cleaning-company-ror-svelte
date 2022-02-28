@@ -1,0 +1,15 @@
+{
+  "name": "Марафеткина - порядок без пипидастров!",
+  "short_name": "Марафеткина",
+  "description": "Симметричная онлайн-платформа услуг по уборке квартир, офисов и производственных помещений",
+  "icons": [
+    {
+      "src": "favicon.png",
+      "sizes": "256x256"
+    }
+  ],
+  "display": "standalone",
+  "orientation": "landscape",
+  "theme_color": "#c6120e",
+  "background_color": "#e0d1d1"
+}
