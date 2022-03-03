@@ -1,50 +1,76 @@
 <script>
-  import Toasts from "$lib/components/UI/Toasts.svelte"
   import Head from "$lib/components/Seo/Head.svelte"
-  import { writable } from 'svelte/store';
+  import { writable } from 'svelte/store'
+  import { prepareFormData, message } from '$lib/components/Hooks/Custom.js'
+  import Loader from "$lib/components/UI/Loader.svelte";
 
   let title = "Зарегестрироваться"
-  let message
-  let user
-
-  user = writable({
+  let user = writable({
     login: "",
+    role: "client",
     password: "",
     _password: "",
-    phone: "",
     email: "",
+    phone: "",
   })
+  let showForm = writable(true)
+  let loading = writable(false)
 
-  message = writable({
-    content: null,
-    type: "info",
-  })
-
-  const handleOnSubmit = (event) => {
+  $message.content = ""
+  const handleOnSubmit = async (event) => {
     event.preventDefault()
     if ($user.password !== $user._password) {
       $message.content = "Пароли не совпадают!"
+      $message.type = "error"
     } else {
       $message.content = null
+      $message.type = "info"
       try {
-
+        $loading = true
+        let data = new FormData(event.target),
+            preparedData = prepareFormData(data, $user, "_password")
+        
+        let result = await fetch("/api/v1/users/", {
+                                  method: event.target.getAttribute("method"),
+                                  cache: 'no-cache',
+                                  mode: 'cors',
+                                  body: preparedData
+                                  }).then(response => response.json());
+        let assets = ""
+        if (result.error) {
+          throw new Error(result.error)
+        }
+        if (result.assets) {
+          assets = `<ul><li>${result.assets.join("</li><li>")}</li></ul>`
+          $message.type = "error"
+          $message.content = `<p>${result.message}:</p>`+ assets
+        } else {
+          $message.type = "success"
+          $message.content = `<p>${result.message}</p>`
+        }
+        $showForm = false
       } catch (e) {
         $message.type = "error"
         $message.content = e.message
+        $showForm = true
+      } finally {
+        $loading = false
       }
     }
-
-    console.log($user, $message)
   }
 </script>
 
 <Head title={title} metaDescription={null} metaKeywords={null} metaRobots={null} />
 
 <article id="page-content">
-  <section id="signup-form-wrapper">
-    {#if $message?.content}
-      <span class="form-message" data-type={$message?.type}>{$message?.content}</span>
+  <section id="signup-form-wrapper" data-loading="{$loading}">
+    {#if $loading}
+      <Loader />
     {/if}
+    {#if $message?.content}
+      <span class="form-message" data-type={$message?.type}>{@html $message?.content}</span>
+    {/if}
+    {#if $showForm}
     <h3>Зарегеструйтесь!</h3>
     <p>И получите доступ к личному кабинету с расширенным функционалом</p>
     <hr />
@@ -58,12 +84,28 @@
       <label data-width="full">
         <input type="password" name="_password" bind:value={$user._password} required placeholder="Повторите пароль" />
       </label>
+      <hr />
+      <p>Я регестрируюсь как:</p>
       <label data-width="full">
-        <input type="text" name="phone" bind:value={$user.phone} placeholder="Номер телефона *" />
+        <select name="role" bind:value={$user.role}>
+          <option value="client">Клиент</option>
+          <option value="company">Компания</option>
+        </select>
       </label>
-      <p align="center">и / или</p>
+      <p class="small">
+        {#if $user.role == "client"}
+          Роль <strong>Клиент</strong> позволяет получить доступ к личному кабинету, осуществлять заказ услуг, а также отслеживать их статус, оставлять отзывы о компаниях, планировать события и получать уведомления на телефон и/или по электронной почте.
+        {:else if $user.role == "company"}
+          Роль <strong>Компания</strong> позволяет создать и настроить профиль компании и вести деятельность от её имени, а также, использовать все функции пользователя. Однако, действия комании, подразумевает более строгую систему модерации.
+        {/if}
+      </p>
+      <hr />
       <label data-width="full">
         <input type="text" name="email" bind:value={$user.email} placeholder="Адрес электронной почты *" />
+      </label>
+      <p align="center">и<span class="light small">&nbsp;/&nbsp;</span>или</p>
+      <label data-width="full">
+        <input type="text" name="phone" bind:value={$user.phone} placeholder="Номер телефона *" />
       </label>
       <p>&nbsp;</p>
       <label data-width="full" data-align="center">
@@ -72,6 +114,7 @@
       <hr />
       <p>Поля, отмеченные <strong>*</strong> необходимы для подтверждения вашего аккаунта. Должно быть заполнено хотя бы одно поле.</p>
     </form>
+    {/if}
   </section>
 </article>
 

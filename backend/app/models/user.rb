@@ -67,7 +67,7 @@ class User
 
   def mail_and_phone_unpresent?
     if email.nil? && phone.nil?
-      errors.add(:email, "Email or Phone must be specified")
+      errors.add(:email, "or Phone must be specified")
     end
   end
 

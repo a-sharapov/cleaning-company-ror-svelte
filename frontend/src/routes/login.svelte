@@ -1,13 +1,18 @@
 <script>
-  import Toasts from "$lib/components/UI/Toasts.svelte"
   import Head from "$lib/components/Seo/Head.svelte"
+  import { writable } from 'svelte/store'
 
   let title = "Авторизироваться"
+  let loading = writable(false)
+
+
+  $message.content = ""
+
 </script>
 
 <Head title={title} metaDescription={null} metaKeywords={null} metaRobots={null} />
 <article id="page-content">
-  <section id="login-form-wrapper">
+  <section id="login-form-wrapper" data-loading="{$loading}">
     <h3>Войдите!</h3>
     <p>Для того, чтобы использовать все возможности приложения</p>
     <hr />

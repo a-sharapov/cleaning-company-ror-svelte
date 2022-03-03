@@ -42,7 +42,7 @@ class Api::V1::UsersController < ApplicationController
       escape_with!(:api, :invalid_request, :ok, user.errors.full_messages) unless user.valid?
       escape_with!(:user, :not_create, :ok, user.errors.full_messages) unless user.save
       escape_with!(:api, :activation_send_failure, :ok, user.activation_code) unless notify_handler(user.as_json, :activation_email)
-      render_data(user)
+      render json: {message: ApiError::MESSAGES[:user][:created]}, status: :ok and return
     rescue ApiError => e
       render_api_error(e)
     end

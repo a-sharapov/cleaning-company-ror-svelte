@@ -8,7 +8,6 @@
     "preview": "svelte-kit preview"
   },
   "devDependencies": {
-    "@sveltejs/adapter-node": "next",
     "@sveltejs/kit": "next",
     "svelte": "^3.44.0"
   },

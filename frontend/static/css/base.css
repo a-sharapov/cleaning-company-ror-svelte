@@ -143,10 +143,12 @@ p {
   margin: 0 0 10px;
 }
 
+span.small,
 p.small {
   font-size: 90%;
 }
 
+span.light,
 p.light {
   color: #aaa;
 }
@@ -713,6 +715,12 @@ article > section {
   margin: 0 auto; 
 }
 
+article > section:empty,
+article#page-content:empty {
+  display: none;
+  visibility: hidden;
+}
+
 article section.content-wrapper {
   text-align: left;
   padding: 30px 20px;
@@ -948,24 +956,44 @@ dialog.toast .toast-title {
   text-transform: uppercase;
 }
 
+span.form-message {
+  text-align: left;
+  display: block;
+  background: #f2f5f595 url(/i/info.svg) no-repeat 14px 14px;
+  background-size: 16px;
+  backdrop-filter: blur(10px);
+  border: 1px solid #aaafaf;
+  padding: 10px 20px 10px 40px;
+  margin: -20px -20px 10px;
+  width: calc(100% + 40px);
+}
+
+span.form-message:last-child {
+  margin-bottom: -20px;
+}
+
+span.form-message[data-type='error'], 
 dialog.toast[data-type='error'] {
   background: #fdece995 url(/i/error.svg) no-repeat 14px 14px;
   background-size: 16px;
   border-color: var(--color-danger);
   box-shadow: 0 2px 15px #eb3d2625, inset 0 1px 0 #ffffff90;
 }
+span.form-message[data-type='info'], 
 dialog.toast[data-type='info'] {
   background: #eef7ff95 url(/i/info-c.svg) no-repeat 14px 14px;
   background-size: 16px;
   border-color: var(--color-info);
   box-shadow: 0 2px 15px #368ace25, inset 0 1px 0 #ffffff90;
 }
+span.form-message[data-type='warning'], 
 dialog.toast[data-type='warning'] {
   background: #fff1e795 url(/i/alert.svg) no-repeat 14px 14px;
   background-size: 16px;
   border-color: var(--color-alert);
   box-shadow: 0 2px 15px #f87e2525, inset 0 1px 0 #ffffff90;
 }
+span.form-message[data-type='success'], 
 dialog.toast[data-type='success'] {
   background: #ecf9f495 url(/i/success.svg) no-repeat 14px 14px;
   background-size: 16px;
@@ -1087,4 +1115,16 @@ nav[role='paging'] a.prev-page-link:before {
 
 p.ligher {
   color: #766767;
+}
+
+*[data-loading="true"] > *:not(.loader) {
+  position: relative;
+  filter: blur(5px);
+}
+
+*[data-loading="true"] .loader {
+  position: absolute !important;
+  left: 50% !important;
+  top: 50% !important;
+  margin: -35px !important;
 }
