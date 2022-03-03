@@ -5,6 +5,9 @@ const config = {
 	kit: {
 		adapter: adapter(),
 		target: '#app',
+		methodOverride: {
+      allowed: ['PUT', 'PATCH', 'DELETE']
+    },
 	},
 }
 

@@ -37,3 +37,9 @@
 <Footer>
   <svelte:fragment slot="footer-content"></svelte:fragment>
 </Footer>
+
+<style>
+  nav[data-role="header-buttons"] {
+    float: right;
+  }
+</style>

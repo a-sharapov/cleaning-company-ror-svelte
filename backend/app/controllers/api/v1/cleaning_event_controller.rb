@@ -7,7 +7,7 @@ class Api::V1::CleaningEventController < ApplicationController
   def index
     begin
       events = CleaningEvent.all_of(@search_query).limit(@limit).offset(@offset).asc(:id)
-      escape_with!(:events, :not_found, :not_found) unless events.any?
+      escape_with!(:events, :not_found, :ok) unless events.any?
       data = except_all(events)
       records = events.count
       pages = (records.to_f/@limit).ceil
@@ -26,7 +26,7 @@ class Api::V1::CleaningEventController < ApplicationController
 
   def show
     begin
-      escape_with!(:events, :not_exist, :not_found) unless @event
+      escape_with!(:events, :not_exist, :ok) unless @event
       render_data(@event)
     rescue ApiError => e
       render_api_error(e)
@@ -36,14 +36,14 @@ class Api::V1::CleaningEventController < ApplicationController
   def new
     begin
       user = prepare_user!
-      escape_with!(:events, :already_exist, :conflict) if Review.find_by(customer: user.login)
+      escape_with!(:events, :already_exist, :ok) if Review.find_by(customer: user.login)
       event = CleaningEvent.new(event_parameters)
       event.customer = user ? user.login : "Anonymous"
       company = CompanyProfile.find_by(company_name: event_parameters[:company_name])
-      escape_with!(:profiles, :not_exist, :not_found, review.errors.full_messages) unless company
+      escape_with!(:profiles, :not_exist, :ok, review.errors.full_messages) unless company
       event.company_profile = company
-      escape_with!(:events, :already_exist, :conflict) if CleaningEvent.find_by(customer: user.login, company_profile: company)
-      escape_with!(:api, :invalid_request, :unprocessable_entity, event.errors.full_messages) unless event.valid? && event.save()
+      escape_with!(:events, :already_exist, :ok) if CleaningEvent.find_by(customer: user.login, company_profile: company)
+      escape_with!(:api, :invalid_request, :ok, event.errors.full_messages) unless event.valid? && event.save()
       if event_parameters[:attachments].present?
         event_parameters[:attachments].map { |attachment_data| 
           attachment = Attachment.new(attachment_data)
@@ -60,13 +60,13 @@ class Api::V1::CleaningEventController < ApplicationController
   def update  
     begin
       user = prepare_user!
-      escape_with!(:events, :not_exist, :not_found) unless @event
-      escape_with!(:api, :invalid_request, :unprocessable_entity, @event.errors.full_messages) unless @event.valid? && @event.update(event_parameters)
+      escape_with!(:events, :not_exist, :ok) unless @event
+      escape_with!(:api, :invalid_request, :ok, @event.errors.full_messages) unless @event.valid? && @event.update(event_parameters)
       if event_parameters[:attachments].present?
         event_parameters[:attachments].map { |attachment_data| 
           attachment = Attachment.find_by(cleaning_event: @event)
-          escape_with!(:attachments, :not_found, :not_found) unless attachment
-          escape_with!(:api, :invalid_request, :unprocessable_entity, attachment.errors.full_messages) unless attachment.update(attachment_data)
+          escape_with!(:attachments, :not_found, :ok) unless attachment
+          escape_with!(:api, :invalid_request, :ok, attachment.errors.full_messages) unless attachment.update(attachment_data)
         }
       end
       render_data(@event)
@@ -78,8 +78,8 @@ class Api::V1::CleaningEventController < ApplicationController
   def destroy
     begin
       user = prepare_user!
-      escape_with!(:events, :not_exist, :not_found) unless @event
-      escape_with!(:events, :not_remove, :unprocessable_entity) unless @event.destroy
+      escape_with!(:events, :not_exist, :ok) unless @event
+      escape_with!(:events, :not_remove, :ok) unless @event.destroy
       render json: {message: ApiError::MESSAGES[:events][:deleted]}, status: :ok and return
     rescue ApiError => e
       render_api_error(e)

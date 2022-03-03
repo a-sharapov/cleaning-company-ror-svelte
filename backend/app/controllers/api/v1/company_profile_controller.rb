@@ -7,7 +7,7 @@ class Api::V1::CompanyProfileController < ApplicationController
   def index
     begin
       profiles = CompanyProfile.all_of(@search_query).limit(@limit).offset(@offset).asc(:id)
-      escape_with!(:profiles, :not_found, :not_found) unless profiles.any?
+      escape_with!(:profiles, :not_found, :ok) unless profiles.any?
       data = except_all(profiles)
       records = profiles.count
       pages = (records.to_f/@limit).ceil
@@ -26,7 +26,7 @@ class Api::V1::CompanyProfileController < ApplicationController
 
   def show
     begin
-      escape_with!(:profiles, :not_exist, :not_found) unless @profile
+      escape_with!(:profiles, :not_exist, :ok) unless @profile
       render_data(@profile)
     rescue ApiError => e
       render_api_error(e)
@@ -36,10 +36,10 @@ class Api::V1::CompanyProfileController < ApplicationController
   def new
     begin
       user = prepare_user!
-      escape_with!(:profiles, :already_exist, :conflict) if CompanyProfile.find_by(user_id: user.id)
+      escape_with!(:profiles, :already_exist, :ok) if CompanyProfile.find_by(user_id: user.id)
       profile = CompanyProfile.new(company_profile_parameters)
       profile.user = user
-      escape_with!(:api, :invalid_request, :unprocessable_entity, profile.errors.full_messages) unless profile.valid? && profile.update(company_profile_parameters)
+      escape_with!(:api, :invalid_request, :ok, profile.errors.full_messages) unless profile.valid? && profile.update(company_profile_parameters)
       render_data(profile)
     rescue ApiError => e
       render_api_error(e)
@@ -49,8 +49,8 @@ class Api::V1::CompanyProfileController < ApplicationController
   def update
     begin
       user = prepare_user!
-      escape_with!(:profiles, :not_exist, :not_found) unless @profile
-      escape_with!(:api, :invalid_request, :unprocessable_entity, @profile.errors.full_messages) unless @profile.valid? && @profile.update(company_profile_parameters)
+      escape_with!(:profiles, :not_exist, :ok) unless @profile
+      escape_with!(:api, :invalid_request, :ok, @profile.errors.full_messages) unless @profile.valid? && @profile.update(company_profile_parameters)
       render_data(@profile)
     rescue ApiError => e
       render_api_error(e)

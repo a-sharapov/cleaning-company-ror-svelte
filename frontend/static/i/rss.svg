@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" id="rss-icon" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="14px" height="14px" viewBox="0 0 14 14" enable-background="new 0 0 14 14" xml:space="preserve">
+    <g id="rss">
+        <path fill="#D71E00" d="M-0.011,10.013v4.001h4.001
+		C3.991,11.804,2.199,10.013-0.011,10.013z M-0.011,4.831v2.514c3.683,0,6.669,2.986,6.669,6.669h2.514
+		C9.172,8.942,5.061,4.831-0.011,4.831z M-0.011,0.008V2.29c6.475,0,11.724,5.249,11.724,11.724h2.282
+		C13.995,6.278,7.725,0.008-0.011,0.008z" />
+    </g>
+</svg>

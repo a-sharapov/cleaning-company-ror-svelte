@@ -3,7 +3,7 @@ class Api::V1::AssetsController < ApplicationController
   def index
     begin 
       assets = Assets.find_by(slug: params[:slug])
-      escape_with!(:assets, :not_found, :not_found) unless assets
+      escape_with!(:assets, :not_found, :ok) unless assets
       render json: except_data!(assets), status: :ok and return
     rescue ApiError => e
       render_api_error(e)
@@ -13,8 +13,8 @@ class Api::V1::AssetsController < ApplicationController
   def init
     begin
       key = init_parameters[:key]
-      escape_with!(:auth, :unauthorized_access, :unauthorized) unless key.eql?(ENV["SECRET_KEY"])
-      escape_with!(:assets, :not_create, :unprocessable_entity) unless Assets.find_or_create_by(type: "Services", content: {
+      escape_with!(:auth, :unauthorized_access, :ok) unless key.eql?(ENV["SECRET_KEY"])
+      escape_with!(:assets, :not_create, :ok) unless Assets.find_or_create_by(type: "Services", content: {
         elements: [
           "Стандартная уборка помещений", 
           "Генеральная уборка",
@@ -27,7 +27,7 @@ class Api::V1::AssetsController < ApplicationController
         ]
       })
     
-      escape_with!(:assets, :not_create, :unprocessable_entity) unless Assets.find_or_create_by(type: "Status", content: {
+      escape_with!(:assets, :not_create, :ok) unless Assets.find_or_create_by(type: "Status", content: {
         new: "Новый",
         accepted: "Подтверждён",
         canceled: "Отменён",

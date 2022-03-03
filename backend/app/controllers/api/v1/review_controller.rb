@@ -7,7 +7,7 @@ class Api::V1::ReviewController < ApplicationController
   def index
     begin
       reviews = Review.all_of(@search_query).limit(@limit).offset(@offset).asc(:id)
-      escape_with!(:reviews, :not_found, :not_found) unless reviews.any?
+      escape_with!(:reviews, :not_found, :ok) unless reviews.any?
       data = except_all(reviews)
       records = reviews.count
       pages = (records.to_f/@limit).ceil
@@ -26,7 +26,7 @@ class Api::V1::ReviewController < ApplicationController
 
   def show
     begin
-      escape_with!(:reviews, :not_exist, :not_found) unless @review
+      escape_with!(:reviews, :not_exist, :ok) unless @review
       render_data(@review)
     rescue ApiError => e
       render_api_error(e)
@@ -36,14 +36,14 @@ class Api::V1::ReviewController < ApplicationController
   def new
     begin
       user = prepare_user!
-      escape_with!(:reviews, :already_exist, :conflict) if Review.find_by(customer: user.login)
+      escape_with!(:reviews, :already_exist, :ok) if Review.find_by(customer: user.login)
       review = Review.new(review_parameters)
       review.customer = user ? user.login : "Anonymous"
       company = CompanyProfile.find_by(company_name: review_parameters[:company_name])
-      escape_with!(:profiles, :not_exist, :not_found, review.errors.full_messages) unless company
+      escape_with!(:profiles, :not_exist, :ok, review.errors.full_messages) unless company
       review.company_profile = company
-      escape_with!(:reviews, :already_exist, :conflict) if Review.find_by(customer: user.login, company_name: review_parameters[:company_name])
-      escape_with!(:api, :invalid_request, :unprocessable_entity, review.errors.full_messages) unless review.valid? && review.save()
+      escape_with!(:reviews, :already_exist, :ok) if Review.find_by(customer: user.login, company_name: review_parameters[:company_name])
+      escape_with!(:api, :invalid_request, :ok, review.errors.full_messages) unless review.valid? && review.save()
       render_data(review)
     rescue ApiError => e
       render_api_error(e)
@@ -53,8 +53,8 @@ class Api::V1::ReviewController < ApplicationController
   def update
     begin
       user = prepare_user!
-      escape_with!(:reviews, :not_exist, :not_found) unless @review
-      escape_with!(:api, :invalid_request, :unprocessable_entity, @review.errors.full_messages) unless @review.valid? && @review.update(review_parameters)
+      escape_with!(:reviews, :not_exist, :ok) unless @review
+      escape_with!(:api, :invalid_request, :ok, @review.errors.full_messages) unless @review.valid? && @review.update(review_parameters)
       render_data(@review)
     rescue ApiError => e
       render_api_error(e)

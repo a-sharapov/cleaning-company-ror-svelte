@@ -56,10 +56,10 @@ class ApplicationController < ActionController::API
 
   def check_auth!
     begin
-      escape_with!(:token, :not_set, :unprocessable_entity) unless get_tokens
+      escape_with!(:token, :not_set, :ok) unless get_tokens
       access_token = get_tokens[:access_token]
-      escape_with!(:auth, :unauthorized_access, :unauthorized) unless AuthentificationTokenService.decode_token(access_token)
-      escape_with!(:auth, :unauthorized_access, :unauthorized) if AuthentificationTokenService.expired?(access_token)
+      escape_with!(:auth, :unauthorized_access, :ok) unless AuthentificationTokenService.decode_token(access_token)
+      escape_with!(:auth, :unauthorized_access, :ok) if AuthentificationTokenService.expired?(access_token)
     end
   end
 
@@ -74,12 +74,12 @@ class ApplicationController < ActionController::API
   def check_access!(user)
     begin
       escape_if_in_blacklist(user)
-      escape_with!(:auth, :forbidden, :forbidden) unless is_manager?(user) || user.login.eql?(AuthentificationTokenService.decode_token(get_tokens[:access_token]).first["login"])
+      escape_with!(:auth, :forbidden, :ok) unless is_manager?(user) || user.login.eql?(AuthentificationTokenService.decode_token(get_tokens[:access_token]).first["login"])
     end
   end
 
   def escape_if_in_blacklist(user)
-    escape_with!(:management, :banned, :forbidden, user.blacklist.description.to_s) if user.banned.eql?(true)
+    escape_with!(:management, :banned, :ok, user.blacklist.description.to_s) if user.banned.eql?(true)
   end
 
   def generate_new_password
@@ -111,7 +111,7 @@ class ApplicationController < ActionController::API
     begin
       check_auth!
       user = User.find_by(login: user_from_token)
-      escape_with!(:user, :not_exist, :not_found) unless user
+      escape_with!(:user, :not_exist, :ok) unless user
       check_access!(user)
       return user
     end

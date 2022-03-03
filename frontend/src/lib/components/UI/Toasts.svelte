@@ -1,9 +1,11 @@
 <script>
-  export let errors
+  export let message
+  export let type
 </script>
 
-{#if errors}
-  <dialog class="toast" data-type="{errors.type}">
-    {errors.message}  
+{#if message}
+  <dialog class="toast" data-type="{type}" data-hidden="false" on:click={handleOnClick}>
+    <p class="toast-title">Уведомляем!</p>
+    <p>{message}</p>
   </dialog>
 {/if}

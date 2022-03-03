@@ -7,7 +7,7 @@ class Api::V1::UsersController < ApplicationController
   def index
     begin
       users = User.all_of(@search_query).limit(@limit).offset(@offset).asc(:id)
-      escape_with!(:user, :not_found, :not_found) unless users.any?
+      escape_with!(:user, :not_found, :ok) unless users.any?
       data = except_all(users)
       records = users.count
       pages = (records.to_f/@limit).ceil
@@ -26,7 +26,7 @@ class Api::V1::UsersController < ApplicationController
 
   def show 
     begin
-      escape_with!(:user, :not_exist, :not_found) unless @user
+      escape_with!(:user, :not_exist, :ok) unless @user
       render json: except_data!(@user), status: :ok and return
     rescue ApiError => e
       render_api_error(e)
@@ -35,13 +35,13 @@ class Api::V1::UsersController < ApplicationController
 
   def new
     begin
-      escape_with!(:api, :wrong_request, :unprocessable_entity) unless user_create_parameters.present?
+      escape_with!(:api, :wrong_request, :ok) unless user_create_parameters.present?
       user = User.new(user_create_parameters)
       activation_code = SecureRandom.uuid
       user.activation_code = activation_code
-      escape_with!(:api, :invalid_request, :unprocessable_entity, user.errors.full_messages) unless user.valid?
-      escape_with!(:user, :not_create, :unprocessable_entity, user.errors.full_messages) unless user.save
-      escape_with!(:api, :activation_send_failure, :precondition_failed, user.activation_code) unless notify_handler(user.as_json, :activation_email)
+      escape_with!(:api, :invalid_request, :ok, user.errors.full_messages) unless user.valid?
+      escape_with!(:user, :not_create, :ok, user.errors.full_messages) unless user.save
+      escape_with!(:api, :activation_send_failure, :ok, user.activation_code) unless notify_handler(user.as_json, :activation_email)
       render_data(user)
     rescue ApiError => e
       render_api_error(e)
@@ -51,11 +51,11 @@ class Api::V1::UsersController < ApplicationController
   def update
     begin
       check_auth!
-      escape_with!(:api, :wrong_request, :unprocessable_entity) unless user_update_parameters.present?
-      escape_with!(:user, :not_exist, :not_found) unless @user
+      escape_with!(:api, :wrong_request, :ok) unless user_update_parameters.present?
+      escape_with!(:user, :not_exist, :ok) unless @user
       check_access!(@user)
-      escape_with!(:user, :invalid_request, :unprocessable_entity, @user.errors.full_messages) unless @user.valid?
-      escape_with!(:user, :not_update, :not_acceptable) unless @user.update(user_update_parameters)
+      escape_with!(:user, :invalid_request, :ok, @user.errors.full_messages) unless @user.valid?
+      escape_with!(:user, :not_update, :ok) unless @user.update(user_update_parameters)
       render_user_data(@user)
     rescue ApiError => e
       render_api_error(e)
@@ -65,9 +65,9 @@ class Api::V1::UsersController < ApplicationController
   def destroy
     begin
       check_auth!
-      escape_with!(:user, :not_exist, :not_found) unless @user
+      escape_with!(:user, :not_exist, :ok) unless @user
       check_access!(@user)
-      escape_with!(:user, :not_remove, :unprocessable_entity) unless @user.destroy
+      escape_with!(:user, :not_remove, :ok) unless @user.destroy
       
       render json: {message: ApiError::MESSAGES[:user][:deleted]}, status: :ok and return
     rescue ApiError => e
