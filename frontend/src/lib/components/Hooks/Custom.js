@@ -1,4 +1,5 @@
-import { writable } from 'svelte/store'
+  import { browser } from '$app/env'
+  import { writable } from 'svelte/store'
 
 export const prepareFormData = (data, object, defaultRemovedFields = null) => {
   Object.keys(object).map(key => {
@@ -19,3 +20,20 @@ export const message = writable({
   content: null,
   type: "info",
 })
+
+export const getUserFromStorage = () => {
+  let user
+  browser ? user = window?.localStorage.getItem("user") ? window?.localStorage.getItem("user") : window?.sessionStorage.getItem("user") : user = null
+  if (!!user) {
+    return JSON.parse(user)
+  } else {
+    return false
+  }
+}
+
+export const removeUserFromStorage = () => {
+  if (browser) {
+    window?.localStorage.getItem("user") && window?.localStorage.removeItem("user")
+    window?.sessionStorage.removeItem("user")
+  }
+}

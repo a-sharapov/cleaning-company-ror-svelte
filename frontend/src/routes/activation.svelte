@@ -1,10 +1,10 @@
 <script>
   import Head from "$lib/components/Seo/Head.svelte"
-  import { browser } from '$app/env';
+  import Loader from "$lib/components/UI/Loader.svelte"
+  import { browser } from '$app/env'
   import { writable } from 'svelte/store'
-  import { page } from '$app/stores';
+  import { page } from '$app/stores'
   import { message } from '$lib/components/Hooks/Custom.js'
-  import Loader from "$lib/components/UI/Loader.svelte";
 
   let showForm = writable(true)
   let loading = writable(false)
@@ -28,9 +28,8 @@
       if (result.user) {
         $message.type = "success"
         $message.content = `<p>${result.message}</p>`
-        console.log(result.user.access_token)
         if (browser) {
-          window.sessionStorage.setItem("access_token", result.user.access_token)
+          window.sessionStorage.setItem("user", JSON.stringify(result.user))
         }
         $showForm = false
       } else {
@@ -45,8 +44,13 @@
       $loading = false
     }
   }
-
-  //await handleOnSubmit()
+  
+  browser && new Promise(res => {
+	  setTimeout(async () => {
+      document.querySelector("button#activation-form-button").click()
+			res()
+		}, 0)
+  })
 </script>
 
 <Head title={title} metaDescription={null} metaKeywords={null} metaRobots={null} />
@@ -67,7 +71,7 @@
           <input type="text" name="code" bind:value={$code} required placeholder="Код активации"/>
         </label>
         <label data-width="full" data-align="center">
-          <button type="submit">Актививровать аккаунт</button>
+          <button id="activation-form-button" type="submit">Актививровать аккаунт</button>
         </label>
       </form>
     {/if}

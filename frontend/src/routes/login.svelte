@@ -1,10 +1,11 @@
 <script>
   import Head from "$lib/components/Seo/Head.svelte"
   import { writable } from 'svelte/store'
+  import { message, getUserFromStorage } from '$lib/components/Hooks/Custom.js'
 
   let title = "Авторизироваться"
   let loading = writable(false)
-
+  let user = getUserFromStorage()
 
   $message.content = ""
 
@@ -13,26 +14,31 @@
 <Head title={title} metaDescription={null} metaKeywords={null} metaRobots={null} />
 <article id="page-content">
   <section id="login-form-wrapper" data-loading="{$loading}">
-    <h3>Войдите!</h3>
-    <p>Для того, чтобы использовать все возможности приложения</p>
-    <hr />
-    <form action="/login" method="post">
-      <label data-width="full">
-        <input type="text" name="login" required placeholder="Имя пользователя" />
-      </label>
-      <label data-width="full">
-        <input type="password" name="password" required placeholder="Пароль" />
-      </label>
-      <label data-width="full">
-        <input type="checkbox" name="remember_me" value="true" />&nbsp;Запомните этот комьютер
-      </label>
-      <label data-width="full" data-align="center">
-        <button type="submit">Войти</button>
-      </label>
-    </form>
-    <hr />
-    <p align="center">Нет аккаунта? <a href="/signup">Зарегестрируйтесь!</a></p>
-    <p align="center">Забыли пароль? <a href="/restore">Сгенерируйте новый!</a></p>
+    {#if user}
+      <h3>Вы уже авторизованы на этом устройстве</h3>
+      <p>Если желайте выйти из авторизоваться снова, воспользуйтесь кнопкой в основном меню приложения.</p>
+    {:else}
+      <h3>Войдите!</h3>
+      <p>Для того, чтобы использовать все возможности приложения</p>
+      <hr />
+      <form action="/login" method="post">
+        <label data-width="full">
+          <input type="text" name="login" required placeholder="Имя пользователя" />
+        </label>
+        <label data-width="full">
+          <input type="password" name="password" required placeholder="Пароль" />
+        </label>
+        <label data-width="full">
+          <input type="checkbox" name="remember_me" value="true" />&nbsp;Запомните этот комьютер
+        </label>
+        <label data-width="full" data-align="center">
+          <button type="submit">Войти</button>
+        </label>
+      </form>
+      <hr />
+      <p align="center">Нет аккаунта? <a href="/signup">Зарегестрируйтесь!</a></p>
+      <p align="center">Забыли пароль? <a href="/restore">Сгенерируйте новый!</a></p>
+    {/if}
   </section>
 </article>
 

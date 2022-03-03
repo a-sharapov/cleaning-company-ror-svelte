@@ -54,6 +54,11 @@ class ApplicationController < ActionController::API
     }
   end
 
+  def get_tokens_refresh_token
+    return false unless cookies["refresh_token"].present?
+    return cookies["refresh_token"]
+  end
+
   def check_auth!
     begin
       escape_with!(:token, :not_set, :ok) unless get_tokens

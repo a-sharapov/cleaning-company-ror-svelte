@@ -1,8 +1,8 @@
 <script context="module">
   export async function load({params, fetch, session, stuff}) {
     try {
-      const companies = await fetch("/api/v1/companies/", {mode: "cors"})
-      const reviews = await fetch("/api/v1/reviews/", {mode: "cors"})
+      const companies = await fetch("/api/v1/companies/?limit=10", {mode: "cors"})
+      const reviews = await fetch("/api/v1/reviews/?limit=10", {mode: "cors"})
 
       return {
         props: {
@@ -33,7 +33,7 @@
   let title = "Порядок без пипидастров!"
 </script>
 
-<Head title={title} metaDescription={null} metaKeywords={null} metaRobots={null} />
+<Head {title} metaDescription={null} metaKeywords={null} metaRobots={null} />
 <Article>
   <section id="banner">
     <img src="/i/girl.png" alt="Марафеткина" width="350px" class="banner-image" />
