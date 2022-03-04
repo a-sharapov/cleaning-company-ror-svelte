@@ -13,18 +13,18 @@ class Api::V1::AuthentificationController < ApplicationController
       escape_with!(:auth, :need_confirmation, :ok) unless @user.confirmed
       escape_if_in_blacklist(@user)
 
+
+      if @user.authenticate(user_login_parameters[:password]) && @user.blocked_until < Time.now
+        @user.update(wrong_attempts_count: 0)
+      end
       unless @user.wrong_attempts_count.to_i < @wrong_attempts_count
-        @user.update(blocked_until: Time.now + 1.hour)
-        escape_with!(:auth, :blocked_until, :ok)
+        @user.update(blocked_until: Time.now + 1.hour) unless @user.blocked_until.present?
+        escape_with!(:auth, :blocked_until, :ok, "Начиная с #{Time.parse(@user.blocked_until.to_s).in_time_zone('Europe/Minsk')}")
       end
       unless @user.authenticate(user_login_parameters[:password])
         @user.update(wrong_attempts_count: @user.wrong_attempts_count.to_i + 1)
         remaining_attempts = @wrong_attempts_count - @user.wrong_attempts_count.to_i + 1
-        escape_with!(:auth, :password_incorrect, :ok, "You can try again #{remaining_attempts} times")
-      end
-
-      if @user.authenticate(user_login_parameters[:password]) && @user.blocked_until < Time.now
-        @user.update(wrong_attempts_count: 0)
+        escape_with!(:auth, :password_incorrect, :ok, "Вы можете попробовать авторизоваться ещё #{remaining_attempts} раз(а)")
       end
       
       tokens_pair = AuthentificationTokenService.issue_tokens(@user, @metrics)

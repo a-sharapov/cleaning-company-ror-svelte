@@ -42,7 +42,7 @@
           throw new Error(result.error)
         }
         if (result.assets) {
-          assets = `<ul><li>${result.assets.join("</li><li>")}</li></ul>`
+          Array.isArray(result.assets) ? assets = `<ul><li>${result.assets.join("</li><li>")}</li></ul>` : assets = `<p>${result.assets}</p>`
           $message.type = "error"
           $message.content = `<p>${result.message}:</p>`+ assets
         } else {
@@ -61,7 +61,7 @@
   }
 </script>
 
-<Head {title} metaDescription={null} metaKeywords={null} metaRobots={null} />
+<Head {title} metaDescription={null} metaKeywords={null} metaRobots={"noindex, nofollow"} />
 
 <article id="page-content">
   <section id="signup-form-wrapper" data-loading="{$loading}">

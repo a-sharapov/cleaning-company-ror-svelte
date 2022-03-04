@@ -17,10 +17,13 @@
   }
   // cabinet data out logic
   // user update logic
-  console.log($user)
+
+  if (!$user && browser) {
+    goto("/")
+  }
 </script>
 
-<Head {title} metaDescription={null} metaKeywords={null} metaRobots={null} />
+<Head {title} metaDescription={null} metaKeywords={null} metaRobots={"noindex, nofollow"} />
 
 <article id="page-content">
 {#if $loading}
@@ -50,8 +53,8 @@
       
     </form>
   </section>
-{:else if !$user && browser}
-  { goto("/") }
+{:else if !user && browser}
+  <p>Зона доступна только авторизованным пользователям, вы будете перенаправленны на главную страницу</p>
 {/if}
 </article>
 
@@ -63,6 +66,8 @@
     justify-content: center;
     align-items: center;
     height: 100%;
+    padding: 5px 0 20px !important;
+    margin: -20px 0;
   }
   #cabinet-data-wrapper {
     text-align: left;

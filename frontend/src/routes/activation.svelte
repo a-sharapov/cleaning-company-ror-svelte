@@ -55,7 +55,7 @@
   })
 </script>
 
-<Head {title} metaDescription={null} metaKeywords={null} metaRobots={null} />
+<Head {title} metaDescription={null} metaKeywords={null} metaRobots={"noindex, nofollow"} />
 <article id="page-content">
   <section id="activation-form-wrapper" data-loading="{$loading}">
     {#if $loading}

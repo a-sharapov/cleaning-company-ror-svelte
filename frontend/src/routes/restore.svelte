@@ -36,7 +36,7 @@
   }
 </script>
 
-<Head {title} metaDescription={null} metaKeywords={null} metaRobots={null} />
+<Head {title} metaDescription={null} metaKeywords={null} metaRobots={"noindex, nofollow"} />
 <article id="page-content">
   <section id="restoration-form-wrapper" data-loading="{$loading}">
     {#if $loading}

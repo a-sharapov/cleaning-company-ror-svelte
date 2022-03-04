@@ -46,8 +46,15 @@
           }, 2e3)
         })
       } else {
-        $message.type = "warning"
-        $message.content = `<p>${result.message}</p>`
+        if (result.assets) {
+          let assets
+          Array.isArray(result.assets) ? assets = `<ul><li>${result.assets.join("</li><li>")}</li></ul>` : assets = `<p>${result.assets}</p>`
+          $message.type = "error"
+          $message.content = `<p>${result.message}:</p>`+ assets
+        } else {
+          $message.type = "info"
+          $message.content = `<p>${result.message}</p>`
+        }
       }
     } catch (e) {
       $message.type = "error"
@@ -60,7 +67,7 @@
   }
 </script>
 
-<Head title={title} metaDescription={null} metaKeywords={null} metaRobots={null} />
+<Head title={title} metaDescription={null} metaKeywords={null} metaRobots={"noindex, nofollow"} />
 <article id="page-content">
   <section id="login-form-wrapper" data-loading="{$loading}">
     {#if $user && !$message?.content}
