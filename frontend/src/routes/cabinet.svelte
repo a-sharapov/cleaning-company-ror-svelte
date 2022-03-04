@@ -50,7 +50,7 @@
     {#if $user.banned}<p>Забанен до: <strong>{new Date($user.blocked_until).toLocaleDateString("ru-RU")}, {new Date($user.blocked_until).toLocaleTimeString("ru-RU")}</strong></p>{/if}
     <hr />
     <form action="/cabinet" method="put" enctype="multipart/form-data">
-      
+      Форма для обновления данных пользователя
     </form>
   </section>
 {:else if !user && browser}
