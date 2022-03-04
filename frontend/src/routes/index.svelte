@@ -78,7 +78,7 @@
     {#if companies?.data?.message}
       <p class="ligher">{companies.data.message}</p>
     {:else if !companies?.data?.message && companies.data}
-
+    
     {:else}
       <Loader />
     {/if}

@@ -37,3 +37,16 @@ export const removeUserFromStorage = () => {
     window?.sessionStorage.removeItem("user")
   }
 }
+
+export const setUserInStorage = (user, remember) => {
+  if (browser && user) {
+    window?.sessionStorage.setItem("user", JSON.stringify(user))
+    if (remember) {
+      window?.localStorage.setItem("user", JSON.stringify(user))
+    }
+    return true
+  }
+  return false
+}
+
+export const user = writable(getUserFromStorage())

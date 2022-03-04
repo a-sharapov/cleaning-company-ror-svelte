@@ -1,43 +1,100 @@
 <script>
+  import Loader from "$lib/components/UI/Loader.svelte"
   import Head from "$lib/components/Seo/Head.svelte"
+  import { goto } from '$app/navigation'
+  import { browser } from '$app/env'
   import { writable } from 'svelte/store'
-  import { message, getUserFromStorage } from '$lib/components/Hooks/Custom.js'
+  import { message, user, setUserInStorage, getUserFromStorage } from '$lib/components/Hooks/Custom.js'
 
   let title = "Авторизироваться"
   let loading = writable(false)
-  let user = getUserFromStorage()
+  let showForm = writable(true)
+  let auth = writable({
+    login: "",
+    password: "",
+    checked: "",
+  })
 
-  $message.content = ""
+  $message.content = null
 
+  const handleOnSubmit = async (event) => {
+    event.preventDefault()
+    try {
+      $loading = true
+      let data = new FormData(event.target)
+      let result = await fetch("/api/v1/auth/", {
+                              method: event.target.getAttribute("method"),
+                              cache: 'no-cache',
+                              mode: 'cors',
+                              body: data,
+                              }).then(response => response.json());
+
+      if (result.error) {
+        throw new Error(result.error)
+      }
+      if (result.user) {
+        $message.type = "success"
+        $message.content = `<p>${result.message}</p>`
+        if (!setUserInStorage(result.user, data.get("remember_me"))) {
+          throw new Error("Попытка авторизации завершилась неудачей, проверьте настройки безопасности системы и браузера")
+        }
+        $showForm = false
+        browser && new Promise(res => {
+          setTimeout(async () => {
+            goto("/cabinet")
+            res()
+          }, 2e3)
+        })
+      } else {
+        $message.type = "warning"
+        $message.content = `<p>${result.message}</p>`
+      }
+    } catch (e) {
+      $message.type = "error"
+      $message.content = e.message
+      $showForm = true
+    } finally {
+      user.set(getUserFromStorage())
+      $loading = false
+    }
+  }
 </script>
 
 <Head title={title} metaDescription={null} metaKeywords={null} metaRobots={null} />
 <article id="page-content">
   <section id="login-form-wrapper" data-loading="{$loading}">
-    {#if user}
-      <h3>Вы уже авторизованы на этом устройстве</h3>
-      <p>Если желайте выйти из авторизоваться снова, воспользуйтесь кнопкой в основном меню приложения.</p>
+    {#if $user && !$message?.content}
+      <h3>Вы успешно авторизованы на этом устройстве</h3>
+      <p>Если вам необходимо авторизоваться снова, воспользуйтесь кнопкой в основном меню приложения.</p>
     {:else}
-      <h3>Войдите!</h3>
-      <p>Для того, чтобы использовать все возможности приложения</p>
-      <hr />
-      <form action="/login" method="post">
-        <label data-width="full">
-          <input type="text" name="login" required placeholder="Имя пользователя" />
-        </label>
-        <label data-width="full">
-          <input type="password" name="password" required placeholder="Пароль" />
-        </label>
-        <label data-width="full">
-          <input type="checkbox" name="remember_me" value="true" />&nbsp;Запомните этот комьютер
-        </label>
-        <label data-width="full" data-align="center">
-          <button type="submit">Войти</button>
-        </label>
-      </form>
-      <hr />
-      <p align="center">Нет аккаунта? <a href="/signup">Зарегестрируйтесь!</a></p>
-      <p align="center">Забыли пароль? <a href="/restore">Сгенерируйте новый!</a></p>
+      {#if $loading}
+        <Loader />
+      {/if}
+      {#if $message?.content}
+        <span class="form-message" data-type={$message?.type}>{@html $message?.content}</span>
+      {/if}
+      {#if $showForm}
+        <h3>Войдите!</h3>
+        <p>Для того, чтобы использовать все возможности приложения</p>
+        <hr />
+        <form action="/login" method="post" on:submit={handleOnSubmit}>
+          <label data-width="full">
+            <input type="text" name="login" bind:value={$auth.login} required placeholder="Имя пользователя" />
+          </label>
+          <label data-width="full">
+            <input type="password" name="password" bind:value={$auth.password} required placeholder="Пароль" />
+          </label>
+          <label data-width="full">
+            <input type="checkbox" name="remember_me" value="true" bind:checked={$auth.checked} />&nbsp;Запомните этот комьютер
+          </label>
+          <label data-width="full" data-align="center">
+            <button type="submit">Войти</button>
+          </label>
+        </form>
+        <hr />
+        <p align="center">Нет аккаунта? <a href="/signup">Зарегестрируйтесь!</a></p>
+        <p align="center">Забыли пароль? <a href="/restore">Сгенерируйте новый!</a></p>
+      {/if}
     {/if}
   </section>
 </article>

@@ -16,7 +16,8 @@
   let showForm = writable(true)
   let loading = writable(false)
 
-  $message.content = ""
+  $message.content = null
+  
   const handleOnSubmit = async (event) => {
     event.preventDefault()
     if ($user.password !== $user._password) {

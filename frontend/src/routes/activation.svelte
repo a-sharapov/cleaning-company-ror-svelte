@@ -4,14 +4,15 @@
   import { browser } from '$app/env'
   import { writable } from 'svelte/store'
   import { page } from '$app/stores'
-  import { message } from '$lib/components/Hooks/Custom.js'
+  import { message, setUserInStorage, getUserFromStorage, user } from '$lib/components/Hooks/Custom.js'
 
   let showForm = writable(true)
   let loading = writable(false)
   let title = "Активация аккаунта"
   let code = writable($page.url.searchParams.get("code"))
 
-  $message.content = ""
+  $message.content = null
+  
   const handleOnSubmit = async (event) => {
     event.preventDefault()
     if (!Boolean($code)) { return }
@@ -28,8 +29,8 @@
       if (result.user) {
         $message.type = "success"
         $message.content = `<p>${result.message}</p>`
-        if (browser) {
-          window.sessionStorage.setItem("user", JSON.stringify(result.user))
+        if (!setUserInStorage(result.user, false)) {
+          throw new Error("Аккаунт активирован, но попытка авторизации завершилась неудачей, вы можете сделать это позже в манульаном режиме")
         }
         $showForm = false
       } else {
@@ -41,6 +42,7 @@
       $message.content = e.message
       $showForm = true
     } finally {
+      user.set(getUserFromStorage())
       $loading = false
     }
   }
@@ -53,7 +55,7 @@
   })
 </script>
 
-<Head title={title} metaDescription={null} metaKeywords={null} metaRobots={null} />
+<Head {title} metaDescription={null} metaKeywords={null} metaRobots={null} />
 <article id="page-content">
   <section id="activation-form-wrapper" data-loading="{$loading}">
     {#if $loading}

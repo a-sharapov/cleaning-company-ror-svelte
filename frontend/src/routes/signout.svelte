@@ -23,13 +23,15 @@
   import { goto } from '$app/navigation'
   import { browser } from '$app/env'
   import Head from "$lib/components/Seo/Head.svelte"
-  import { message, removeUserFromStorage } from '$lib/components/Hooks/Custom.js'
+  import { message, removeUserFromStorage, user } from '$lib/components/Hooks/Custom.js'
 
   let title = "Выход из системы"
   export let logout
-  $message.content = logout.message
-  removeUserFromStorage()
 
+  $message.content = logout.message
+  user.set(false)
+  removeUserFromStorage()
+  
   browser && new Promise(res => {
 	  setTimeout(async () => {
 			res()   
