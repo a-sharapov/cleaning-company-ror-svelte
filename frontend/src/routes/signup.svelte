@@ -2,7 +2,7 @@
   import Head from "$lib/components/Seo/Head.svelte"
   import { writable } from 'svelte/store'
   import { prepareFormData, message } from '$lib/components/Hooks/Custom.js'
-  import Loader from "$lib/components/UI/Loader.svelte";
+  import Loader from "$lib/components/UI/Loader.svelte"
 
   let title = "Зарегестрироваться"
   let user = writable({
@@ -61,7 +61,7 @@
   }
 </script>
 
-<Head title={title} metaDescription={null} metaKeywords={null} metaRobots={null} />
+<Head {title} metaDescription={null} metaKeywords={null} metaRobots={null} />
 
 <article id="page-content">
   <section id="signup-form-wrapper" data-loading="{$loading}">
