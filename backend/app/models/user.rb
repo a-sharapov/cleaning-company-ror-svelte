@@ -48,9 +48,10 @@ class User
                         if: :phone_present?
 
   validate :mail_and_phone_unpresent?
-
+  
   has_secure_password
   has_mongoid_attached_file :avatar
+  validates_attachment :avatar, content_type: { content_type: ["image/jpg", "image/jpeg", "image/png", "image/gif"] }
   
   private
   def password_not_present?

@@ -64,7 +64,7 @@ class ApplicationController < ActionController::API
       escape_with!(:token, :not_set, :ok) unless get_tokens
       access_token = get_tokens[:access_token]
       escape_with!(:auth, :unauthorized_access, :ok) unless AuthentificationTokenService.decode_token(access_token)
-      escape_with!(:auth, :unauthorized_access, :ok) if AuthentificationTokenService.expired?(access_token)
+      escape_with!(:auth, :token_expired, :ok, "retrieve") if AuthentificationTokenService.expired?(access_token)
     end
   end
 

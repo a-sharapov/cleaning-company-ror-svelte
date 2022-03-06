@@ -36,7 +36,7 @@
                                   cache: 'no-cache',
                                   mode: 'cors',
                                   body: preparedData
-                                  }).then(response => response.json());
+                                  }).then(response => response.json())
         let assets = ""
         if (result.error) {
           throw new Error(result.error)
@@ -48,8 +48,8 @@
         } else {
           $message.type = "success"
           $message.content = `<p>${result.message}</p>`
+          $showForm = false
         }
-        $showForm = false
       } catch (e) {
         $message.type = "error"
         $message.content = e.message

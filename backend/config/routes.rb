@@ -1,6 +1,7 @@
 Rails.application.routes.draw do
   namespace :api do
     get '/', to: "v1/api#index"
+    get '/avatar/:login', to: "v1/api#avatar"
     get 'v1', to: "v1/api#endpoints"
 
     namespace :v1 do

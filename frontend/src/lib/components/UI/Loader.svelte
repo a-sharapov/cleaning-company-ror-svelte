@@ -5,8 +5,10 @@
 
 <style>
   .loader {
+    position: relative;
     display: inline-block;
     margin: 20px auto;
+    z-index: 999;
   }
   .loader,
   .loader:after {

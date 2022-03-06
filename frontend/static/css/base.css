@@ -6,7 +6,7 @@
   --color-success: #4caf50;
   --color-info: #368ace;
   --mf-red: #c6120e;
-  --mf-darkerd: #940f05;
+  --mf-darkred: #940f05;
   --mf-brown: #432c20;
   --mf-darkbrown: #1f0c05;
   --mf-lightgray: #f8f2f2;
@@ -69,7 +69,7 @@ body * {
 }
 
 ::selection {
-  background: var(--mf-darkerd);
+  background: var(--mf-darkred);
   color: #fff;
   text-shadow: 0 1px 0 #00000040;
 }
@@ -85,14 +85,14 @@ hr {
 }
 
 a {
-  color: var(--mf-darkerd);
+  color: var(--mf-darkred);
   text-decoration: underline;
   transition: all 0.3s linear;
   cursor: pointer;
 }
 
 a:visited {
-  color: var(--mf-darkerd);
+  color: var(--mf-darkred);
 }
 
 a:active,
@@ -198,7 +198,7 @@ label {
   position: relative;
   display: inline-block;
   width: 100%;
-  padding: 0;
+  padding: 0 5px;
   vertical-align: top;
   margin-bottom: 10px;
 }
@@ -208,22 +208,7 @@ label[data-width='full'] {
 }
 
 label[data-width='half'] {
-  width: calc(50% - 8px);
-}
-
-label[data-width='half'] + label[data-width='half'] {
-  margin-left: 15px;
-}
-
-label[data-width='half'] + label[data-width='half'] + label[data-width='half'] {
-  margin-left: 0;
-}
-
-label[data-width='half']
-  + label[data-width='half']
-  + label[data-width='half']
-  + label[data-width='half'] {
-  margin-left: 15px;
+  width: 50%;
 }
 
 label[data-align='left'] {
@@ -327,7 +312,7 @@ input:hover,
 input[type='submit']:hover,
 select:hover,
 textarea:hover {
-  border-color: var(--mf-darkerd);
+  border-color: var(--mf-darkred);
 }
 
 input:focus,
@@ -337,6 +322,7 @@ textarea:focus {
 
 .input-file,
 input[type='datetime-local'],
+input[type='file'],
 input[type='email'],
 input[type='number'],
 input[type='password'],
@@ -351,6 +337,37 @@ textarea {
   width: 100%;
   border-radius: 2px;
   text-transform: none;
+}
+
+input[type='file'] {
+  position: relative;
+  box-sizing: border-box;
+  padding: 0 120px 0 10px;
+  height: 40px;
+  line-height: 36px;
+}
+
+input[type='file']::file-selector-button {
+  position: absolute;
+  left: auto;
+  height: 40px;
+  line-height: 36px;
+  right: 0;
+  width: 120px;
+  text-align: center;
+  font-size: 14px;
+  margin: -1px 0 -1px 10px;
+  border-radius: 0;
+  outline: none;
+  border: none;
+  background: var(--mf-darkred);
+  color: #fff;
+  cursor: pointer;
+  transition: all .2s linear;
+}
+
+input[type='file']::file-selector-button:hover {
+  background: var(--mf-red);
 }
 
 .input-file,
@@ -381,7 +398,7 @@ input[type='range']::-webkit-slider-thumb {
   height: 20px;
   width: 20px;
   border-radius: 10px;
-  background: var(--mf-darkerd);
+  background: var(--mf-darkred);
   cursor: pointer;
   margin: -8px 0 0;
   border: 1px solid #33878a;
@@ -398,7 +415,7 @@ input[type='range']::-webkit-slider-runnable-track {
 }
 
 input[type='range']:focus::-webkit-slider-runnable-track {
-  background: var(--mf-darkerd);
+  background: var(--mf-darkred);
 }
 
 input[type='radio'] {
@@ -412,7 +429,7 @@ input[type='radio'] {
 }
 
 input[type='radio']:hover {
-  border-color: var(--mf-darkerd);
+  border-color: var(--mf-darkred);
 }
 
 input[type='radio'] {
@@ -487,7 +504,7 @@ input[type='submit'] {
   padding: 0 15px;
   height: 34px;
   line-height: 34px;
-  background: var(--mf-darkerd);
+  background: var(--mf-darkred);
   color: #fff;
   border: none;
   cursor: pointer;
@@ -502,7 +519,7 @@ button:hover,
 input[type='button']:hover,
 input[type='reset']:hover,
 input[type='submit']:hover {
-  background: var(--mf-darkerd);
+  background: var(--mf-darkred);
 }
 
 .button:active,
@@ -511,7 +528,7 @@ button:active,
 input[type='button']:active,
 input[type='reset']:active,
 input[type='submit']:active {
-  background: var(--mf-darkerd);
+  background: var(--mf-darkred);
 }
 
 .button:disabled,
@@ -1030,7 +1047,7 @@ nav[role='paging'] a:hover {
 
 nav[role='paging'] span.active {
   color: #fff;
-  background: var(--mf-darkerd);
+  background: var(--mf-darkred);
   text-shadow: 0 1px 0 #00000010;
 }
 

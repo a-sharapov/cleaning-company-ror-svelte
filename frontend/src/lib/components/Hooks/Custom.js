@@ -3,13 +3,13 @@
 
 export const prepareFormData = (data, object, defaultRemovedFields = null) => {
   Object.keys(object).map(key => {
-    object[key] === "" && data.delete(key) 
+    data[key] === "" && data.delete(key) 
   })
 
   if (defaultRemovedFields) {
     let defautls = defaultRemovedFields.split(',')
     defautls.map(key => {
-      data.delete(key)
+      data.delete(key.split())
     })
   }
 
@@ -47,6 +47,44 @@ export const setUserInStorage = (user, remember) => {
     return true
   }
   return false
+}
+
+export const remembered = () => {
+  if (browser) 
+  if (window?.localStorage.getItem("user")) {
+    return true
+  }
+  return false
+}
+
+export const messageProcessor = (result) => {
+  let assets = "",
+      message = {
+        type: "info",
+        content: null,
+      }
+
+  if (result.error) {
+    message.content = result.error
+    message.type = "error"
+    return message
+  }
+  if (result.assets) {
+    if (result.assets === "retrieve") {
+      message.content = result.content
+      message.type = "retrieve"
+      return message
+    } else {
+      Array.isArray(result.assets) ? assets = `<ul><li>${result.assets.join("</li><li>")}</li></ul>` : assets = `<p>${result.assets}</p>`
+      message.type = "error"
+      message.content = `<p>${result.message}:</p>` + assets
+    }
+  } else {
+    message.type = "info"
+    message.content = `<p>${result.message}</p>`
+  }
+
+  return message
 }
 
 export const user = writable(getUserFromStorage())

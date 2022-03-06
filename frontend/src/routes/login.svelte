@@ -4,7 +4,7 @@
   import { goto } from '$app/navigation'
   import { browser } from '$app/env'
   import { writable } from 'svelte/store'
-  import { message, user, setUserInStorage, getUserFromStorage } from '$lib/components/Hooks/Custom.js'
+  import { message, user, setUserInStorage, getUserFromStorage, messageProcessor } from '$lib/components/Hooks/Custom.js'
 
   let title = "Авторизироваться"
   let loading = writable(false)
@@ -27,7 +27,7 @@
                               cache: 'no-cache',
                               mode: 'cors',
                               body: data,
-                              }).then(response => response.json());
+                              }).then(response => response.json())
 
       if (result.error) {
         throw new Error(result.error)
@@ -43,7 +43,7 @@
           setTimeout(async () => {
             goto("/cabinet")
             res()
-          }, 2e3)
+          }, 5e2)
         })
       } else {
         if (result.assets) {

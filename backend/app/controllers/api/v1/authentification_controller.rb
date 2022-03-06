@@ -82,12 +82,9 @@ class Api::V1::AuthentificationController < ApplicationController
 
   def refresh
     begin
-      check_auth!
-      access_token = get_tokens[:access_token]
-      refresh_token = get_tokens[:refresh_token]
-      escape_with!(:auth, :unauthorized_access, :ok) unless access_token_data = AuthentificationTokenService.decode_token(access_token)
-      user = User.find_by(login: access_token_data.first["login"])
-      check_access!(user)
+      refresh_token = get_tokens_refresh_token
+      escape_with!(:auth, :unauthorized_access, :ok) unless refresh_token_data = AuthentificationTokenService.decode_token(refresh_token)
+      user = User.find_by(login: refresh_token_data.first["login"])
       escape_with!(:user, :not_exist, :ok) unless user 
       escape_with!(:auth, :unauthorized_access, :ok) unless user.tokens.any? && user.tokens.find(refresh_token).any?
       escape_with!(:auth, :not_update, :ok) unless user.set(tokens: user.tokens.as_json.filter{ |t| t != refresh_token })

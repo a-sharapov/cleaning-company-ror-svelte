@@ -4,7 +4,7 @@
       const response = await fetch("/api/v1/auth/", {
                                     method: "delete", 
                                     mode: "cors"
-                                  });
+                                  })
       return {
         props: {
           logout: response.ok && (await response.json()),
@@ -32,19 +32,19 @@
   export let logout
 
   $message.content = logout.message
-  user.set(false)
-  removeUserFromStorage()
+  
+  if (browser) {
+    user.set(false)
+    removeUserFromStorage()
+    $loading = false
+  }
   
   browser && new Promise(res => {
 	  setTimeout(async () => {
-			res()   
-		}, 2e3)
-  }).then(() => {
-    goto("/")
+			res()
+      goto("/")
+		}, 5e2)
   })
-  if (browser) {
-    $loading = false
-  }
 </script>
 
 <Head {title} metaDescription={null} metaKeywords={null} metaRobots={"noindex, nofollow"} />

@@ -19,13 +19,8 @@
                               method: event.target.getAttribute("method"),
                               cache: 'no-cache',
                               mode: 'cors',
-                              }).then(response => response.json());
-      if (result.error) {
-        throw new Error(result.error)
-      }
-
-      $message.type = "info"
-      $message.content = `<p>${result.message}</p>`
+                              }).then(response => response.json())
+      message.set(messageProcessor(result))
     } catch (e) {
       $message.type = "error"
       $message.content = e.message

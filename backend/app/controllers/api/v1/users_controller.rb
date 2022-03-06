@@ -55,8 +55,12 @@ class Api::V1::UsersController < ApplicationController
       escape_with!(:user, :not_exist, :ok) unless @user
       check_access!(@user)
       escape_with!(:user, :invalid_request, :ok, @user.errors.full_messages) unless @user.valid?
-      escape_with!(:user, :not_update, :ok) unless @user.update(user_update_parameters)
-      render_user_data(@user)
+      escape_with!(:user, :not_update, :ok, @user.errors.full_messages) unless @user.update(user_update_parameters)
+      response = {
+        message: ApiError::MESSAGES[:user][:updated],
+        user: except_data!(@user)
+      }
+      render json: response, status: :ok and return
     rescue ApiError => e
       render_api_error(e)
     end
@@ -81,7 +85,7 @@ class Api::V1::UsersController < ApplicationController
   end
 
   def user_update_parameters 
-    params.permit(:login, :description, :email, :phone, :password, address: [:zip, :country, :city, :state, :street])
+    params.permit(:login, :avatar, :description, :email, :phone, address: [:zip, :country, :city, :state, :street])
   end
   
   def get_user
