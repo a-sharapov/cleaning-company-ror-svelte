@@ -24,7 +24,8 @@
   import { browser } from '$app/env'
   import { prepareFormData, getUserFromStorage, setUserInStorage, messageProcessor, message, user, remembered } from '$lib/components/Hooks/Custom.js'
 
-  let title = "Зарегестрироваться"
+  let title = `Личный кабинет - ${$user.login}`
+  let removeConfirmationWindowShow = writable(false)
   let loading = writable(true)
   let currentUserData = writable({...$user})
   let retry = writable(true)
@@ -60,11 +61,12 @@
     event.preventDefault()
     let count = 0
     let maxTries = 3
+    let removeEmpty = {password: "", avatar: "", phone: "", description: ""}
 
       try {
         $loading = true
         let data = new FormData(event.target),
-          preparedData = prepareFormData(data, {password: "", avatar: ""})
+          preparedData = prepareFormData(data, removeEmpty)
           while ($retry) {
             let result = await fetch(`/api/v1/user/${$user.login}/`, {
               method: event.target.getAttribute("method"),
@@ -112,13 +114,26 @@
         }
   }
 
+  const handleOnProfileRemove = () => {
+    removeConfirmationWindowShow.set(!$removeConfirmationWindowShow)
+  }
+
   if (!$user && browser) {
     goto("/")
   }
 </script>
 
 <Head {title} metaDescription={null} metaKeywords={null} metaRobots={"noindex, nofollow"} />
-
+{#if $removeConfirmationWindowShow}
+  <dialog class="window" data-header="false">
+    <p>Вы действительно хотите удалить свой аккаунт?</p>
+    <p>&nbsp;</p>
+    <p>
+      <a class="button" href="/signout?and=remove">Удалить</a>
+      <span class="button white" on:click="{handleOnProfileRemove}">Отменить</span>
+    </p>
+  </dialog>
+{/if}
 <article id="page-content">
   <section id="cabinet-data-wrapper" data-loading="{$loading}">
     {#if $loading}
@@ -151,6 +166,7 @@
         {/if}
         <span on:click="{handleTabSwitch}" class="tab-contller" data-tab="2">События</span>
         <span on:click="{handleTabSwitch}" class="tab-contller" data-tab="3">Отзывы</span>
+        <span on:click="{handleTabSwitch}" class="tab-contller" data-tab="4">Удаление</span>
       </nav>
       </aside>
     <aside id="cabinet-tabs">
@@ -178,9 +194,11 @@
           <label data-width="full">
             <select name="address[country]" bind:value={$currentUserAddress.country}>
               <option disabled value="unselected">Выберите свою страну из списка</option>
-              {#each countryList.content.elements as coutry }
+              {#if countryList?.content?.elements}
+              {#each countryList?.content?.elements as coutry }
               <option value="{coutry}">{coutry}</option>
               {/each}
+              {/if}
             </select>
           </label>
           <label data-width="half">
@@ -208,6 +226,12 @@
       </div>
       <div class="tab" data-tab="3">
         Отзывы
+      </div>
+      <div class="tab" data-tab="4">
+        <h4>Удаление аккаунта</h4>
+        <p>Вы можете удалить ваш аккаунт в любое время или прямо сейчас. Но, если вы вдруг поменяете своё мнение, вы не сможете его восстановить.</p>
+        <p>&nbsp;</p>
+        <p><span class="button" on:click="{handleOnProfileRemove}">Удалить аккаунт</span></p>
       </div>
     </aside>
     {:else if !user && browser}
@@ -372,5 +396,12 @@
   span.form-message {
     margin: 0 20px 20px;
     width: calc(100% - 40px);
+  }
+
+  span.button.white {
+    float: right;
+    color: #333;
+    background-color: var(--mf-darkgray);
+    text-shadow: 0 1px 0 #fff;
   }
 </style>

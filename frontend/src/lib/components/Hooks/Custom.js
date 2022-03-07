@@ -3,12 +3,12 @@
 
 export const prepareFormData = (data, object, defaultRemovedFields = null) => {
   Object.keys(object).map(key => {
-    data[key] === "" && data.delete(key) 
+    data.get(key) === "" ? data.delete(key) : void -1
   })
 
   if (defaultRemovedFields) {
-    let defautls = defaultRemovedFields.split(',')
-    defautls.map(key => {
+    let defaults = defaultRemovedFields.split(',')
+    defaults.map(key => {
       data.delete(key.split())
     })
   }

@@ -21,30 +21,48 @@
 
 <script>
   import { goto } from '$app/navigation'
+  import { page } from '$app/stores'
   import { browser } from '$app/env'
+  import Loader from "$lib/components/UI/Loader.svelte"
   import Head from "$lib/components/Seo/Head.svelte"
   import { writable } from 'svelte/store'
   import { message, removeUserFromStorage, user } from '$lib/components/Hooks/Custom.js'
-  import Loader from "$lib/components/UI/Loader.svelte"
 
   let title = "Выход из системы"
   let loading = writable(true)
+  let assets = $page.url.searchParams.get("and")
   export let logout
 
   $message.content = logout.message
   
-  if (browser) {
+  browser && new Promise(async (res) => {
+    let response
+    if (assets === "remove") {
+      response = await fetch(`/api/v1/user/${$user.login}/`, {
+          method: "delete",
+          cache: 'no-cache',
+          mode: 'cors',
+          headers: {
+            'Authorization': `Bearer ${$user.access_token}`,
+          }
+        })
+    } else {
+      response = null
+    }
     user.set(false)
     removeUserFromStorage()
     $loading = false
-  }
-  
-  browser && new Promise(res => {
-	  setTimeout(async () => {
-			res()
-      goto("/")
-		}, 5e2)
-  })
+    res(response.json())
+  }).then((result) => {
+    if (result.error) {
+      $message.type = "warning"
+      $message.content = `${$message.content}, ${result.error}`
+    } else {
+      $message.content = `${$message.content}, ${result.message}`
+    }
+  }).finally(
+    setTimeout(async () => { goto("/") }, 1e3)
+  )
 </script>
 
 <Head {title} metaDescription={null} metaKeywords={null} metaRobots={"noindex, nofollow"} />

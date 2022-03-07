@@ -872,6 +872,12 @@ span[data-placeholder='true']:before {
   border-radius: 2px 2px 5px 5px;
 }
 
+header+.window {
+  position: fixed;
+  z-index: 100;
+  top: 10%;
+}
+
 .window[data-header='false'] {
   padding: 30px 40px;
 }
