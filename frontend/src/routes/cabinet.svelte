@@ -85,26 +85,20 @@
     let userProfileAvatar = await getAvatarByUser($user)
     !!!userProfileAvatar.message && isAvatar.set(true)
 
-    let userProfileSessions = await getUserSessions($user, user)
-    data.userSessions = userProfileSessions
+    data.userSessions = await getUserSessions($user, user)
 
-    let companyProfileRequest = await getCompanyProfile($user, user)
-    data.companyProfile = companyProfileRequest
+    data.companyProfile = await getCompanyProfile($user, user)
 
     if (companyProfileRequest && !companyProfileRequest.message) {
-      let companyEventsRequest = await getCompanyEvents($user, user, companyProfileRequest.company_name)
-      data.companyEvents = companyEventsRequest
-      let companyReviewRequest = await getCompanyReviews($user, user, companyProfileRequest.company_name)
-      data.companyReviews = companyReviewRequest
+      data.companyEvents = await getCompanyEvents($user, user, companyProfileRequest.company_name)
+      data.companyReviews = await getCompanyReviews($user, user, companyProfileRequest.company_name)
     } else {
       data.companyEvents = {message: "В данный момент профиль компании ещё не заполнен, поэтому запрос событий не произведён"}
       data.companyReviews = {message: "В данный момент профиль компании ещё не заполнен, поэтому запрос отзывов не произведён"}
     }
     
-    let userEventsRequest = await getUserEvents($user, user)
-    data.userEvents = userEventsRequest
-    let userReviewsRequest = await getUserReviews($user, user)
-    data.userReviews = userReviewsRequest
+    data.userEvents = await getUserEvents($user, user)
+    data.userReviews = await getUserReviews($user, user)
     
     res(data)
   }).then((data) => {
@@ -157,13 +151,14 @@
         {
           method: "delete", 
           mode: "cors"
-        }).then((response) => {
-          response.ok && setTimeout(async () => { 
-            removeUserFromStorage()
-            user.set(null)
-            goto("/") 
-          }, 1e3)
-        })
+        }
+      ).then((response) => {
+        response.ok && setTimeout(async () => { 
+          removeUserFromStorage()
+          user.set(null)
+          goto("/") 
+        }, 1e3)
+      })
     }
   })
 
