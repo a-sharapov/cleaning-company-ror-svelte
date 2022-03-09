@@ -105,7 +105,8 @@ export const retryFetch = async (url, options, user) => {
         if (updateSession) {
           retry = true
           user.set(getUserFromStorage())
-          opts.access_token = resign.user.access_token
+          console.log(usr.access_token)
+          opts.access_token = usr.access_token
         } else {
           retry = false
           return {

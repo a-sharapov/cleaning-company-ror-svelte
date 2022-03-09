@@ -3,8 +3,6 @@
 
   export let content
   export let assets = null
-
-  console.log($page)
 </script>
 
 {#if assets}

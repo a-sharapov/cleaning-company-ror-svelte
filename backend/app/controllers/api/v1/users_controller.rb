@@ -82,8 +82,10 @@ class Api::V1::UsersController < ApplicationController
   def avatar
     begin
       escape_with!(:user, :not_exist, :ok) unless @user
-      escape_with!(:user, :avatar_not_exist, :ok) unless @user.avatar_file_name
-      send_file "public/system/users/avatars/original/#{@user.avatar_file_name}", type: @user.avatar_content_type, disposition: 'inline'
+      escape_with!(:user, :avatar_not_found, :ok) unless @user.avatar_file_name
+      avatar_path = "public/system/users/avatars/original/#{@user.avatar_file_name}"
+      escape_with!(:user, :avatar_not_exist, :not_found) unless File.exist?(avatar_path)
+      send_file(avatar_path, type: @user.avatar_content_type, disposition: 'inline')
     rescue ApiError => e
       render_api_error(e)
     end

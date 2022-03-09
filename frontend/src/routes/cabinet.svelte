@@ -30,7 +30,7 @@
   let loading = writable(true)
   let currentUserData
   let isUser = writable(true)
-
+  let isAvatar = writable(false)
 
   user.subscribe(data => {
     currentUserData = writable({
@@ -73,6 +73,16 @@
     ).then((data) => data.json())
 
     !!userProfileRequest.message && isUser.set(false)
+
+    let userProfileAvatar = await fetch(
+      `/api/v1/avatar/${$user.login}?image=${$user.avatar_file_name}`,
+      {
+        method: "get",
+        cache: 'no-cache',
+        mode: 'cors',
+      }
+    )
+    userProfileAvatar.ok && isAvatar.set(true)
 
     let companyProfileRequest = await retryFetch(
       `/api/v1/${$user.login}/company/`,
@@ -245,7 +255,7 @@
     {#if $user}
     <aside id="cabinet-left">
       <span class="user-avatar">
-        {#if $user.avatar_file_name}
+        {#if $isAvatar}
           <img src="/api/v1/avatar/{$user.login}?image={$user.avatar_file_name}" alt="{$user.login}" height="100%" />
         {:else}
           <span>{$user.login.charAt(0).toUpperCase()}</span>
