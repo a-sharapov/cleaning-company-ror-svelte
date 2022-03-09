@@ -46,22 +46,15 @@
           }, 5e2)
         })
       } else {
-        if (result.assets) {
-          let assets
-          Array.isArray(result.assets) ? assets = `<ul><li>${result.assets.join("</li><li>")}</li></ul>` : assets = `<p>${result.assets}</p>`
-          $message.type = "error"
-          $message.content = `<p>${result.message}:</p>`+ assets
-        } else {
-          $message.type = "info"
-          $message.content = `<p>${result.message}</p>`
-        }
+        message.set(messageProcessor(result))
       }
     } catch (e) {
       $message.type = "error"
       $message.content = e.message
       $showForm = true
     } finally {
-      user.set(getUserFromStorage())
+      let current = getUserFromStorage()
+      current && user.set(current)
       $loading = false
     }
   }

@@ -1,7 +1,7 @@
 <script>
   import Head from "$lib/components/Seo/Head.svelte"
   import { writable } from 'svelte/store'
-  import { prepareFormData, message } from '$lib/components/Hooks/Custom.js'
+  import { prepareFormData, message, messageProcessor } from '$lib/components/Hooks/Custom.js'
   import Loader from "$lib/components/UI/Loader.svelte"
 
   let title = "Зарегестрироваться"
@@ -40,15 +40,9 @@
         let assets = ""
         if (result.error) {
           throw new Error(result.error)
-        }
-        if (result.assets) {
-          Array.isArray(result.assets) ? assets = `<ul><li>${result.assets.join("</li><li>")}</li></ul>` : assets = `<p>${result.assets}</p>`
-          $message.type = "error"
-          $message.content = `<p>${result.message}:</p>`+ assets
         } else {
-          $message.type = "success"
-          $message.content = `<p>${result.message}</p>`
-          $showForm = false
+          message.set(messageProcessor(result))
+          $showForm = true
         }
       } catch (e) {
         $message.type = "error"

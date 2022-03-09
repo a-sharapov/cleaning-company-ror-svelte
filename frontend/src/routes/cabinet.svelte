@@ -18,7 +18,7 @@
 
 <script>
   import Loader from "$lib/components/UI/Loader.svelte"
-  import Placeholder from "$lib/components/chunks/Placeholder.svelte"
+  import Container from "$lib/components/chunks/Container.svelte"
   import Head from "$lib/components/Seo/Head.svelte"
   import { writable } from 'svelte/store'
   import { goto } from '$app/navigation'
@@ -324,20 +324,20 @@
       </div>
       {#if $user.role === "company"}
       <div class="tab" data-tab="4">
-        <Placeholder content={$tabsContent.companyProfile} />
+        <Container content={$tabsContent.companyProfile} />
       </div>
       <div class="tab" data-tab="5">
-        <Placeholder content={$tabsContent.companyEvents} />
+        <Container content={$tabsContent.companyEvents} />
       </div>
       <div class="tab" data-tab="6">
-        <Placeholder content={$tabsContent.companyReviews} />
+        <Container content={$tabsContent.companyReviews} />
       </div>
       {/if}
       <div class="tab" data-tab="1">
-        <Placeholder content={$tabsContent.userEvents} />
+        <Container content={$tabsContent.userEvents} />
       </div>
       <div class="tab" data-tab="2">
-        <Placeholder content={$tabsContent.userReviews} />
+        <Container content={$tabsContent.userReviews} />
       </div>
       <div class="tab" data-tab="3">
         <h4>Удаление аккаунта</h4>

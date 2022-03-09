@@ -65,11 +65,11 @@ export const messageProcessor = (result) => {
       }
 
   switch (true) {
-    case result.error:
+    case !!result.error:
       message.content = result.error
       message.type = "error"
       break
-    case result.assets:
+    case !!result.assets:
       Array.isArray(result.assets) ? assets = `<ul><li>${result.assets.join("</li><li>")}</li></ul>` : assets = `<p>${result.assets}</p>`
       message.type = "error"
       message.content = `<p>${result.message}:</p>` + assets
