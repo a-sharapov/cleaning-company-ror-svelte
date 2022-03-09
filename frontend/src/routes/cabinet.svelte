@@ -89,7 +89,7 @@
 
     data.companyProfile = await getCompanyProfile($user, user)
 
-    if (companyProfileRequest && !companyProfileRequest.message) {
+    if (data.companyProfile && !data.companyProfile.message) {
       data.companyEvents = await getCompanyEvents($user, user, companyProfileRequest.company_name)
       data.companyReviews = await getCompanyReviews($user, user, companyProfileRequest.company_name)
     } else {
@@ -102,9 +102,7 @@
     
     res(data)
   }).then((data) => {
-    Object.keys(data).map((response) => {
-      !!data[response].message ? $tabsContent[response] = data[response].message : $tabsContent[response] = data[response]
-    })
+    tabsContent.set({...data})
   }).finally(() => {
     $loading = false
   })
