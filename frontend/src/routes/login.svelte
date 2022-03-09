@@ -4,7 +4,16 @@
   import { goto } from '$app/navigation'
   import { browser } from '$app/env'
   import { writable } from 'svelte/store'
-  import { message, user, setUserInStorage, getUserFromStorage, messageProcessor } from '$lib/components/Hooks/Custom.js'
+  import { 
+    message, 
+    user, 
+    setUserInStorage, 
+    getUserFromStorage, 
+    messageProcessor 
+  } from '$lib/components/Hooks/Custom.js'
+  import {
+    authenticateUser
+  } from '$lib/components/Utils/Requests.js'
 
   let title = "Авторизироваться"
   let loading = writable(false)
@@ -22,13 +31,7 @@
     try {
       $loading = true
       let data = new FormData(event.target)
-      let result = await fetch("/api/v1/auth/", {
-                              method: event.target.getAttribute("method"),
-                              cache: 'no-cache',
-                              mode: 'cors',
-                              body: data,
-                              }).then(response => response.json())
-
+      let result = await authenticateUser(data)
       if (result.error) {
         throw new Error(result.error)
       }
@@ -53,9 +56,9 @@
       $message.content = e.message
       $showForm = true
     } finally {
+      $loading = false
       let current = getUserFromStorage()
       current && user.set(current)
-      $loading = false
     }
   }
 </script>

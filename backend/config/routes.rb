@@ -13,6 +13,7 @@ Rails.application.routes.draw do
       put "user/:login", to: "users#update"
       delete "user/:login", to: "users#destroy"
       get 'avatar/:login', to: "users#avatar"
+      get 'sessions/:login', to: "users#sessions"
 
       get "companies", to: "company_profile#index"
       post "companies", to: "company_profile#new"

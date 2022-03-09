@@ -1,6 +1,6 @@
 class Api::V1::UsersController < ApplicationController
   before_action :set_paging, only: [:index] 
-  before_action :get_user, only: [:show, :update, :destroy, :avatar] 
+  before_action :get_user, only: [:show, :update, :destroy, :avatar, :sessions] 
   before_action :set_users_search_query, only: [:index] 
   before_action :get_tokens, only: [:update, :destroy] 
 
@@ -86,6 +86,22 @@ class Api::V1::UsersController < ApplicationController
       avatar_path = "public/system/users/avatars/original/#{@user.avatar_file_name}"
       escape_with!(:user, :avatar_not_exist, :not_found) unless File.exist?(avatar_path)
       send_file(avatar_path, type: @user.avatar_content_type, disposition: 'inline')
+    rescue ApiError => e
+      render_api_error(e)
+    end
+  end
+
+  def sessions
+    begin
+      check_auth!
+      escape_with!(:user, :not_exist, :ok) unless @user
+      check_access!(@user)
+      active_sessions = []
+      @user.tokens.as_json.map do |token|
+        active_sessions.push(AuthentificationTokenService.decode_token(token).first)
+      end
+      escape_with!(:user, :no_sessions, :ok) if active_sessions.empty? 
+      render json: active_sessions, status: :ok and return
     rescue ApiError => e
       render_api_error(e)
     end

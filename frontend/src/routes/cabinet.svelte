@@ -18,12 +18,31 @@
 
 <script>
   import Loader from "$lib/components/UI/Loader.svelte"
-  import Container from "$lib/components/chunks/Container.svelte"
   import Head from "$lib/components/Seo/Head.svelte"
   import { writable } from 'svelte/store'
   import { goto } from '$app/navigation'
   import { browser } from '$app/env'
-  import { prepareFormData, getUserFromStorage, setUserInStorage, removeUserFromStorage, messageProcessor, message, user, remembered, retryFetch } from '$lib/components/Hooks/Custom.js'
+  import { 
+    prepareFormData, 
+    getUserFromStorage, 
+    setUserInStorage, 
+    removeUserFromStorage, 
+    messageProcessor, 
+    message, 
+    user, 
+    remembered 
+  } from '$lib/components/Hooks/Custom.js'
+  import { 
+    getAvatarByUser, 
+    getUserByLogin, 
+    getCompanyProfile, 
+    getCompanyEvents,
+    getCompanyReviews,
+    getUserEvents,
+    getUserReviews,
+    updateUserProfile,
+    getUserSessions,
+  } from '$lib/components/Utils/Requests.js'
 
   let title = `Личный кабинет - ${$user.login}`
   let removeConfirmationWindowShow = writable(false)
@@ -32,11 +51,7 @@
   let isUser = writable(true)
   let isAvatar = writable(false)
 
-  user.subscribe(data => {
-    currentUserData = writable({
-      ...data
-    })
-  })
+  currentUserData = writable(getUserFromStorage())
 
   delete $currentUserData.access_token
   delete $currentUserData.address
@@ -58,113 +73,48 @@
     companyProfile: null,
     companyEvents: null,
     companyReviews: null,
+    userSessions: null,
   })
 
   browser && new Promise(async (res) => {
     let data = {}
 
-    let userProfileRequest = await fetch(
-      `/api/v1/user/${$user.login}/`,
-      {
-        method: "get",
-        cache: 'no-cache',
-        mode: 'cors',
-      }
-    ).then((data) => data.json())
-
+    let userProfileRequest = await getUserByLogin($user.login)
     !!userProfileRequest.message && isUser.set(false)
 
-    let userProfileAvatar = await fetch(
-      `/api/v1/avatar/${$user.login}?image=${$user.avatar_file_name}`,
-      {
-        method: "get",
-        cache: 'no-cache',
-        mode: 'cors',
-      }
-    )
-    userProfileAvatar.ok && isAvatar.set(true)
+    let userProfileAvatar = await getAvatarByUser($user)
+    !!!userProfileAvatar.message && isAvatar.set(true)
 
-    let companyProfileRequest = await retryFetch(
-      `/api/v1/${$user.login}/company/`,
-      {
-        method: "get",
-        cache: 'no-cache',
-        mode: 'cors',
-        headers: {
-          'Authorization': `Bearer ${$user.access_token}`,
-        }
-      },
-      user
-    )
+    let userProfileSessions = await getUserSessions($user, user)
+    data.userSessions = userProfileSessions
+
+    let companyProfileRequest = await getCompanyProfile($user, user)
     data.companyProfile = companyProfileRequest
 
     if (companyProfileRequest && !companyProfileRequest.message) {
-      let companyEventsRequest = await retryFetch(
-        `/api/v1/events/?company_name=${companyProfileRequest.company_name}`,
-        {
-          method: "get",
-          cache: 'no-cache',
-          mode: 'cors',
-          headers: {
-            'Authorization': `Bearer ${$user.access_token}`,
-          }
-        },
-        user
-      )
+      let companyEventsRequest = await getCompanyEvents($user, user, companyProfileRequest.company_name)
       data.companyEvents = companyEventsRequest
-      let companyReviewRequest = await retryFetch(
-        `/api/v1/reviews/?company_name=${companyProfileRequest.company_name}`,
-        {
-          method: "get",
-          cache: 'no-cache',
-          mode: 'cors',
-          headers: {
-            'Authorization': `Bearer ${$user.access_token}`,
-          }
-        },
-        user
-      )
+      let companyReviewRequest = await getCompanyReviews($user, user, companyProfileRequest.company_name)
       data.companyReviews = companyReviewRequest
     } else {
       data.companyEvents = {message: "В данный момент профиль компании ещё не заполнен, поэтому запрос событий не произведён"}
       data.companyReviews = {message: "В данный момент профиль компании ещё не заполнен, поэтому запрос отзывов не произведён"}
     }
     
-    let userEventsRequest = await retryFetch(
-      `/api/v1/reviews/?customer=${$user.login}`,
-      {
-        method: "get",
-        cache: 'no-cache',
-        mode: 'cors',
-        headers: {
-          'Authorization': `Bearer ${$user.access_token}`,
-        }
-      },
-      user
-    )
+    let userEventsRequest = await getUserEvents($user, user)
     data.userEvents = userEventsRequest
-    let userReviewsRequest = await retryFetch(
-      `/api/v1/events/?customer=${$user.login}`,
-      {
-        method: "get",
-        cache: 'no-cache',
-        mode: 'cors',
-        headers: {
-          'Authorization': `Bearer ${$user.access_token}`,
-        }
-      },
-      user
-    )
+    let userReviewsRequest = await getUserReviews($user, user)
     data.userReviews = userReviewsRequest
-
+    
     res(data)
   }).then((data) => {
     Object.keys(data).map((response) => {
-      data[response].message ? $tabsContent[response] = data[response].message : $tabsContent[response] = data[response]
+      !!data[response].message ? $tabsContent[response] = data[response].message : $tabsContent[response] = data[response]
     })
   }).finally(() => {
     $loading = false
   })
+  
 
   const handleTabSwitch = (event) => {
     if (browser) {
@@ -182,22 +132,9 @@
 
       try {
         $loading = true
-        let data = new FormData(event.target),
-          preparedData = prepareFormData(data, removeEmpty)
-
-          let result = await retryFetch(`/api/v1/user/${$user.login}/`,
-            {
-              method: event.target.getAttribute("method"),
-              cache: 'no-cache',
-              mode: 'cors',
-              headers: {
-                'Authorization': `Bearer ${$user.access_token}`,
-              },
-              body: preparedData
-            },
-            user
-          )
-          
+        let data = new FormData(event.target)
+        
+        let result = await updateUserProfile($user, user, prepareFormData(data, removeEmpty))
           message.set(messageProcessor(result))
           setUserInStorage({...$user, ...result.user}, remembered())
         } catch (e) {
@@ -221,7 +158,6 @@
           method: "delete", 
           mode: "cors"
         }).then((response) => {
-          console.log(response.json())
           response.ok && setTimeout(async () => { 
             removeUserFromStorage()
             user.set(null)
@@ -271,6 +207,7 @@
         <span on:click="{handleTabSwitch}" class="tab-contller active" data-tab="0">Профиль</span>
         <span on:click="{handleTabSwitch}" class="tab-contller" data-tab="2">События</span>
         <span on:click="{handleTabSwitch}" class="tab-contller" data-tab="1">Отзывы</span>
+        <span on:click="{handleTabSwitch}" class="tab-contller" data-tab="7">Активные сессии</span>
         {#if $user.role === "company"}
         <span on:click="{handleTabSwitch}" class="tab-contller" data-tab="4">Профиль компании</span>
         <span on:click="{handleTabSwitch}" class="tab-contller" data-tab="5">Cобытия компании</span>
@@ -334,20 +271,23 @@
       </div>
       {#if $user.role === "company"}
       <div class="tab" data-tab="4">
-        <Container content={$tabsContent.companyProfile} />
+        {$tabsContent.companyProfile}
       </div>
       <div class="tab" data-tab="5">
-        <Container content={$tabsContent.companyEvents} />
+        {$tabsContent.companyEvents}
       </div>
       <div class="tab" data-tab="6">
-        <Container content={$tabsContent.companyReviews} />
+        {$tabsContent.companyReviews}
       </div>
       {/if}
       <div class="tab" data-tab="1">
-        <Container content={$tabsContent.userEvents} />
+        {$tabsContent.userEvents}
       </div>
       <div class="tab" data-tab="2">
-        <Container content={$tabsContent.userReviews} />
+        {$tabsContent.userReviews}
+      </div>
+      <div class="tab" data-tab="7">
+        {$tabsContent.userSessions}
       </div>
       <div class="tab" data-tab="3">
         <h4>Удаление аккаунта</h4>

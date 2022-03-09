@@ -1,5 +1,5 @@
-  import { browser } from '$app/env'
-  import { writable } from 'svelte/store'
+import { browser } from '$app/env'
+import { writable } from 'svelte/store'
 
 export const prepareFormData = (data, object, defaultRemovedFields = null) => {
   Object.keys(object).map(key => {
@@ -31,15 +31,20 @@ export const getUserFromStorage = () => {
   }
 }
 
+export const user = writable(getUserFromStorage())
+
 export const removeUserFromStorage = () => {
-  if (browser) {
-    window?.localStorage.getItem("user") && window?.localStorage.removeItem("user")
-    window?.sessionStorage.removeItem("user")
+  switch (true) {
+    case !!window.localStorage.getItem("user"):
+      window?.localStorage.removeItem("user")
+    default:
+      window.sessionStorage.removeItem("user")
   }
+  return
 }
 
 export const setUserInStorage = (user, remember) => {
-  if (browser && user) {
+  if (user) {
     window?.sessionStorage.setItem("user", JSON.stringify(user))
     if (remember) {
       window?.localStorage.setItem("user", JSON.stringify(user))
@@ -50,7 +55,6 @@ export const setUserInStorage = (user, remember) => {
 }
 
 export const remembered = () => {
-  if (browser) 
   if (window?.localStorage.getItem("user")) {
     return true
   }
@@ -85,7 +89,9 @@ export const retryFetch = async (url, options, user) => {
       retry = true,
       result,
       usr,
-      opts = options
+      opts = {
+        ...options
+      }
 
   user.subscribe(value => {
     usr = value
@@ -105,7 +111,6 @@ export const retryFetch = async (url, options, user) => {
         if (updateSession) {
           retry = true
           user.set(getUserFromStorage())
-          console.log(usr.access_token)
           opts.access_token = usr.access_token
         } else {
           retry = false
@@ -128,5 +133,3 @@ export const retryFetch = async (url, options, user) => {
     }
   }
 }
-
-export const user = writable(getUserFromStorage())

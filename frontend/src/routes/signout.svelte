@@ -5,6 +5,7 @@
                                     method: "delete", 
                                     mode: "cors"
                                   })
+
       return {
         props: {
           logout: response.ok && (await response.json()),
@@ -26,7 +27,8 @@
   import Loader from "$lib/components/UI/Loader.svelte"
   import Head from "$lib/components/Seo/Head.svelte"
   import { writable } from 'svelte/store'
-  import { message, removeUserFromStorage, user } from '$lib/components/Hooks/Custom.js'
+  import { message, user, removeUserFromStorage } from '$lib/components/Hooks/Custom.js'
+  import { removeUser } from '$lib/components/Utils/Requests.js'
 
   let title = "Выход из системы"
   let loading = writable(true)
@@ -35,37 +37,35 @@
 
   $message.content = logout.message
   
-  browser && new Promise(async (res) => {
+  const pocessSignOut = async () => {
+    user.set(null)
+    console.log(removeUserFromStorage())
+
     let response
     if (assets === "remove") {
-      response = await retryFetch(`/api/v1/user/${$user.login}/`,
-            {
-              method: "delete",
-              cache: 'no-cache',
-              mode: 'cors',
-              headers: {
-                'Authorization': `Bearer ${$user.access_token}`,
-              }
-            },
-            user
-          )
+      response = await removeUser($user, user)
     } else {
       response = null
     }
-    user.set(false)
-    removeUserFromStorage()
-    $loading = false
-    res(response.json())
-  }).then((result) => {
-    if (result && result.error) {
+
+    if (response && response.error) {
       $message.type = "warning"
       $message.content = `${$message.content}, ${result.error}`
-    } else if (result) {
+    } else if (response) {
       $message.content = `${$message.content}, ${result.message}`
     }
-  }).finally(
-    setTimeout(async () => { goto("/") }, 1e3)
-  )
+  }
+
+  if (browser) {
+    $loading = false
+    pocessSignOut()
+    new Promise(async (res) => {
+      setTimeout(async () => { 
+        res()
+        goto("/")
+      }, 1e3)
+    })
+  }  
 </script>
 
 <Head {title} metaDescription={null} metaKeywords={null} metaRobots={"noindex, nofollow"} />
