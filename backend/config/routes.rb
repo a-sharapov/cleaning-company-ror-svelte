@@ -1,7 +1,6 @@
 Rails.application.routes.draw do
   namespace :api do
     get '/', to: "v1/api#index"
-    get '/avatar/:login', to: "v1/api#avatar"
     get 'v1', to: "v1/api#endpoints"
 
     namespace :v1 do
@@ -13,6 +12,7 @@ Rails.application.routes.draw do
       get "user/:login", to: "users#show"
       put "user/:login", to: "users#update"
       delete "user/:login", to: "users#destroy"
+      get 'avatar/:login', to: "users#avatar"
 
       get "companies", to: "company_profile#index"
       post "companies", to: "company_profile#new"

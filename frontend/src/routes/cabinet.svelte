@@ -23,13 +23,14 @@
   import { writable } from 'svelte/store'
   import { goto } from '$app/navigation'
   import { browser } from '$app/env'
-  import { prepareFormData, getUserFromStorage, setUserInStorage, messageProcessor, message, user, remembered, retryFetch } from '$lib/components/Hooks/Custom.js'
+  import { prepareFormData, getUserFromStorage, setUserInStorage, removeUserFromStorage, messageProcessor, message, user, remembered, retryFetch } from '$lib/components/Hooks/Custom.js'
 
   let title = `Личный кабинет - ${$user.login}`
   let removeConfirmationWindowShow = writable(false)
   let loading = writable(true)
   let currentUserData
-  let retry = writable(true)
+  let isUser = writable(true)
+
 
   user.subscribe(data => {
     currentUserData = writable({
@@ -61,6 +62,17 @@
 
   browser && new Promise(async (res) => {
     let data = {}
+
+    let userProfileRequest = await fetch(
+      `/api/v1/user/${$user.login}/`,
+      {
+        method: "get",
+        cache: 'no-cache',
+        mode: 'cors',
+      }
+    ).then((data) => data.json())
+
+    !!userProfileRequest.message && isUser.set(false)
 
     let companyProfileRequest = await retryFetch(
       `/api/v1/${$user.login}/company/`,
@@ -184,13 +196,30 @@
         } finally {
           user.set(getUserFromStorage())
           $loading = false
-          $retry = true
         }
   }
 
   const handleOnProfileRemove = () => {
     removeConfirmationWindowShow.set(!$removeConfirmationWindowShow)
   }
+
+  isUser.subscribe(async (current) => {
+    if (current === false) {
+      let response = await fetch(
+        "/api/v1/auth/", 
+        {
+          method: "delete", 
+          mode: "cors"
+        }).then((response) => {
+          console.log(response.json())
+          response.ok && setTimeout(async () => { 
+            removeUserFromStorage()
+            user.set(null)
+            goto("/") 
+          }, 1e3)
+        })
+    }
+  })
 
   if (!$user && browser) {
     goto("/")
@@ -217,7 +246,7 @@
     <aside id="cabinet-left">
       <span class="user-avatar">
         {#if $user.avatar_file_name}
-          <img src="/api/avatar/{$user.login}?image={$user.avatar_file_name}" alt="{$user.login}" height="100%" />
+          <img src="/api/v1/avatar/{$user.login}?image={$user.avatar_file_name}" alt="{$user.login}" height="100%" />
         {:else}
           <span>{$user.login.charAt(0).toUpperCase()}</span>
         {/if}

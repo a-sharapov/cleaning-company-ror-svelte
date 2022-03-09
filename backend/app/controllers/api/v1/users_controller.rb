@@ -1,6 +1,6 @@
 class Api::V1::UsersController < ApplicationController
   before_action :set_paging, only: [:index] 
-  before_action :get_user, only: [:show, :update, :destroy] 
+  before_action :get_user, only: [:show, :update, :destroy, :avatar] 
   before_action :set_users_search_query, only: [:index] 
   before_action :get_tokens, only: [:update, :destroy] 
 
@@ -74,6 +74,16 @@ class Api::V1::UsersController < ApplicationController
       escape_with!(:user, :not_remove, :ok) unless @user.destroy
       
       render json: {message: ApiError::MESSAGES[:user][:deleted]}, status: :ok and return
+    rescue ApiError => e
+      render_api_error(e)
+    end
+  end
+
+  def avatar
+    begin
+      escape_with!(:user, :not_exist, :ok) unless @user
+      escape_with!(:user, :avatar_not_exist, :ok) unless @user.avatar_file_name
+      send_file "public/system/users/avatars/original/#{@user.avatar_file_name}", type: @user.avatar_content_type, disposition: 'inline'
     rescue ApiError => e
       render_api_error(e)
     end

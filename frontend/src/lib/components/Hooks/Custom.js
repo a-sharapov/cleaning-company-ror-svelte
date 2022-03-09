@@ -108,12 +108,18 @@ export const retryFetch = async (url, options, user) => {
           opts.access_token = resign.user.access_token
         } else {
           retry = false
-          throw new Error("Попытка авторизации завершилась неудачей, проверьте настройки безопасности системы и браузера")
+          return {
+            message: "Попытка создания локальной сессии завершилась неудачей",
+            assets: "Проверьте настройки безопасности системы и браузера",
+          }
         }
       }
       if (++count == maxTries) {
         retry = false
-        throw new Error("Внимание! Попытка обновления сессии закончиалсь неудачей")
+        return {
+          message: "Внимание! Попытка обновления сессии закончиалсь неудачей",
+          assets: "Попробуйте запросить данные снова или перезагрузить страницу",
+        }
       }
     } else {
       retry = false

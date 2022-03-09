@@ -10,12 +10,6 @@ class Api::V1::ApiController < ApplicationController
     render :template => "api-hello", :locals => {:content => API_MESSAGES}
   end
 
-  def avatar
-    user_login = params[:login]
-    user = User.find_by(login: user_login)
-    send_file "public/system/users/avatars/original/#{user.avatar_file_name}", type: user.avatar_content_type, disposition: 'inline'
-  end
-
   def endpoints 
     message = {
       "name": API_MESSAGES[:service_name],
