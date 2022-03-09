@@ -58,33 +58,68 @@ export const remembered = () => {
 }
 
 export const messageProcessor = (result) => {
-  let assets = "",
+  let assets,
       message = {
         type: "info",
-        content: null,
+        content: `<p>${result.message}</p>`,
       }
 
-  if (result.error) {
-    message.content = result.error
-    message.type = "error"
-    return message
-  }
-  if (result.assets) {
-    if (result.assets === "retrieve") {
-      message.content = result.content
-      message.type = "retrieve"
-      return message
-    } else {
+  switch (true) {
+    case result.error:
+      message.content = result.error
+      message.type = "error"
+      break
+    case result.assets:
       Array.isArray(result.assets) ? assets = `<ul><li>${result.assets.join("</li><li>")}</li></ul>` : assets = `<p>${result.assets}</p>`
       message.type = "error"
       message.content = `<p>${result.message}:</p>` + assets
-    }
-  } else {
-    message.type = "info"
-    message.content = `<p>${result.message}</p>`
+      break
   }
 
   return message
+}
+
+export const retryFetch = async (url, options, user) => {
+  let count = 0,
+      maxTries = 3,
+      retry = true,
+      result,
+      usr,
+      opts = options
+
+  user.subscribe(value => {
+    usr = value
+  })
+
+  while (retry) {
+    result = await fetch(url, opts).then(response => response.json())
+
+    if (result && result.assets === "retrieve") {
+      let resign = await fetch("/api/v1/auth/", {
+        method: "put",
+        cache: 'no-cache',
+        mode: 'cors',
+      }).then(response => response.json())
+      if (resign.user) {
+        let updateSession = setUserInStorage({...usr, ...resign.user}, remembered())
+        if (updateSession) {
+          retry = true
+          user.set(getUserFromStorage())
+          opts.access_token = resign.user.access_token
+        } else {
+          retry = false
+          throw new Error("Попытка авторизации завершилась неудачей, проверьте настройки безопасности системы и браузера")
+        }
+      }
+      if (++count == maxTries) {
+        retry = false
+        throw new Error("Внимание! Попытка обновления сессии закончиалсь неудачей")
+      }
+    } else {
+      retry = false
+      return result
+    }
+  }
 }
 
 export const user = writable(getUserFromStorage())

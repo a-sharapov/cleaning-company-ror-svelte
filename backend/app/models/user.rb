@@ -74,6 +74,7 @@ class User
 
   def prepare_data
     self.email = email.downcase unless email.blank?
+    self.phone = phone.gsub(/[+-]/, '') unless phone.blank?
     self.blocked_until = Time.now
   end
 end

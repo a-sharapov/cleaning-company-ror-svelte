@@ -38,14 +38,17 @@
   browser && new Promise(async (res) => {
     let response
     if (assets === "remove") {
-      response = await fetch(`/api/v1/user/${$user.login}/`, {
-          method: "delete",
-          cache: 'no-cache',
-          mode: 'cors',
-          headers: {
-            'Authorization': `Bearer ${$user.access_token}`,
-          }
-        })
+      response = await retryFetch(`/api/v1/user/${$user.login}/`,
+            {
+              method: "delete",
+              cache: 'no-cache',
+              mode: 'cors',
+              headers: {
+                'Authorization': `Bearer ${$user.access_token}`,
+              }
+            },
+            user
+          )
     } else {
       response = null
     }
@@ -54,10 +57,10 @@
     $loading = false
     res(response.json())
   }).then((result) => {
-    if (result.error) {
+    if (result && result.error) {
       $message.type = "warning"
       $message.content = `${$message.content}, ${result.error}`
-    } else {
+    } else if (result) {
       $message.content = `${$message.content}, ${result.message}`
     }
   }).finally(

@@ -33,6 +33,16 @@ class Api::V1::CompanyProfileController < ApplicationController
     end
   end
 
+  def show_to_user
+    begin
+      user = prepare_user!
+      escape_with!(:profiles, :not_exist, :ok) unless profile = CompanyProfile.find_by(user_id: user.id)
+      render_data(profile)
+    rescue ApiError => e
+      render_api_error(e)
+    end
+  end
+
   def new
     begin
       user = prepare_user!

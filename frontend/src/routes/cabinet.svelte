@@ -18,17 +18,25 @@
 
 <script>
   import Loader from "$lib/components/UI/Loader.svelte"
+  import Placeholder from "$lib/components/chunks/Placeholder.svelte"
   import Head from "$lib/components/Seo/Head.svelte"
   import { writable } from 'svelte/store'
   import { goto } from '$app/navigation'
   import { browser } from '$app/env'
-  import { prepareFormData, getUserFromStorage, setUserInStorage, messageProcessor, message, user, remembered } from '$lib/components/Hooks/Custom.js'
+  import { prepareFormData, getUserFromStorage, setUserInStorage, messageProcessor, message, user, remembered, retryFetch } from '$lib/components/Hooks/Custom.js'
 
   let title = `Личный кабинет - ${$user.login}`
   let removeConfirmationWindowShow = writable(false)
   let loading = writable(true)
-  let currentUserData = writable({...$user})
+  let currentUserData
   let retry = writable(true)
+
+  user.subscribe(data => {
+    currentUserData = writable({
+      ...data
+    })
+  })
+
   delete $currentUserData.access_token
   delete $currentUserData.address
   let currentUserAddress = writable({
@@ -43,9 +51,98 @@
 
   $message.content = null
 
-  if (browser) {
+  let tabsContent = writable({
+    userReviews: null,
+    userEvents: null,
+    companyProfile: null,
+    companyEvents: null,
+    companyReviews: null,
+  })
+
+  browser && new Promise(async (res) => {
+    let data = {}
+
+    let companyProfileRequest = await retryFetch(
+      `/api/v1/${$user.login}/company/`,
+      {
+        method: "get",
+        cache: 'no-cache',
+        mode: 'cors',
+        headers: {
+          'Authorization': `Bearer ${$user.access_token}`,
+        }
+      },
+      user
+    )
+    data.companyProfile = companyProfileRequest
+
+    if (companyProfileRequest && !companyProfileRequest.message) {
+      let companyEventsRequest = await retryFetch(
+        `/api/v1/events/?company_name=${companyProfileRequest.company_name}`,
+        {
+          method: "get",
+          cache: 'no-cache',
+          mode: 'cors',
+          headers: {
+            'Authorization': `Bearer ${$user.access_token}`,
+          }
+        },
+        user
+      )
+      data.companyEvents = companyEventsRequest
+      let companyReviewRequest = await retryFetch(
+        `/api/v1/reviews/?company_name=${companyProfileRequest.company_name}`,
+        {
+          method: "get",
+          cache: 'no-cache',
+          mode: 'cors',
+          headers: {
+            'Authorization': `Bearer ${$user.access_token}`,
+          }
+        },
+        user
+      )
+      data.companyReviews = companyReviewRequest
+    } else {
+      data.companyEvents = {message: "В данный момент профиль компании ещё не заполнен, поэтому запрос событий не произведён"}
+      data.companyReviews = {message: "В данный момент профиль компании ещё не заполнен, поэтому запрос отзывов не произведён"}
+    }
+    
+    let userEventsRequest = await retryFetch(
+      `/api/v1/reviews/?customer=${$user.login}`,
+      {
+        method: "get",
+        cache: 'no-cache',
+        mode: 'cors',
+        headers: {
+          'Authorization': `Bearer ${$user.access_token}`,
+        }
+      },
+      user
+    )
+    data.userEvents = userEventsRequest
+    let userReviewsRequest = await retryFetch(
+      `/api/v1/events/?customer=${$user.login}`,
+      {
+        method: "get",
+        cache: 'no-cache',
+        mode: 'cors',
+        headers: {
+          'Authorization': `Bearer ${$user.access_token}`,
+        }
+      },
+      user
+    )
+    data.userReviews = userReviewsRequest
+
+    res(data)
+  }).then((data) => {
+    Object.keys(data).map((response) => {
+      data[response].message ? $tabsContent[response] = data[response].message : $tabsContent[response] = data[response]
+    })
+  }).finally(() => {
     $loading = false
-  }
+  })
 
   const handleTabSwitch = (event) => {
     if (browser) {
@@ -59,16 +156,15 @@
 
   const handleProfileUpdate = async (event) => {
     event.preventDefault()
-    let count = 0
-    let maxTries = 3
     let removeEmpty = {password: "", avatar: "", phone: "", description: ""}
 
       try {
         $loading = true
         let data = new FormData(event.target),
           preparedData = prepareFormData(data, removeEmpty)
-          while ($retry) {
-            let result = await fetch(`/api/v1/user/${$user.login}/`, {
+
+          let result = await retryFetch(`/api/v1/user/${$user.login}/`,
+            {
               method: event.target.getAttribute("method"),
               cache: 'no-cache',
               mode: 'cors',
@@ -76,34 +172,12 @@
                 'Authorization': `Bearer ${$user.access_token}`,
               },
               body: preparedData
-            }).then(response => response.json())
-            message.set(messageProcessor(result))
-
-            if ($message.type === "retrieve") {
-              let result = await fetch("/api/v1/auth/", {
-                method: "put",
-                cache: 'no-cache',
-                mode: 'cors',
-              }).then(response => response.json())
-              if (result.user) {
-                let updateSession = setUserInStorage({...$user, ...result.user}, remembered())
-                if (updateSession) {
-                  $retry = true
-                  user.set(getUserFromStorage())
-                } else {
-                  throw new Error("Попытка авторизации завершилась неудачей, проверьте настройки безопасности системы и браузера")
-                }
-              }
-
-              if (++count == maxTries) {
-                $retry = false
-                throw new Error("Внимание! Попытка обновления сессии закончиалсь неудачей")
-              }
-            } else {
-              $retry = false
-              setUserInStorage({...$user, ...result.user}, remembered())
-            }
-          }
+            },
+            user
+          )
+          
+          message.set(messageProcessor(result))
+          setUserInStorage({...$user, ...result.user}, remembered())
         } catch (e) {
           $message.type = "error"
           $message.content = e.message
@@ -153,21 +227,24 @@
         {#if $user.confirmed}<span class="confirmed" title="Аккаунт подтвержен">&#10003;</span>{/if}
         {#if $user.banned}<span class="banned" title="Аккаунт заблокирован">&#10008;</span>{/if}
       </h3>
+      <hr />
+      <nav data-role="tab-controll-menu">
+        <span on:click="{handleTabSwitch}" class="tab-contller active" data-tab="0">Профиль</span>
+        <span on:click="{handleTabSwitch}" class="tab-contller" data-tab="2">События</span>
+        <span on:click="{handleTabSwitch}" class="tab-contller" data-tab="1">Отзывы</span>
+        {#if $user.role === "company"}
+        <span on:click="{handleTabSwitch}" class="tab-contller" data-tab="4">Профиль компании</span>
+        <span on:click="{handleTabSwitch}" class="tab-contller" data-tab="5">Cобытия компании</span>
+        <span on:click="{handleTabSwitch}" class="tab-contller" data-tab="6">Отзывы о компании</span>
+        {/if}
+        <span on:click="{handleTabSwitch}" class="tab-contller" data-tab="3">Удаление</span>
+      </nav>
+      <hr />
       <p>Вы создали аккаунт: <br /><strong>{new Date($user.created_at).toLocaleDateString("ru-RU")} в {new Date($user.created_at).toLocaleTimeString("ru-RU")}</strong></p>
       {#if $user.created_at !== $user.updated_at}
       <p>И последний раз обновили данные: <br /><strong>{new Date($user.updated_at).toLocaleDateString("ru-RU")} в {new Date($user.updated_at).toLocaleTimeString("ru-RU")}</strong></p>
       {/if}
       {#if $user.banned}<p>Заблокирован до: <br /><strong>{new Date($user.blocked_until).toLocaleDateString("ru-RU")}, {new Date($user.blocked_until).toLocaleTimeString("ru-RU")}</strong></p>{/if}
-      <hr />
-      <nav data-role="tab-controll-menu">
-        <span on:click="{handleTabSwitch}" class="tab-contller active" data-tab="0">Профиль</span>
-        {#if $user.role === "company"}
-        <span on:click="{handleTabSwitch}" class="tab-contller" data-tab="1">Профиль компании</span>
-        {/if}
-        <span on:click="{handleTabSwitch}" class="tab-contller" data-tab="2">События</span>
-        <span on:click="{handleTabSwitch}" class="tab-contller" data-tab="3">Отзывы</span>
-        <span on:click="{handleTabSwitch}" class="tab-contller" data-tab="4">Удаление</span>
-      </nav>
       </aside>
     <aside id="cabinet-tabs">
       {#if $message?.content}
@@ -181,7 +258,7 @@
           </label><label data-width="half">
             <input type="text" name="email" bind:value={$currentUserData.email} placeholder="Адрес ээлектронной почты"/>
           </label><label data-width="half">
-            <input type="text" name="phone" bind:value={$currentUserData.phone} placeholder="Контактный телефон"/>
+            <input type="text" name="phone" bind:value={$currentUserData.phone} placeholder="Контактный телефон (без +)"/>
           </label><label data-width="half">
             <input type="file" name="avatar" placeholder="Аватар" />
           </label>
@@ -217,17 +294,23 @@
         </form>
       </div>
       {#if $user.role === "company"}
-      <div class="tab" data-tab="1">
-        Профиль компании
+      <div class="tab" data-tab="4">
+        <Placeholder content={$tabsContent.companyProfile} />
+      </div>
+      <div class="tab" data-tab="5">
+        <Placeholder content={$tabsContent.companyEvents} />
+      </div>
+      <div class="tab" data-tab="6">
+        <Placeholder content={$tabsContent.companyReviews} />
       </div>
       {/if}
+      <div class="tab" data-tab="1">
+        <Placeholder content={$tabsContent.userEvents} />
+      </div>
       <div class="tab" data-tab="2">
-        События
+        <Placeholder content={$tabsContent.userReviews} />
       </div>
       <div class="tab" data-tab="3">
-        Отзывы
-      </div>
-      <div class="tab" data-tab="4">
         <h4>Удаление аккаунта</h4>
         <p>Вы можете удалить ваш аккаунт в любое время или прямо сейчас. Но, если вы вдруг поменяете своё мнение, вы не сможете его восстановить.</p>
         <p>&nbsp;</p>
