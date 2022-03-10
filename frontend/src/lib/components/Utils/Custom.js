@@ -1,16 +1,16 @@
 export const compose = (...fns) => fns.reduceRight((prevFn, nextFn) => (...args) => nextFn(prevFn(...args)), value => value)
 
 export const memoize = (fn) => {
-  let cache = {};
+  let cache = {}
   return (...args) => {
-    let n = args[0];
+    let n = args[0]
     if (n in cache) {
-      return cache[n];
+      return cache[n]
     }
     else {
-      let result = fn(n);
-      cache[n] = result;
-      return result;
+      let result = fn(n)
+      cache[n] = result
+      return result
     }
   }
 }
@@ -23,7 +23,7 @@ export const debounce = (fn, wait, immediate) => {
     const args = arguments
 
     const later = function() {
-      timeout = null;
+      timeout = null
       if (!immediate) fn.apply(context, args)
     }
 
@@ -67,4 +67,12 @@ export const throttle = (fn, wait, options) => {
     }
     return result
   }
+}
+
+export const parseUserAgent = (agent) => {
+  let parts = agent.split(/\s*[;)(]\s*/)
+  return ({
+    OS: parts[1],
+    browser: parts[parts.length - 1].split(" ")[0].replace("/", " ")
+  })
 }

@@ -39,7 +39,6 @@
   
   const pocessSignOut = async () => {
     user.set(null)
-    console.log(removeUserFromStorage())
 
     let response
     if (assets === "remove") {

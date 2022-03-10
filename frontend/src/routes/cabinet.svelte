@@ -4,7 +4,7 @@
         const countries = await fetch("/api/v1/assets/countries/", {mode: "cors"})
         return {
           props: {
-            countryList: countries.ok && (await countries.json()),
+            countries: countries.ok && (await countries.json()),
           }
         }
     } catch (e) {
@@ -19,18 +19,15 @@
 <script>
   import Loader from "$lib/components/UI/Loader.svelte"
   import Head from "$lib/components/Seo/Head.svelte"
+  import UserProfileForm from "$lib/components/Forms/UserProfileForm.svelte"
+  import UserSessionsControll from "$lib/components/Forms/UserSessionsControll.svelte"
   import { writable } from 'svelte/store'
   import { goto } from '$app/navigation'
   import { browser } from '$app/env'
   import { 
-    prepareFormData, 
-    getUserFromStorage, 
-    setUserInStorage, 
     removeUserFromStorage, 
-    messageProcessor, 
     message, 
     user, 
-    remembered 
   } from '$lib/components/Hooks/Custom.js'
   import { 
     getAvatarByUser, 
@@ -40,69 +37,53 @@
     getCompanyReviews,
     getUserEvents,
     getUserReviews,
-    updateUserProfile,
     getUserSessions,
   } from '$lib/components/Utils/Requests.js'
 
   let title = `Личный кабинет - ${$user.login}`
   let removeConfirmationWindowShow = writable(false)
   let loading = writable(true)
-  let currentUserData
   let isUser = writable(true)
   let isAvatar = writable(false)
 
-  currentUserData = writable(getUserFromStorage())
-
-  delete $currentUserData.access_token
-  delete $currentUserData.address
-  let currentUserAddress = writable({
-      zip: "",
-      country: "unselected",
-      city: "",
-      state: "",
-      street: "",
-      ...$user.address
-  })
-  export let countryList
+  export let countries
 
   $message.content = null
 
-  let tabsContent = writable({
-    userReviews: null,
-    userEvents: null,
-    companyProfile: null,
-    companyEvents: null,
-    companyReviews: null,
-    userSessions: null,
-  })
+  let userReviews,
+      userEvents,
+      companyProfile,
+      companyEvents,
+      companyReviews,
+      userSessions
 
   browser && new Promise(async (res) => {
-    let data = {}
+    //let data = {}
 
     let userProfileRequest = await getUserByLogin($user.login)
     !!userProfileRequest.message && isUser.set(false)
 
     let userProfileAvatar = await getAvatarByUser($user)
-    !!!userProfileAvatar.message && isAvatar.set(true)
+    userProfileAvatar.ok && isAvatar.set(true)
 
-    data.userSessions = await getUserSessions($user, user)
+    userSessions = await getUserSessions($user, user)
 
-    data.companyProfile = await getCompanyProfile($user, user)
+    companyProfile = await getCompanyProfile($user, user)
 
-    if (data.companyProfile && !data.companyProfile.message) {
-      data.companyEvents = await getCompanyEvents($user, user, companyProfileRequest.company_name)
-      data.companyReviews = await getCompanyReviews($user, user, companyProfileRequest.company_name)
+    if (companyProfile && !companyProfile.message) {
+      companyEvents = await getCompanyEvents($user, user, companyProfileRequest.company_name)
+      companyReviews = await getCompanyReviews($user, user, companyProfileRequest.company_name)
     } else {
-      data.companyEvents = {message: "В данный момент профиль компании ещё не заполнен, поэтому запрос событий не произведён"}
-      data.companyReviews = {message: "В данный момент профиль компании ещё не заполнен, поэтому запрос отзывов не произведён"}
+      companyEvents = {message: "В данный момент профиль компании ещё не заполнен, поэтому запрос событий не произведён"}
+      companyReviews = {message: "В данный момент профиль компании ещё не заполнен, поэтому запрос отзывов не произведён"}
     }
     
-    data.userEvents = await getUserEvents($user, user)
-    data.userReviews = await getUserReviews($user, user)
+    userEvents = await getUserEvents($user, user)
+    userReviews = await getUserReviews($user, user)
     
-    res(data)
+    res()
   }).then((data) => {
-    tabsContent.set({...data})
+    //tabsContent.set({...data})
   }).finally(() => {
     $loading = false
   })
@@ -116,26 +97,6 @@
       let mustActive = document.querySelectorAll(`.tab[data-tab="${index}"], .tab-contller[data-tab="${index}"]`)
       mustActive.forEach(element => element.classList.add("active"))
     }
-  }
-
-  const handleProfileUpdate = async (event) => {
-    event.preventDefault()
-    let removeEmpty = {password: "", avatar: "", phone: "", description: ""}
-
-      try {
-        $loading = true
-        let data = new FormData(event.target)
-        
-        let result = await updateUserProfile($user, user, prepareFormData(data, removeEmpty))
-          message.set(messageProcessor(result))
-          setUserInStorage({...$user, ...result.user}, remembered())
-        } catch (e) {
-          $message.type = "error"
-          $message.content = e.message
-        } finally {
-          user.set(getUserFromStorage())
-          $loading = false
-        }
   }
 
   const handleOnProfileRemove = () => {
@@ -221,66 +182,29 @@
       {/if}
       <div class="tab active" data-tab="0">
         <h3>Данные профиля:</h3>
-        <form action="/cabinet" method="put" enctype="multipart/form-data" on:submit={handleProfileUpdate}>
-          <label data-width="half">
-            <input type="text" name="login" bind:value={$currentUserData.login} required placeholder="Имя пользователя"/>
-          </label><label data-width="half">
-            <input type="text" name="email" bind:value={$currentUserData.email} placeholder="Адрес ээлектронной почты"/>
-          </label><label data-width="half">
-            <input type="text" name="phone" bind:value={$currentUserData.phone} placeholder="Контактный телефон (без +)"/>
-          </label><label data-width="half">
-            <input type="file" name="avatar" placeholder="Аватар" />
-          </label>
-          <hr />
-          <label data-width="full">
-            <textarea name="description" rows="3" bind:value={$currentUserData.description} placeholder="Расскажите о себе"></textarea>
-          </label>
-          <hr />
-          <h5>Адрес:</h5>
-          <label data-width="full">
-            <select name="address[country]" bind:value={$currentUserAddress.country}>
-              <option disabled value="unselected">Выберите свою страну из списка</option>
-              {#if countryList?.content?.elements}
-              {#each countryList?.content?.elements as coutry }
-              <option value="{coutry}">{coutry}</option>
-              {/each}
-              {/if}
-            </select>
-          </label>
-          <label data-width="half">
-            <input type="text" name="address[zip]" bind:value={$currentUserAddress.zip} placeholder="Индекс" />
-          </label><label data-width="half">
-            <input type="text" name="address[city]" bind:value={$currentUserAddress.city} placeholder="Город" />
-          </label><label data-width="half">
-            <input type="text" name="address[state]" bind:value={$currentUserAddress.state} placeholder="Область" />
-          </label><label data-width="half">
-            <input type="text" name="address[street]" bind:value={$currentUserAddress.street} placeholder="Улица, дом" />
-          </label>
-          <hr />
-          <label data-width="full">
-            <button type="submit">Обновить данные</button>
-          </label>
-        </form>
+        <UserProfileForm {countries}/>
       </div>
       {#if $user.role === "company"}
       <div class="tab" data-tab="4">
-        {$tabsContent.companyProfile}
+        {companyProfile}
       </div>
       <div class="tab" data-tab="5">
-        {$tabsContent.companyEvents}
+        {companyEvents}
       </div>
       <div class="tab" data-tab="6">
-        {$tabsContent.companyReviews}
+        {companyReviews}
       </div>
       {/if}
       <div class="tab" data-tab="1">
-        {$tabsContent.userEvents}
+        {userEvents}
       </div>
       <div class="tab" data-tab="2">
-        {$tabsContent.userReviews}
+        {userReviews}
       </div>
       <div class="tab" data-tab="7">
-        {$tabsContent.userSessions}
+        <UserSessionsControll data="{userSessions}">
+          <h3>Активные сессии:</h3>
+        </UserSessionsControll>
       </div>
       <div class="tab" data-tab="3">
         <h4>Удаление аккаунта</h4>

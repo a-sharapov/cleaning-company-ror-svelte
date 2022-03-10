@@ -81,8 +81,8 @@ class Api::V1::UsersController < ApplicationController
 
   def avatar
     begin
-      escape_with!(:user, :not_exist, :ok) unless @user
-      escape_with!(:user, :avatar_not_found, :ok) unless @user.avatar_file_name
+      escape_with!(:user, :not_exist, :not_found) unless @user
+      escape_with!(:user, :avatar_not_found, :not_found) unless @user.avatar_file_name
       avatar_path = "public/system/users/avatars/original/#{@user.avatar_file_name}"
       escape_with!(:user, :avatar_not_exist, :not_found) unless File.exist?(avatar_path)
       send_file(avatar_path, type: @user.avatar_content_type, disposition: 'inline')
@@ -98,7 +98,8 @@ class Api::V1::UsersController < ApplicationController
       check_access!(@user)
       active_sessions = []
       @user.tokens.as_json.map do |token|
-        active_sessions.push(AuthentificationTokenService.decode_token(token).first)
+        token_id = token.split('.')[1]
+        active_sessions.push(AuthentificationTokenService.decode_token(token).first.merge({id: token_id}))
       end
       escape_with!(:user, :no_sessions, :ok) if active_sessions.empty? 
       render json: active_sessions, status: :ok and return
