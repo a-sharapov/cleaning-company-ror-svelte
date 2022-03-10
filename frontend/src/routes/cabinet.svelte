@@ -20,7 +20,8 @@
   import Loader from "$lib/components/UI/Loader.svelte"
   import Head from "$lib/components/Seo/Head.svelte"
   import UserProfileForm from "$lib/components/Forms/UserProfileForm.svelte"
-  import UserSessionsList from "$lib/components/Chunks/UserSessionsList.svelte"
+  import UserSessions from "$lib/components/Chunks/UserSessions.svelte"
+  import UserEvents from "$lib/components/Chunks/UserEvents.svelte"
   import { writable } from 'svelte/store'
   import { goto } from '$app/navigation'
   import { browser } from '$app/env'
@@ -63,6 +64,7 @@
     let userProfileAvatar = await getAvatarByUser($user)
     userProfileAvatar.ok && isAvatar.set(true)
 
+    // move to chunks
     companyProfile = await getCompanyProfile($user, user)
 
     if (companyProfile && !companyProfile.message) {
@@ -189,15 +191,17 @@
       </div>
       {/if}
       <div class="tab" data-tab="1">
-        {userEvents}
-      </div>
-      <div class="tab" data-tab="2">
         {userReviews}
       </div>
+      <div class="tab" data-tab="2">
+        <UserEvents>
+          <h3>События:</h3>
+        </UserEvents>
+      </div>
       <div class="tab" data-tab="7">
-        <UserSessionsList>
+        <UserSessions>
           <h3>Активные сессии:</h3>
-        </UserSessionsList>
+        </UserSessions>
       </div>
       <div class="tab" data-tab="3">
         <h4>Удаление аккаунта</h4>
