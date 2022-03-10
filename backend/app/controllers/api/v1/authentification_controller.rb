@@ -118,6 +118,19 @@ class Api::V1::AuthentificationController < ApplicationController
     end
   end
 
+  def remove
+    begin
+      token_part = params[:id]
+      user = prepare_user!
+      escape_with!(:user, :not_exist, :ok) unless user
+      escape_with!(:token, :missmatching, :ok) unless !user.tokens.empty? && user.tokens.filter{ |t| t.include?(token_part) }.length > 0
+      escape_with!(:auth, :not_logout, :ok) unless user.set(tokens: user.tokens.as_json.filter{ |t| t.exclude?(token_part) })
+      render json: {message: "Сессия была удалена", active_sessions: user.tokens.as_json}, status: :ok
+    rescue ApiError => e
+      render_api_error(e)
+    end
+  end
+
   private
   def set_metrics
     if request.remote_ip.nil? && request.user_agent.nil?

@@ -137,3 +137,10 @@ export const signOutUser = async(user, subscriber) => {
   })
   return output
 }
+
+export const removeSession = async (token_id, user, subscriber) => {
+  let output = await retryApiRequest(`session/${token_id}`, user, subscriber, {
+    method: "delete",
+  })
+  return output
+}

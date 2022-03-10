@@ -37,6 +37,7 @@ Rails.application.routes.draw do
       put "auth", to: "authentification#refresh"
       put "restore/:code", to: "authentification#unlock"
       get "confirm", to: "authentification#confirm"
+      delete "session/:id", to: "authentification#remove"
 
       get "manager", to: "management#index"
       get "manager/add/:login", to: "management#add"

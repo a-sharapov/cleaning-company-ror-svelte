@@ -20,7 +20,7 @@
   import Loader from "$lib/components/UI/Loader.svelte"
   import Head from "$lib/components/Seo/Head.svelte"
   import UserProfileForm from "$lib/components/Forms/UserProfileForm.svelte"
-  import UserSessionsControll from "$lib/components/Forms/UserSessionsControll.svelte"
+  import UserSessionsList from "$lib/components/Chunks/UserSessionsList.svelte"
   import { writable } from 'svelte/store'
   import { goto } from '$app/navigation'
   import { browser } from '$app/env'
@@ -37,7 +37,6 @@
     getCompanyReviews,
     getUserEvents,
     getUserReviews,
-    getUserSessions,
   } from '$lib/components/Utils/Requests.js'
 
   let title = `Личный кабинет - ${$user.login}`
@@ -54,19 +53,15 @@
       userEvents,
       companyProfile,
       companyEvents,
-      companyReviews,
-      userSessions
+      companyReviews
 
   browser && new Promise(async (res) => {
-    //let data = {}
 
     let userProfileRequest = await getUserByLogin($user.login)
     !!userProfileRequest.message && isUser.set(false)
 
     let userProfileAvatar = await getAvatarByUser($user)
     userProfileAvatar.ok && isAvatar.set(true)
-
-    userSessions = await getUserSessions($user, user)
 
     companyProfile = await getCompanyProfile($user, user)
 
@@ -82,8 +77,6 @@
     userReviews = await getUserReviews($user, user)
     
     res()
-  }).then((data) => {
-    //tabsContent.set({...data})
   }).finally(() => {
     $loading = false
   })
@@ -202,9 +195,9 @@
         {userReviews}
       </div>
       <div class="tab" data-tab="7">
-        <UserSessionsControll data="{userSessions}">
+        <UserSessionsList>
           <h3>Активные сессии:</h3>
-        </UserSessionsControll>
+        </UserSessionsList>
       </div>
       <div class="tab" data-tab="3">
         <h4>Удаление аккаунта</h4>
