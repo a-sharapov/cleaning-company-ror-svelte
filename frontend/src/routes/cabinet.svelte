@@ -22,6 +22,10 @@
   import UserProfileForm from "$lib/components/Forms/UserProfileForm.svelte"
   import UserSessions from "$lib/components/Chunks/UserSessions.svelte"
   import UserEvents from "$lib/components/Chunks/UserEvents.svelte"
+  import UserReviews from "$lib/components/Chunks/UserReviews.svelte"
+  import UserCompanyReviews from "$lib/components/Chunks/UserCompanyReviews.svelte"
+  import UserCompanyEvents from "$lib/components/Chunks/UserCompanyEvents.svelte"
+  import UserCompanyProfile from "$lib/components/Chunks/UserCompanyProfile.svelte"
   import { writable } from 'svelte/store'
   import { goto } from '$app/navigation'
   import { browser } from '$app/env'
@@ -33,11 +37,6 @@
   import { 
     getAvatarByUser, 
     getUserByLogin, 
-    getCompanyProfile, 
-    getCompanyEvents,
-    getCompanyReviews,
-    getUserEvents,
-    getUserReviews,
   } from '$lib/components/Utils/Requests.js'
 
   let title = `Личный кабинет - ${$user.login}`
@@ -50,12 +49,6 @@
 
   $message.content = null
 
-  let userReviews,
-      userEvents,
-      companyProfile,
-      companyEvents,
-      companyReviews
-
   browser && new Promise(async (res) => {
 
     let userProfileRequest = await getUserByLogin($user.login)
@@ -63,20 +56,6 @@
 
     let userProfileAvatar = await getAvatarByUser($user)
     userProfileAvatar.ok && isAvatar.set(true)
-
-    // move to chunks
-    companyProfile = await getCompanyProfile($user, user)
-
-    if (companyProfile && !companyProfile.message) {
-      companyEvents = await getCompanyEvents($user, user, companyProfileRequest.company_name)
-      companyReviews = await getCompanyReviews($user, user, companyProfileRequest.company_name)
-    } else {
-      companyEvents = {message: "В данный момент профиль компании ещё не заполнен, поэтому запрос событий не произведён"}
-      companyReviews = {message: "В данный момент профиль компании ещё не заполнен, поэтому запрос отзывов не произведён"}
-    }
-    
-    userEvents = await getUserEvents($user, user)
-    userReviews = await getUserReviews($user, user)
     
     res()
   }).finally(() => {
@@ -181,17 +160,25 @@
       </div>
       {#if $user.role === "company"}
       <div class="tab" data-tab="4">
-        {companyProfile}
+        <UserCompanyProfile>
+          <h3>Профиль компании:</h3>
+        </UserCompanyProfile>
       </div>
       <div class="tab" data-tab="5">
-        {companyEvents}
+        <UserCompanyEvents>
+          <h3>События компании:</h3>
+        </UserCompanyEvents>
       </div>
       <div class="tab" data-tab="6">
-        {companyReviews}
+        <UserCompanyReviews>
+          <h3>Отзывы о комании:</h3>
+        </UserCompanyReviews>
       </div>
       {/if}
       <div class="tab" data-tab="1">
-        {userReviews}
+        <UserReviews>
+          <h3>Отзывы:</h3>
+        </UserReviews>
       </div>
       <div class="tab" data-tab="2">
         <UserEvents>
