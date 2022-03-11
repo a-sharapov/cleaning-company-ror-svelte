@@ -109,8 +109,8 @@ class Api::V1::AuthentificationController < ApplicationController
       escape_if_in_blacklist(user)
       new_password = generate_new_password
       data = user.as_json.merge({new_password: new_password})
-      escape_with!(:api, :new_password_send_failure, :ok) unless notify_handler(data, :new_password)
       escape_with!(:auth, :not_update, :ok) unless user.update(password: new_password)
+      escape_with!(:api, :new_password_send_failure, :ok) unless notify_handler(data, :new_password)
       user.update({wrong_attempts_count: 0, blocked_until: Time.now})
       render json: {message: ApiError::MESSAGES[:user][:new_password]}, status: :ok
     rescue ApiError => e

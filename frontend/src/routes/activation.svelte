@@ -1,10 +1,12 @@
 <script>
   import Head from "$lib/components/Seo/Head.svelte"
+  import FormAlert from "$lib/components/Forms/FormAlert.svelte"
   import Loader from "$lib/components/UI/Loader.svelte"
   import { browser } from '$app/env'
   import { writable } from 'svelte/store'
   import { page } from '$app/stores'
-  import { message, setUserInStorage, getUserFromStorage, user } from '$lib/components/Hooks/Custom.js'
+  import { message, messageProcessor, setUserInStorage, getUserFromStorage, user } from '$lib/components/Hooks/Custom.js'
+  import { confirmUser } from '$lib/components/Utils/Requests.js'
 
   let showForm = writable(true)
   let loading = writable(false)
@@ -18,25 +20,14 @@
     if (!Boolean($code)) { return }
     try {
       $loading = true
-      let result = await fetch("/api/v1/confirm/?code=" + $code, {
-                              method: event.target.getAttribute("method"),
-                              cache: 'no-cache',
-                              mode: 'cors',
-                              }).then(response => response.json());
-      if (result.error) {
-        throw new Error(result.error)
-      }
+      let result = await confirmUser($code)
       if (result.user) {
-        $message.type = "success"
-        $message.content = `<p>${result.message}</p>`
         if (!setUserInStorage(result.user, false)) {
           throw new Error("Аккаунт активирован, но попытка авторизации завершилась неудачей, вы можете сделать это позже в манульаном режиме")
         }
         $showForm = false
-      } else {
-        $message.type = "warning"
-        $message.content = `<p>${result.message}</p>`
       }
+      message.set(messageProcessor(result))
     } catch (e) {
       $message.type = "error"
       $message.content = e.message
@@ -61,9 +52,7 @@
     {#if $loading}
       <Loader />
     {/if}
-    {#if $message?.content}
-      <span class="form-message" data-type={$message?.type}>{@html $message?.content}</span>
-    {/if}
+    <FormAlert {message} />
     {#if $showForm}
       <h3>Активация аккаунта</h3>
       <p>Введите код активации из письма в поле ниже, если он не был добавлен автоматически</p>

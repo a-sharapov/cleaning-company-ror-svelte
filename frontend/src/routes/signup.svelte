@@ -2,7 +2,9 @@
   import Head from "$lib/components/Seo/Head.svelte"
   import { writable } from 'svelte/store'
   import { prepareFormData, message, messageProcessor } from '$lib/components/Hooks/Custom.js'
+  import FormAlert from "$lib/components/Forms/FormAlert.svelte"
   import Loader from "$lib/components/UI/Loader.svelte"
+  import { createUser } from '$lib/components/Utils/Requests.js'
 
   let title = "Зарегестрироваться"
   let user = writable({
@@ -31,19 +33,9 @@
         let data = new FormData(event.target),
             preparedData = prepareFormData(data, $user, "_password")
         
-        let result = await fetch("/api/v1/users/", {
-                                  method: event.target.getAttribute("method"),
-                                  cache: 'no-cache',
-                                  mode: 'cors',
-                                  body: preparedData
-                                  }).then(response => response.json())
-        let assets = ""
-        if (result.error) {
-          throw new Error(result.error)
-        } else {
-          message.set(messageProcessor(result))
-          $showForm = true
-        }
+        let result = await createUser(preparedData)
+        message.set(messageProcessor(result))
+        $showForm = true
       } catch (e) {
         $message.type = "error"
         $message.content = e.message
@@ -62,9 +54,7 @@
     {#if $loading}
       <Loader />
     {/if}
-    {#if $message?.content}
-      <span class="form-message" data-type={$message?.type}>{@html $message?.content}</span>
-    {/if}
+    <FormAlert {message} />
     {#if $showForm}
     <h3>Зарегеструйтесь!</h3>
     <p>И получите доступ к личному кабинету с расширенным функционалом</p>

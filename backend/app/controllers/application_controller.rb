@@ -89,7 +89,7 @@ class ApplicationController < ActionController::API
 
   def generate_new_password
     o = [('a'..'z'), ('A'..'Z')].map(&:to_a).flatten
-    return (0...12).map { o[rand(o.length)] }.join
+    return (0...12).map { o[rand(o.length)] }.join + "#A1"
   end
   
   def notify_handler(data, type, deliver = :deliver_now)

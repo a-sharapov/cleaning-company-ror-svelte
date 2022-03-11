@@ -144,3 +144,25 @@ export const removeSession = async (token_id, user, subscriber) => {
   })
   return output
 }
+
+export const confirmUser = async (code) => {
+  let output = await ApiRequest(`confirm/?code=${code}`, {
+    method: "get",
+  })
+  return output
+}
+
+export const restoreUser = async (code) => {
+  let output = await ApiRequest(`restore/${code}/`, {
+    method: "put",
+  })
+  return output
+}
+
+export const createUser = async (body) => {
+  let output = await ApiRequest(`users/`, {
+    method: "post",
+    body,
+  })
+  return output
+}

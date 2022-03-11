@@ -20,6 +20,7 @@
   import Loader from "$lib/components/UI/Loader.svelte"
   import Head from "$lib/components/Seo/Head.svelte"
   import UserProfileForm from "$lib/components/Forms/UserProfileForm.svelte"
+  import FormAlert from "$lib/components/Forms/FormAlert.svelte"
   import UserSessions from "$lib/components/Chunks/UserSessions.svelte"
   import UserEvents from "$lib/components/Chunks/UserEvents.svelte"
   import UserReviews from "$lib/components/Chunks/UserReviews.svelte"
@@ -151,9 +152,7 @@
       {#if $user.banned}<p>Заблокирован до: <br /><strong>{new Date($user.blocked_until).toLocaleDateString("ru-RU")}, {new Date($user.blocked_until).toLocaleTimeString("ru-RU")}</strong></p>{/if}
       </aside>
     <aside id="cabinet-tabs">
-      {#if $message?.content}
-      <span class="form-message" data-type={$message?.type}>{@html $message?.content}</span>
-      {/if}
+      <FormAlert {message} />
       <div class="tab active" data-tab="0">
         <h3>Данные профиля:</h3>
         <UserProfileForm {countries}/>

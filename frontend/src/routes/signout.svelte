@@ -38,21 +38,19 @@
   $message.content = logout.message
   
   const pocessSignOut = async () => {
-    user.set(null)
-
     let response
     if (assets === "remove") {
       response = await removeUser($user, user)
     } else {
       response = null
     }
-
     if (response && response.error) {
       $message.type = "warning"
-      $message.content = `${$message.content}, ${result.error}`
+      $message.content = `${$message.content}, ${response.error}`
     } else if (response) {
-      $message.content = `${$message.content}, ${result.message}`
+      $message.content = `${$message.content}, ${response.message}`
     }
+    user.set(null)
   }
 
   if (browser) {

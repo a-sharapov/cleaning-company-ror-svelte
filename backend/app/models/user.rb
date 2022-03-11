@@ -14,7 +14,7 @@ class User
   field :description, type: String
   field :email, type: String
   field :phone, type: String
-  field :address, type: Object
+  field :address, type: Object, default: {}
   field :password_digest, type: String
   field :tokens, type: Array
   field :confirmed, type: Boolean, default: false
@@ -26,25 +26,25 @@ class User
   validates :login,     presence: true, 
                         uniqueness: true, 
                         length: {minimum: 6}, 
-                        format: { without: /\s/, message: "Login must not contains any spaces" }
+                        format: { without: /\s/, message: " не должен содержать пробелов" }
 
   validates :password,  presence: true, 
                         length: {minimum: 8, maximum: 72}, 
-                        format: {with: /\A(?=.{8,})(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[[:^alnum:]])/x, message: "Password must contain at least one digit, one character, one alphabetic character"},
-                        if: :password_not_present? || changes[:password_digest]
+                        format: {with: /\A(?=.{8,})(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[[:^alnum:]])/x, message: " должен иметь хотя бы одну цифру, спецзнак и символ в верхнем регистре"},
+                        if: :password_present? || changes[:password_digest]
 
-  validates :role,      inclusion: {in: %w(client company), message: "User should be a client or company"}
+  validates :role,      inclusion: {in: %w(client company), message: "Тип пользователя может быть только клиент и компания"}
 
   validates :email,     presence: false, 
                         uniqueness: true, 
                         length: {minimum: 8, maximum: 72}, 
-                        format: {with: /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\z/i, message: "Email must begin match with template name@domain.zone"}, 
+                        format: {with: /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\z/i, message: " должен соответсвовать шаблону name@domain.zone"}, 
                         if: :email_present?
 
   validates :phone,     uniqueness: true, 
                         numericality: true, 
                         length: {minimum: 10, maximum: 15}, 
-                        presence: {message: "Only positive number without spaces are allowed"}, 
+                        presence: {message: " должен сотоять исключительно из цифр"}, 
                         if: :phone_present?
 
   validate :mail_and_phone_unpresent?
@@ -54,8 +54,8 @@ class User
   validates_attachment :avatar, content_type: { content_type: ["image/jpg", "image/jpeg", "image/png", "image/gif"] }
   
   private
-  def password_not_present?
-    password.nil? && !self.password_digest.present?
+  def password_present?
+    !password.nil? && self.password_digest.present?
   end
 
   def phone_present?
@@ -68,7 +68,7 @@ class User
 
   def mail_and_phone_unpresent?
     if email.nil? && phone.nil?
-      errors.add(:email, "or Phone must be specified")
+      errors.add(:email, " или Телефон должен быть указан обязательно")
     end
   end
 

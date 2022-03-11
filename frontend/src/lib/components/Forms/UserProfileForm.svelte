@@ -20,7 +20,11 @@
 
   let currentUserData = writable({
     address: {
-      country: "unselected"
+      country: "unselected",
+      city: "",
+      zip: "",
+      state: "",
+      street: "",
     },
     ...getUserFromStorage(),
   })

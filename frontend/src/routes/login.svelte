@@ -1,5 +1,6 @@
 <script>
   import Loader from "$lib/components/UI/Loader.svelte"
+  import FormAlert from "$lib/components/Forms/FormAlert.svelte"
   import Head from "$lib/components/Seo/Head.svelte"
   import { goto } from '$app/navigation'
   import { browser } from '$app/env'
@@ -73,9 +74,7 @@
       {#if $loading}
         <Loader />
       {/if}
-      {#if $message?.content}
-        <span class="form-message" data-type={$message?.type}>{@html $message?.content}</span>
-      {/if}
+      <FormAlert {message} />
       {#if $showForm}
         <h3>Войдите!</h3>
         <p>Для того, чтобы использовать все возможности приложения</p>

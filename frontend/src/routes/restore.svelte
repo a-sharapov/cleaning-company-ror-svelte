@@ -1,8 +1,10 @@
 <script>
   import Head from "$lib/components/Seo/Head.svelte"
+  import FormAlert from "$lib/components/Forms/FormAlert.svelte"
   import Loader from "$lib/components/UI/Loader.svelte"
   import { writable } from 'svelte/store'
-  import { message } from '$lib/components/Hooks/Custom.js'
+  import { message, messageProcessor } from '$lib/components/Hooks/Custom.js'
+  import { restoreUser } from '$lib/components/Utils/Requests.js'
 
   let showForm = writable(true)
   let loading = writable(false)
@@ -15,11 +17,7 @@
     event.preventDefault()
     try {
       $loading = true
-      let result = await fetch(`/api/v1/restore/${$code}/`, {
-                              method: event.target.getAttribute("method"),
-                              cache: 'no-cache',
-                              mode: 'cors',
-                              }).then(response => response.json())
+      let result = await restoreUser($code)
       message.set(messageProcessor(result))
     } catch (e) {
       $message.type = "error"
@@ -37,9 +35,7 @@
     {#if $loading}
     <Loader />
     {/if}
-    {#if $message?.content}
-      <span class="form-message" data-type={$message?.type}>{@html $message?.content}</span>
-    {/if}
+    <FormAlert {message} />
     {#if $showForm}
       <h3>Ре-активация аккаунта</h3>
       <p>Введите код активации из письма, которое вы получили при регистрации, в поле ниже. Новый пароль будет сгенерирован и отправлен вам на электронную почту и/или SMS</p>
