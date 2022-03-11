@@ -20,40 +20,49 @@ const joinOpts = (opts) => {
 }
 
 const CheckRequest = async (url, addOpts = {}) => {
-  let output = await fetch(
-    `/api/v1/${url}`,
-    {
-      ...fetchOpts,
-      ...addOpts,
-    }
-  )
-  return output
+  if (url) {
+    let output = await fetch(
+      `/api/v1/${url}`,
+      {
+        ...fetchOpts,
+        ...addOpts,
+      }
+    )
+    return output
+  }
+  return null
 }
 
 const ApiRequest = async (url, addOpts = {}) => {
-  let output = await fetch(
-    `/api/v1/${url}`,
-    {
-      ...fetchOpts,
-      ...addOpts,
-    }
-  ).then(data => data.json())
-  return output
+  if (url) {
+    let output = await fetch(
+      `/api/v1/${url}`,
+      {
+        ...fetchOpts,
+        ...addOpts,
+      }
+    ).then(data => data.json())
+    return output
+  }
+  return null
 }
 
 const retryApiRequest = async (url, user, subscriber, addOpts = {}) => {
-  let output = await retryFetch(
-    `/api/v1/${url}`,
-    {
-      ...fetchOpts,
-      headers: {
-        'Authorization': `Bearer ${user.access_token}`,
+  if (url && user) {
+    let output = await retryFetch(
+      `/api/v1/${url}`,
+      {
+        ...fetchOpts,
+        headers: {
+          'Authorization': `Bearer ${user.access_token}`,
+        },
+        ...addOpts,
       },
-      ...addOpts,
-    },
-    subscriber
-  )
-  return output
+      subscriber
+    )
+    return output
+  }
+  return null
 }
 
 // users, companies, reviews, events, etc.
@@ -163,6 +172,13 @@ export const createUser = async (body) => {
   let output = await ApiRequest(`users/`, {
     method: "post",
     body,
+  })
+  return output
+}
+
+export const retrieveSession = async () => {
+  let output = await ApiRequest(`auth/`, {
+    method: "put",
   })
   return output
 }

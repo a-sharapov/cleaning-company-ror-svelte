@@ -992,6 +992,11 @@ span.form-message {
   user-select: none;
 }
 
+aside span.form-message {
+  margin: 0 20px 20px;
+  width: calc(100% - 40px);
+}
+
 span.form-message:last-child {
   margin-bottom: -20px;
 }
@@ -1151,4 +1156,9 @@ p.ligher {
   left: 50% !important;
   top: 50% !important;
   margin: -35px !important;
+}
+
+article form:empty() {
+  display: none;
+  visibility: hidden;
 }

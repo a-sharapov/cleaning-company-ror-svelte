@@ -44,13 +44,14 @@
     } else {
       response = null
     }
-    if (response && response.error) {
+    if (response && !!response.error) {
       $message.type = "warning"
       $message.content = `${$message.content}, ${response.error}`
     } else if (response) {
       $message.content = `${$message.content}, ${response.message}`
     }
     user.set(null)
+    removeUserFromStorage()
   }
 
   if (browser) {

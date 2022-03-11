@@ -54,7 +54,7 @@ class ApplicationController < ActionController::API
     }
   end
 
-  def get_tokens_refresh_token
+  def get_refresh_token
     return false unless cookies["refresh_token"].present?
     return cookies["refresh_token"]
   end

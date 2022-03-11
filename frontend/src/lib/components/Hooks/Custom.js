@@ -1,5 +1,7 @@
 import { browser } from '$app/env'
+import { goto } from '$app/navigation'
 import { writable } from 'svelte/store'
+import { retrieveSession } from '$lib/components/Utils/Requests.js'
 
 export const prepareFormData = (data, object, defaultRemovedFields = null) => {
   Object.keys(object).map(key => {
@@ -100,32 +102,26 @@ export const retryFetch = async (url, options, user) => {
   while (retry) {
     result = await fetch(url, opts).then(response => response.json())
 
-    if (result && result.assets === "retrieve") {
-      let resign = await fetch("/api/v1/auth/", {
-        method: "put",
-        cache: 'no-cache',
-        mode: 'cors',
-      }).then(response => response.json())
-      if (resign.user) {
-        let updateSession = setUserInStorage({...usr, ...resign.user}, remembered())
-        if (updateSession) {
-          retry = true
-          user.set(getUserFromStorage())
-          opts.access_token = usr.access_token
-        } else {
-          retry = false
-          return {
-            message: "Попытка создания локальной сессии завершилась неудачей",
-            assets: "Проверьте настройки безопасности системы и браузера",
-          }
-        }
+    if (result.assets === "retrieve") {
+      let resign = await retrieveSession()
+
+      if (!!resign.user) {
+        retry = true
+        setUserInStorage({...usr, ...resign.user}, remembered())
+        user.set(getUserFromStorage())
+        opts.access_token = usr.access_token
       }
+
+      if (resign.assets === "unauthorize") {
+        removeUserFromStorage()
+        user.set(null)
+        setTimeout(async () => { 
+          goto("/")
+        }, 5e2)
+      }
+
       if (++count == maxTries) {
         retry = false
-        return {
-          message: "Внимание! Попытка обновления сессии закончиалсь неудачей",
-          assets: "Попробуйте запросить данные снова или перезагрузить страницу",
-        }
       }
     } else {
       retry = false
