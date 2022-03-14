@@ -155,5 +155,7 @@ class Api::V1::AuthentificationController < ApplicationController
   def get_user_by_login
     @login = param_to_search(user_login_parameters[:login])
     @user = User.find_by(:login => @login)
+    @user = User.find_by(:email => @login) unless @user
+    @user = User.find_by(:phone => @login) unless @user
   end
 end

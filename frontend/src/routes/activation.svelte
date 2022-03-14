@@ -2,6 +2,7 @@
   import Head from "$lib/components/Seo/Head.svelte"
   import FormAlert from "$lib/components/Forms/FormAlert.svelte"
   import Loader from "$lib/components/UI/Loader.svelte"
+  import { goto } from '$app/navigation'
   import { browser } from '$app/env'
   import { writable } from 'svelte/store'
   import { page } from '$app/stores'
@@ -124,7 +125,6 @@
       0px 11.3px 13px -19px rgba(0, 0, 0, 0.024),
       0px 11.3px 22.3px -19px rgba(0, 0, 0, 0.034),
       0px 11.1px 42px -19px rgba(0, 0, 0, 0.049),
-      0px 15px 164px -19px rgba(0, 0, 0, 0.07)
-    ;
+      0px 15px 164px -19px rgba(0, 0, 0, 0.07);
   }
 </style>

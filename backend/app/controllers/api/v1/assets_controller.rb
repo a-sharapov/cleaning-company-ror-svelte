@@ -32,6 +32,12 @@ class Api::V1::AssetsController < ApplicationController
         accepted: "Подтверждён",
         canceled: "Отменён",
       })
+    
+      escape_with!(:assets, :not_create, :ok) unless Assets.find_or_create_by(type: "odds", content: {
+        standard: 1,
+        large: 1.2,
+        restrooms: 1.5,
+      })
 
       escape_with!(:assets, :not_create, :ok) unless Assets.find_or_create_by(type: "Countries", content: {
         elements: ["Афганистан",

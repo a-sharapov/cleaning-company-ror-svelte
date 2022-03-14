@@ -3,10 +3,12 @@
     try {
         const countries = await fetch("/api/v1/assets/countries/", {mode: "cors"})
         const services = await fetch("/api/v1/assets/services/", {mode: "cors"})
+        const odds = await fetch("/api/v1/assets/odds/", {mode: "cors"})
         return {
           props: {
             countries: countries.ok && (await countries.json()),
             services: services.ok && (await services.json()),
+            odds: odds.ok && (await odds.json()),
           }
         }
     } catch (e) {
@@ -51,6 +53,7 @@
 
   export let countries
   export let services
+  export let odds
 
   $message.content = null
 
@@ -165,7 +168,7 @@
       </div>
       {#if $user.role === "company"}
       <div class="tab" data-tab="4">
-        <UserCompanyProfile {countries} {services}>
+        <UserCompanyProfile {countries} {services} {odds}>
           <h3>Профиль компании:</h3>
         </UserCompanyProfile>
       </div>

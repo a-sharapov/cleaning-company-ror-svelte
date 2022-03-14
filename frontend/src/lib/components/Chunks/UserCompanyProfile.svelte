@@ -11,6 +11,7 @@
 
   export let countries
   export let services
+  export let odds
 
   let userCompanyProfile = writable(null)
   let loading = writable(true)
@@ -19,6 +20,11 @@
   let currentProfileData = writable({
     company_name: "New company",
     service_types: [],
+    prices: {
+      standard: "",
+      large: "",
+      restroom: "",
+    },
     address: {
       country: $user.address?.country ? $user.address?.country : "unselected",
       city: "",
@@ -39,7 +45,7 @@
       
       let result = await setCompanyProfile($user, user, $profilePath, $updateMethod, data)
       message.set(messageProcessor(result))
-      if (!Boolean(result.message)) {
+      if (!Boolean(result?.message)) {
         currentProfileData.set(result)
         profilePath.set(`company/${result.slug}/`)
         $message.type = "success"
@@ -53,6 +59,12 @@
     } finally {
       $loading = false
     }
+  }
+
+  const handleRecalc = async (event) => {
+    let standard = event.target.value
+    $currentProfileData.prices.large = odds?.large ? parseFloat(odds.large * standard).toFixed(2) : parseFloat(1.2 * standard).toFixed(2)
+    $currentProfileData.prices.restroom = odds?.restrooms ? parseFloat(odds.restrooms * standard).toFixed(2) : parseFloat(1.4 * standard).toFixed(2)
   }
 
   browser && new Promise(async (res) => {
@@ -82,7 +94,7 @@
 <slot></slot>
   {#if $isLogotype}
   <span class="company-logotype">
-  Текущий логотип компании: <img src="/api/v1/logotype/{$currentProfileData.slug}?image={$currentProfileData.logotype_file_name}" alt="{$currentProfileData.company_name}" height="100px" />
+  Логотип: <img src="/api/v1/logotype/{$currentProfileData.slug}?image={$currentProfileData.logotype_file_name}" alt="{$currentProfileData.company_name}" height="100px" />
   </span>
   {/if}
 <form action="/cabinet" enctype="multipart/form-data" method="post" on:submit={handleOnSubmit}>
@@ -109,6 +121,18 @@
   <label data-width="half"><input type="checkbox" name="service_types[]" value="{service}" bind:group={profileServicesCheck} />&nbsp;{service}</label>
   {/each}
   {/if}
+  <hr />
+  <h5>Стоимость услуг:</h5>
+  <p>В данном разделе заполняется стоимость в рублях <strong>BYN</strong> исходя из <strong>1 часа</strong> работы.</p>
+  <label data-width="full">
+    <input type="text" name="prices[standard]" bind:value={$currentProfileData.prices.standard} on:input="{handleRecalc}" required placeholder="Для стандартного помещения (до 20 м&#178;)"/>
+  </label>
+  <label data-width="half">
+    <input type="text" name="prices[large]" bind:value={$currentProfileData.prices.large} required placeholder="Для большого помещения (более 20 м&#178;)"/>
+  </label><label data-width="half">
+    <input type="text" name="prices[restroom]" bind:value={$currentProfileData.prices.restroom} required placeholder="Для санузлов"/>
+  </label>
+  <p class="small">В качестве основной цены используется <strong>стоимость уборки простого помещения (до 20 м<sup>2</sup>)</strong>, остальные данные рассчитываются исходя из стандартных коэффициентов, но вы в праве их изменить их. <em>Однако, это может сказаться на количестве заказов.</em></p>
   <hr />
   <h5>Адрес:</h5>
   <label data-width="full">

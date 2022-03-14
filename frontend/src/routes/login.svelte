@@ -81,7 +81,7 @@
         <hr />
         <form action="/login" method="post" on:submit={handleOnSubmit}>
           <label data-width="full">
-            <input type="text" name="login" bind:value={$auth.login} required placeholder="Имя пользователя" />
+            <input type="text" name="login" bind:value={$auth.login} required placeholder="Login/Email/Телефон" />
           </label>
           <label data-width="full">
             <input type="password" name="password" bind:value={$auth.password} required placeholder="Пароль" />
