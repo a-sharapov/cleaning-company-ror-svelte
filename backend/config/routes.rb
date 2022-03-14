@@ -19,6 +19,7 @@ Rails.application.routes.draw do
       post "companies", to: "company_profile#new"
       get ":user/company", to: "company_profile#show_to_user"
       get "company/:slug", to: "company_profile#show"
+      get 'logotype/:slug', to: "company_profile#logotype"
       put "company/:slug", to: "company_profile#update"
 
       get "reviews", to: "review#index"

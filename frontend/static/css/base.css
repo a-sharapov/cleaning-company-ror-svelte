@@ -653,6 +653,18 @@ main#app {
   background: none;
 }
 
+main#app:before {
+  content: "";
+  position: fixed;
+  top: 0;
+  display: block;
+  width: 100%;
+  height: 90px;
+  background: radial-gradient(#22000060, transparent);
+  filter: blur(20px);
+  z-index: 2;
+}
+
 main#app header {
   padding: 10px 20px;
   flex: 0 0 auto;
@@ -993,8 +1005,8 @@ span.form-message {
 }
 
 aside span.form-message {
-  margin: 0 20px 20px;
-  width: calc(100% - 40px);
+  margin: 0 5px 20px;
+  width: calc(100% - 10px);
 }
 
 span.form-message:last-child {

@@ -1,6 +1,6 @@
 class Api::V1::CompanyProfileController < ApplicationController
   before_action :set_paging, only: [:index] 
-  before_action :get_company_profile, only: [:show, :update] 
+  before_action :get_company_profile, only: [:show, :update, :logotype] 
   before_action :set_profiles_search_query, only: [:index] 
   before_action :get_tokens, only: [:new, :update, :destroy] 
 
@@ -60,8 +60,19 @@ class Api::V1::CompanyProfileController < ApplicationController
     begin
       user = prepare_user!
       escape_with!(:profiles, :not_exist, :ok) unless @profile
-      escape_with!(:api, :invalid_request, :ok, @profile.errors.full_messages) unless @profile.valid? && @profile.update(company_profile_parameters)
+      escape_with!(:api, :invalid_request, :ok, @profile.errors.full_messages) unless @profile.valid? && @profile.update(company_profile_parameters.merge({slug: Translit.convert(params[:company_name], :english).parameterize}))
       render_data(@profile)
+    rescue ApiError => e
+      render_api_error(e)
+    end
+  end
+
+  def logotype
+    begin
+      escape_with!(:profiles, :not_exist, :not_found) unless @profile
+      logo_path = "public/system/company_profiles/logotypes/original/#{params[:image]}"
+      escape_with!(:profiles, :logo_not_exist, :not_found) unless File.exist?(logo_path)
+      send_file(logo_path, type: @profile.logotype_content_type, disposition: 'inline')
     rescue ApiError => e
       render_api_error(e)
     end
@@ -72,16 +83,16 @@ class Api::V1::CompanyProfileController < ApplicationController
     params.permit(
       :logotype, 
       :company_name, 
-      :description,
-      :service_types, 
-      :prices,  
+      :description, 
       address: [
         :zip, 
         :country, 
         :city, 
         :state, 
         :street
-      ]
+      ],
+      service_types: [],
+      prices: {}
     )
   end
 

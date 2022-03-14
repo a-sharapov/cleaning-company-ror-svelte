@@ -2,9 +2,11 @@
   export async function load({params, fetch, session, stuff}) {
     try {
         const countries = await fetch("/api/v1/assets/countries/", {mode: "cors"})
+        const services = await fetch("/api/v1/assets/services/", {mode: "cors"})
         return {
           props: {
             countries: countries.ok && (await countries.json()),
+            services: services.ok && (await services.json()),
           }
         }
     } catch (e) {
@@ -47,6 +49,7 @@
   let isAvatar = writable(false)
 
   export let countries
+  export let services
 
   $message.content = null
 
@@ -159,7 +162,7 @@
       </div>
       {#if $user.role === "company"}
       <div class="tab" data-tab="4">
-        <UserCompanyProfile>
+        <UserCompanyProfile {countries} {services}>
           <h3>Профиль компании:</h3>
         </UserCompanyProfile>
       </div>

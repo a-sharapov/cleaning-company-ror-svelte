@@ -35,22 +35,22 @@
     event.preventDefault()
     let removeEmpty = {password: "", avatar: "", phone: "", description: ""}
 
-      try {
-        $loading = true
-        let data = new FormData(event.target)
-        
-        let result = await updateUserProfile($user, user, prepareFormData(data, removeEmpty))
-          message.set(messageProcessor(result))
-          setUserInStorage({...$user, ...result.user}, remembered())
-        } catch (e) {
-          $message.type = "error"
-          $message.content = e.message
-        } finally {
-          let userFromStore = getUserFromStorage()
-          user.set(userFromStore)
-          currentUserData.set(userFromStore)
-          $loading = false
-        }
+    try {
+      $loading = true
+      let data = new FormData(event.target)
+      
+      let result = await updateUserProfile($user, user, prepareFormData(data, removeEmpty))
+        message.set(messageProcessor(result))
+        setUserInStorage({...$user, ...result.user}, remembered())
+    } catch (e) {
+      $message.type = "error"
+      $message.content = e.message
+    } finally {
+      let userFromStore = getUserFromStorage()
+      user.set(userFromStore)
+      currentUserData.set(userFromStore)
+      $loading = false
+    }
   }
 </script>
 

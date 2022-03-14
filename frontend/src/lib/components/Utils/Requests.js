@@ -182,3 +182,11 @@ export const retrieveSession = async () => {
   })
   return output
 }
+
+export const setCompanyProfile = async (user, subscriber, path, method, body) => {
+  let output = await retryApiRequest(path, user, subscriber, {
+    method,
+    body,
+  })
+  return output
+}

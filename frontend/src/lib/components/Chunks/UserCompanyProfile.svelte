@@ -1,33 +1,155 @@
 <script>
   import { browser } from '$app/env'
   import Loader from "$lib/components/UI/Loader.svelte"
-  import { getCompanyProfile } from "$lib/components/Utils/Requests.js"
+  import { getCompanyProfile, setCompanyProfile } from "$lib/components/Utils/Requests.js"
   import { 
-    messageProcessor,
+    messageProcessor, 
     message, 
     user, 
   } from '$lib/components/Hooks/Custom.js'
   import { writable } from 'svelte/store'
 
+  export let countries
+  export let services
+
   let userCompanyProfile = writable(null)
   let loading = writable(true)
+  let isLogotype = writable(false)
+
+  let currentProfileData = writable({
+    company_name: "New company",
+    service_types: [],
+    address: {
+      country: $user.address?.country ? $user.address?.country : "unselected",
+      city: "",
+      zip: "",
+      state: "",
+      street: "",
+    }
+  })
+  let profilePath = writable(`companies`)
+  let updateMethod = writable("post")
+  let profileServicesCheck = []
+
+  const handleOnSubmit = async (event) => {
+    event.preventDefault()
+    try {
+      $loading = true
+      let data = new FormData(event.target)
+      
+      let result = await setCompanyProfile($user, user, $profilePath, $updateMethod, data)
+      message.set(messageProcessor(result))
+      if (!Boolean(result.message)) {
+        currentProfileData.set(result)
+        profilePath.set(`company/${result.slug}/`)
+        $message.type = "success"
+        $message.content = "Профиль компании был успешно обновлён"
+      } else {
+        message.set(messageProcessor(result))
+      } 
+    } catch (e) {
+      $message.type = "error"
+      $message.content = e.message
+    } finally {
+      $loading = false
+    }
+  }
 
   browser && new Promise(async (res) => {
     let result = await getCompanyProfile($user, user)
+    res(result)
+  }).then((result) => {
     userCompanyProfile.set(result)
-    res()
+    if (!Boolean(result.message)) {
+      isLogotype.set(!!result.logotype_file_name)
+      currentProfileData.set({
+        ...$currentProfileData,
+        ...result,
+      })
+      profileServicesCheck = result.service_types
+      profilePath.set(`company/${result.slug}/`)
+      updateMethod.set("put")
+    }
   }).finally(() => {
     $loading = false
-  })
+  }
+  )
 </script>
 
 {#if $loading}
   <Loader />
 {/if}
 <slot></slot>
-{#if $userCompanyProfile?.message}
-  <p>{$userCompanyProfile?.message}</p>
-{/if}
-{#if Array.isArray($userCompanyProfile)}
+  {#if $isLogotype}
+  <span class="company-logotype">
+  Текущий логотип компании: <img src="/api/v1/logotype/{$userCompanyProfile.slug}?image={$userCompanyProfile.logotype_file_name}" alt="{$userCompanyProfile.company_name}" height="100px" />
+  </span>
+  {/if}
+<form action="/cabinet" enctype="multipart/form-data" method="post" on:submit={handleOnSubmit}>
+  {#if $userCompanyProfile?.message}
+    <span class="form-message">{$userCompanyProfile?.message}</span>
+  {/if}
+  <label data-width="half">
+    <input type="text" name="company_name" bind:value={$currentProfileData.company_name} required placeholder="Название компании"/>
+  </label><label data-width="half">
+    <p>Название в адресной строке: <strong>{$currentProfileData.slug}</strong></p>
+  </label>
+  <hr />
+  <label data-width="full">
+    Логотип:<br />
+    <input type="file" name="logotype" placeholder="Логотип" />
+  </label>
+  <hr />
+  <label data-width="full">
+    <textarea name="description" rows="3" bind:value={$currentProfileData.description} placeholder="Расскажите о компании"></textarea>
+  </label>
+  <hr />
+  <h5>Услуги:</h5>
+  {#if services?.content?.elements}
+  {#each services?.content?.elements as service }
+  <label data-width="half"><input type="checkbox" name="service_types[]" value="{service}" bind:group={profileServicesCheck} />&nbsp;{service}</label>
+  {/each}
+  {/if}
+  <hr />
+  <h5>Адрес:</h5>
+  <label data-width="full">
+    <select name="address[country]" bind:value={$currentProfileData.address.country}>
+      <option disabled value="unselected">Выберите свою страну из списка</option>
+      {#if countries?.content?.elements}
+      {#each countries?.content?.elements as coutry }
+      <option value="{coutry}">{coutry}</option>
+      {/each}
+      {/if}
+    </select>
+  </label>
+  <label data-width="half">
+    <input type="text" name="address[zip]" bind:value={$currentProfileData.address.zip} placeholder="Индекс" />
+  </label><label data-width="half">
+    <input type="text" name="address[city]" bind:value={$currentProfileData.address.city} placeholder="Город" />
+  </label><label data-width="half">
+    <input type="text" name="address[state]" bind:value={$currentProfileData.address.state} placeholder="Область" />
+  </label><label data-width="half">
+    <input type="text" name="address[street]" bind:value={$currentProfileData.address.street} placeholder="Улица, дом" />
+  </label>
+  <hr />
+  <label data-width="full">
+    <button type="submit">Обновить данные</button>
+  </label>
+</form>
 
-{/if}
+<style>
+  label > p {
+    margin-top: 8px;
+  }
+  .company-logotype {
+    display: block;
+    width: fit-content;
+    line-height: 100px;
+    margin: 0 auto 20px;
+    border: 1px dotted #ccc;
+    padding: 20px;
+  }
+  .company-logotype > * {
+    vertical-align: middle;
+  }
+</style>

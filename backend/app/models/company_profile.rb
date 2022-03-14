@@ -16,7 +16,10 @@ class CompanyProfile
 
   validates :company_name, presence: true
   validates :address, presence: true
-  validates :slug, uniqueness: true
+  validates :slug, uniqueness: true, 
+                    length: {minimum: 3}, 
+                    format: { without: /\s/, message: " не должен содержать пробелов" }
 
   has_mongoid_attached_file :logotype
+  validates_attachment :logotype, content_type: { content_type: ["image/jpg", "image/jpeg", "image/png", "image/gif"] }
 end

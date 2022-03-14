@@ -17,7 +17,7 @@
     let result = {message: "В данный момент профиль компании ещё не заполнен, поэтому запрос отзывов не произведён"}
 
     if (companyProfile && !companyProfile.message) {
-      result = await getCompanyEvents($user, user, company_name)
+      result = await getCompanyEvents($user, user, companyProfile.company_name)
     }
     userCompanyEvents.set(result)
     res()
