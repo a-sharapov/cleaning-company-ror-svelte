@@ -82,17 +82,16 @@
 <slot></slot>
   {#if $isLogotype}
   <span class="company-logotype">
-  Текущий логотип компании: <img src="/api/v1/logotype/{$userCompanyProfile.slug}?image={$userCompanyProfile.logotype_file_name}" alt="{$userCompanyProfile.company_name}" height="100px" />
+  Текущий логотип компании: <img src="/api/v1/logotype/{$currentProfileData.slug}?image={$currentProfileData.logotype_file_name}" alt="{$currentProfileData.company_name}" height="100px" />
   </span>
   {/if}
 <form action="/cabinet" enctype="multipart/form-data" method="post" on:submit={handleOnSubmit}>
   {#if $userCompanyProfile?.message}
     <span class="form-message">{$userCompanyProfile?.message}</span>
   {/if}
-  <label data-width="half">
+  <label data-width="full">
     <input type="text" name="company_name" bind:value={$currentProfileData.company_name} required placeholder="Название компании"/>
-  </label><label data-width="half">
-    <p>Название в адресной строке: <strong>{$currentProfileData.slug}</strong></p>
+    <p class="light small">Название в адресной строке: <strong>{$currentProfileData.slug}</strong></p>
   </label>
   <hr />
   <label data-width="full">
@@ -138,8 +137,8 @@
 </form>
 
 <style>
-  label > p {
-    margin-top: 8px;
+  label > p strong {
+    white-space: nowrap;
   }
   .company-logotype {
     display: block;

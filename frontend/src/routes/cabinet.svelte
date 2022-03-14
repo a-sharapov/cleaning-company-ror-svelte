@@ -23,6 +23,7 @@
   import Head from "$lib/components/Seo/Head.svelte"
   import UserProfileForm from "$lib/components/Forms/UserProfileForm.svelte"
   import FormAlert from "$lib/components/Forms/FormAlert.svelte"
+  import UserPasswordForm from "$lib/components/Forms/UserPasswordForm.svelte"
   import UserSessions from "$lib/components/Chunks/UserSessions.svelte"
   import UserEvents from "$lib/components/Chunks/UserEvents.svelte"
   import UserReviews from "$lib/components/Chunks/UserReviews.svelte"
@@ -140,10 +141,12 @@
         <span on:click="{handleTabSwitch}" class="tab-contller" data-tab="2">События</span>
         <span on:click="{handleTabSwitch}" class="tab-contller" data-tab="1">Отзывы</span>
         <span on:click="{handleTabSwitch}" class="tab-contller" data-tab="7">Активные сессии</span>
+        <span on:click="{handleTabSwitch}" class="tab-contller" data-tab="9">Изменть пароль</span>
         {#if $user.role === "company"}
         <span on:click="{handleTabSwitch}" class="tab-contller" data-tab="4">Профиль компании</span>
-        <span on:click="{handleTabSwitch}" class="tab-contller" data-tab="5">Cобытия компании</span>
         <span on:click="{handleTabSwitch}" class="tab-contller" data-tab="6">Отзывы о компании</span>
+        <span on:click="{handleTabSwitch}" class="tab-contller" data-tab="5">Календарь</span>
+        <span on:click="{handleTabSwitch}" class="tab-contller" data-tab="8">Графики</span>
         {/if}
         <span on:click="{handleTabSwitch}" class="tab-contller" data-tab="3">Удаление</span>
       </nav>
@@ -168,13 +171,16 @@
       </div>
       <div class="tab" data-tab="5">
         <UserCompanyEvents>
-          <h3>События компании:</h3>
+          <h3>Календарь:</h3>
         </UserCompanyEvents>
       </div>
       <div class="tab" data-tab="6">
         <UserCompanyReviews>
           <h3>Отзывы о комании:</h3>
         </UserCompanyReviews>
+      </div>
+      <div class="tab" data-tab="8">
+        Графики
       </div>
       {/if}
       <div class="tab" data-tab="1">
@@ -191,6 +197,16 @@
         <UserSessions>
           <h3>Активные сессии:</h3>
         </UserSessions>
+      </div>
+      <div class="tab" data-tab="9">
+        <UserPasswordForm>
+          <h3>Изменть пароль:</h3>
+          <div slot="after">
+            <hr />
+            <p>Пароль пользователя также может быть изменён в любой момент с помощью <a href="/restore">фомы восстановления доступа</a>, однако вам необходимо иметь уникальный код из письма активации.</p>
+            <p>В этом случае новый пароль будет сгенерирован автоматически и отправлен по SMS/email.</p>
+          </div>
+        </UserPasswordForm>
       </div>
       <div class="tab" data-tab="3">
         <h4>Удаление аккаунта</h4>

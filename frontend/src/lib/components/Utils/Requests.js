@@ -190,3 +190,11 @@ export const setCompanyProfile = async (user, subscriber, path, method, body) =>
   })
   return output
 }
+
+export const setPasswordDirectly = async (user, subscriber, body) => {
+  let output = await retryApiRequest(`user/${user.login}/password/`, user, subscriber, {
+    method: "put",
+    body,
+  })
+  return output
+}

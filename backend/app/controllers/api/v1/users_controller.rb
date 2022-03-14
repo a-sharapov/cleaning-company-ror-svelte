@@ -1,6 +1,6 @@
 class Api::V1::UsersController < ApplicationController
   before_action :set_paging, only: [:index] 
-  before_action :get_user, only: [:show, :update, :destroy, :avatar, :sessions] 
+  before_action :get_user, only: [:show, :update, :destroy, :avatar, :sessions, :change_password] 
   before_action :set_users_search_query, only: [:index] 
   before_action :get_tokens, only: [:update, :destroy] 
 
@@ -108,6 +108,20 @@ class Api::V1::UsersController < ApplicationController
     end
   end
 
+  def change_password
+    begin
+      escape_with!(:api, :wrong_request, :ok) unless user_change_password.present?
+      check_auth!
+      escape_with!(:user, :not_exist, :ok) unless @user
+      check_access!(@user)
+      escape_with!(:user, :invalid_request, :ok, @user.errors.full_messages) unless @user.valid?
+      escape_with!(:user, :not_update, :ok, @user.errors.full_messages) unless @user.update(user_change_password)
+      render json: {message: ApiError::MESSAGES[:user][:update_password]}, status: :ok and return
+    rescue ApiError => e
+      render_api_error(e)
+    end
+  end
+
   private
   def user_create_parameters 
     params.permit(:login, :role, :email, :phone, :password)
@@ -115,6 +129,10 @@ class Api::V1::UsersController < ApplicationController
 
   def user_update_parameters 
     params.permit(:login, :avatar, :description, :email, :phone, address: [:zip, :country, :city, :state, :street])
+  end
+
+  def user_change_password
+    params.permit(:password)
   end
   
   def get_user

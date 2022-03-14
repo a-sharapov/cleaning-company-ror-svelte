@@ -11,6 +11,7 @@ Rails.application.routes.draw do
       post "users", to: "users#new"
       get "user/:login", to: "users#show"
       put "user/:login", to: "users#update"
+      put "user/:login/password", to: "users#change_password"
       delete "user/:login", to: "users#destroy"
       get 'avatar/:login', to: "users#avatar"
       get 'sessions/:login', to: "users#sessions"

@@ -28,6 +28,7 @@ class ApiError < StandardError
       new_password: "Пароль был сгенерирован и отправлен, проверьте SMS/email",
       old_password_mismatch: "Старый пароль указан неверно",
       no_sessions: "У пользователя пока нет активных сессий",
+      update_password: "Пароль был успешно обвновлён",
     },
     profiles: {
       not_exist: "Профиль компании недоступен или ещё не был создан",
