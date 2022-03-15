@@ -25,6 +25,8 @@
 <script>
   import Head from "$lib/components/Seo/Head.svelte"
   import Article from "$lib/components/Chunks/Article.svelte"
+  import CompanyItem from "$lib/components/Chunks/CompanyItem.svelte"
+  import ReviewItem from "$lib/components/Chunks/ReviewItem.svelte"
   import Loader from "$lib/components/UI/Loader.svelte"
 
   export let companies
@@ -78,7 +80,9 @@
     {#if companies?.data?.message}
       <p class="ligher">{companies.data.message}</p>
     {:else if !companies?.data?.message && companies.data}
-    
+      {#each companies.data.data as item}
+        <CompanyItem {item} />
+      {/each}
     {:else}
       <Loader />
     {/if}
@@ -88,7 +92,7 @@
     {#if reviews?.data?.message}
       <p class="ligher">{reviews.data.message}</p>
     {:else if !reviews?.data?.message && reviews.data}
-
+      <Reviews data={reviews.data} short={true} />
     {:else}
       <Loader />
     {/if}

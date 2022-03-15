@@ -100,7 +100,7 @@ export const retryFetch = async (url, options, user) => {
   })
 
   while (retry) {
-    result = await fetch(url, opts).then(response => response.json())
+      result = await fetch(url, opts).then(response => response.json())
 
     if (result.assets === "retrieve") {
       let resign = await retrieveSession()
