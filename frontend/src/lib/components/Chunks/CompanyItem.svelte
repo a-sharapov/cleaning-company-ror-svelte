@@ -70,7 +70,7 @@
       0px 33px 80px rgba(0, 0, 0, 0.19);
   }
   .company-item .company-logo {
-    margin: -70px auto 10px;
+    margin: -70px auto 0;
   }
   .company-item .company-location {
     position: absolute;
