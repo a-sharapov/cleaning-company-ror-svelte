@@ -61,6 +61,34 @@ class Api::V1::ReviewController < ApplicationController
     end
   end
 
+  def raiting
+    begin
+      company = CompanyProfile.find_by(slug: params[:slug])
+      escape_with!(:profiles, :not_exist, :ok) unless company
+      reviews = Review.all_of(company_name: company.company_name)
+      records = reviews.count
+      if records > 0
+        assessment = 0
+        reviews.each do |review|
+          assessment += review.assessment.to_i
+        end
+        average = (assessment.to_i/records.to_i).ceil
+        message = {
+          count: records,
+          assessment: average
+        }
+      else
+        message = {
+          count: 0,
+          assessment: 5
+        }
+      end
+      render json: message, status: :ok and return 
+    rescue ApiError => e
+      render_api_error(e)
+    end
+  end
+
   private
   def review_parameters
     params.permit(

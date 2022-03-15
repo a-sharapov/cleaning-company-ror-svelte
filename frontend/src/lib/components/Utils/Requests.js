@@ -198,3 +198,8 @@ export const setPasswordDirectly = async (user, subscriber, body) => {
   })
   return output
 }
+
+export const getRaiting = async (company_slug) => {
+  let output = await ApiRequest(`raiting/${company_slug}/`)
+  return output
+}

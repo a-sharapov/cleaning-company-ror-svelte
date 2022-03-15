@@ -27,6 +27,7 @@ Rails.application.routes.draw do
       post "reviews", to: "review#new"
       get "review/:slug", to: "review#show"
       put "review/:slug", to: "review#update"
+      get "raiting/:slug", to: "review#raiting"
 
       get "events", to: "cleaning_event#index"
       post "events", to: "cleaning_event#new"

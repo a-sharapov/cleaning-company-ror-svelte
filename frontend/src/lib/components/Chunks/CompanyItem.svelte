@@ -1,5 +1,16 @@
 <script>
+  import { writable } from 'svelte/store'
+  import { browser } from '$app/env'
+  import { getRaiting } from "$lib/components/Utils/Requests.js"
+
   export let item
+  let assessment = writable(null)
+
+  browser && new Promise(async (res) => {
+  let result = await getRaiting(item.slug)
+  assessment.set(result)
+  res()
+  })
 </script>
 
 <div class="company-item">
@@ -12,6 +23,16 @@
     <span class="company-location">{item.address.country}</span>
   {/if}
   <h4 class="company-header">{item.company_name}</h4>
+  {#if $assessment}
+    <span class="company-assessment">
+      <span>{$assessment.assessment.toFixed(2)}</span> 
+      {#if $assessment.count > 0}
+      ({$assessment.count} Оценок)
+      {:else}
+      (Пока нет оценок)
+      {/if}
+    </span>
+  {/if}
   <p class="company-description">{item.description}</p>
   {#if item.service_types.length > 0}
   <span class="company-services">
@@ -85,5 +106,26 @@
   }
   .company-prices-header {
     font-weight: bold;
+  }
+  .company-assessment {
+    display: block;
+    margin: 5px auto;
+    padding: 0;
+    font-size: 12px;
+    color: #00000070;
+  }
+  .company-assessment > span {
+    font-weight: bold;
+    font-size: 16px;
+    color: #211;
+  }
+  .company-assessment > span:before {
+    display: inline-block;
+    content: "";
+    width: 16px;
+    height: 16px;
+    margin: 0 4px -2px 0;
+    background: url(/i/star.svg) no-repeat center center;
+    background-size: contain;
   }
 </style>
