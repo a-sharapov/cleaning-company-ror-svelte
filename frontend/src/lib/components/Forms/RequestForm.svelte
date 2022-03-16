@@ -3,8 +3,7 @@
   import { browser } from '$app/env'
   import Loader from "$lib/components/UI/Loader.svelte"
   import FormAlert from "$lib/components/Forms/FormAlert.svelte"
-  import StarInput from "$lib/components/Forms/StarInput.svelte"
-  import { setReview } from "$lib/components/Utils/Requests.js"
+  import {  } from "$lib/components/Utils/Requests.js" //setEvent
   import { 
     messageProcessor, 
     message, 
@@ -22,19 +21,8 @@
 
   const handleOnSubmit = async (event) => {
     event.preventDefault()
-    try {
-      $loading = true
-      let data = new FormData(event.target)
-      let result = await setReview(data)
-      message.set(messageProcessor(result))
-    } catch (e) {
-      $message.type = "error"
-      $message.content = e.message
-    } finally {
-      $loading = false
-    }
   }
-  
+
   browser && loading.set(false)
 </script>
 
@@ -42,32 +30,19 @@
   {#if $loading}
     <Loader />
   {/if}
-  <form action="/" method="post" enctype="multipart/form-data" on:submit="{handleOnSubmit}">
+  <form method="post" enctype="multipart/form-data" on:submit="{handleOnSubmit}">
     <FormAlert {message} />
     <slot></slot>
-    <label data-width="full">
-      Оцените компанию: <StarInput name={"assessment"} />
-    </label>
-    <label data-width="half">
-      <input type="text" name="customer" placeholder="Отображемое имя" readonly={$readonly} bind:value={$customer} />
-    </label><label data-width="half">
-      <input type="text" name="company_name" placeholder="Название компании" readonly={$readonly} bind:value={$companyName} />
-    </label>
-    <label data-width="full">
-      <textarea name="description" rows="3" placeholder="Напишите ваш отзыв"></textarea>
-    </label>
-    <label data-width="full">
-      <button type="submit">Оставить отзыв</button>
-    </label>
+  
   </form>
-  <slot name="after"></slot>
 </div>
 
 <style>
   .event-request-form-wrapper {
     display: block;
     clear: both;
-    margin: 50px 0;
+    padding: 50px 0;
+    background: var(--mf-darkgray)
   }
 
   .event-request-form-wrapper form {

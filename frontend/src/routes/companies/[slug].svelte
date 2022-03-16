@@ -27,6 +27,7 @@
   import Loader from "$lib/components/UI/Loader.svelte"
   import Head from "$lib/components/Seo/Head.svelte"
   import ReviewItem from "$lib/components/Chunks/ReviewItem.svelte"
+  import ReviewForm from "$lib/components/Forms/ReviewForm.svelte"
   import RequestForm from "$lib/components/Forms/RequestForm.svelte"
   import { browser } from '$app/env'
   import { writable } from 'svelte/store'
@@ -113,8 +114,11 @@
         {/if}
       </div>
       <RequestForm company={company.company_name}>
-        <h4>Оцените работу компании</h4>
+        <h4>Оставьте заявку на проведение уборки</h4>
       </RequestForm>
+      <ReviewForm company={company.company_name}>
+        <h4>Оцените работу компании</h4>
+      </ReviewForm>
     {/if}
   </section>
 </article>
