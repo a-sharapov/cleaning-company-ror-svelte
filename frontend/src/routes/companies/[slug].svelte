@@ -105,18 +105,15 @@
         <h4>Отзывы о компании</h4>
         {#if $companyReviews?.message}
           <p>{$companyReviews?.message}</p>
-          <hr />
-          <p>Хотите быт первым?</p>
         {:else if !$companyReviews?.message && $companyReviews?.data}
           {#each $companyReviews.data as item}
           <ReviewItem {item} />
           {/each}
-          <hr />
-          <p>Желаете оставить свой?</p>
         {/if}
-        <p><a href="/reviews?company={company.slug}" class="button">Оставить отзыв</a></p>
       </div>
-      <RequestForm company={company.slug} />
+      <RequestForm company={company.slug}>
+        <h4>Оцените работу компании написав отзыв</h4>
+      </RequestForm>
     {/if}
   </section>
 </article>
