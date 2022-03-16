@@ -7,11 +7,8 @@
     let current = event.target.getAttribute("data-value")
     let allStars = event.target.closest(".star-input").querySelectorAll(".star")
     allStars.forEach(element => {
-      element.classList.remove("active")
+      (element.getAttribute("data-value") <= current) ? element.classList.add("active") : element.classList.remove("active")
     })
-    for (let i = 1; i <= current; i++) {
-      event.target.closest(".star-input").querySelector(`.star[data-value="${i}"]`).classList.add("active")
-    }
   }
 
   const handleOnMouseLeave = (event) => {
