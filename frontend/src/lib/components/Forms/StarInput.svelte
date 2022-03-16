@@ -1,7 +1,7 @@
 <script>
   import { writable } from 'svelte/store'
   export let name
-  let assessment = writable(0)
+  let assessment = writable("Не указана")
   
   const handleOnMouseOver = (event) => {
     let current = event.target.getAttribute("data-value")

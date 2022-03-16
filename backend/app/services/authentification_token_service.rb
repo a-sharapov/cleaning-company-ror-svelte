@@ -5,7 +5,7 @@ class AuthentificationTokenService
   class << self
     def create_token(data, type, metrics = nil)
       return false unless data.present?
-      expires_in = type.eql?(:refresh) ? (Time.now + 7.days).to_i : (Time.now + 25.minutes).to_i
+      expires_in = type.eql?(:refresh) ? (Time.now + 7.days).to_i : (Time.now + 1.minutes).to_i
 
       refresh_data = {
         login: data[:login],

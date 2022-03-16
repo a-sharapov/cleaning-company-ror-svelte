@@ -203,3 +203,11 @@ export const getRaiting = async (company_slug) => {
   let output = await ApiRequest(`raiting/${company_slug}/`)
   return output
 }
+
+export const setReview = async (body) => {
+  let output = await ApiRequest(`reviews`, {
+    method: "post",
+    body,
+  })
+  return output
+}

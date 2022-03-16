@@ -46,7 +46,6 @@
     companyReviews.set(reviews)
     res()
   })
-  console.log(company)
 </script>
 
 <Head {title} metaDescription={null} metaKeywords={null} metaRobots={"noindex, nofollow"} />
@@ -69,22 +68,13 @@
       {:else}
         <h1>Профиль компании <strong>&laquo;{company.company_name}&raquo;</strong></h1>
       {/if}
-      <div class="row">
-        <h4>Оценка на основании отзывов пользователей</h4>
-        <span class="company-assessment">
-          <span>{$companyAssessment.assessment?.toFixed(2)}</span> 
-          {#if $companyAssessment.count > 0}
-          ({$companyAssessment.count} Оценок)
-          {:else}
-          (Пока нет оценок)
-          {/if}
-        </span>
-      </div>
       <div class="row half-row">
         <h4>Предоставляемые услуги</h4>
         {#if company.service_types?.length > 0}
         <ul class="company-services">
-          <li>{@html company.service_types.join("</li><li>")}</li>
+          {#each company.service_types as service}
+            <li>{service}</li>
+          {/each}
         </ul>
         {:else}
         <p>Компания ещё не указала, какие услуги она предоставляет</p>
@@ -102,6 +92,17 @@
         {/if}
       </div>
       <div class="row">
+        <h4>Срденяя оценка</h4>
+        <span class="company-assessment">
+          <span>{$companyAssessment.assessment?.toFixed(2)}</span> 
+          {#if $companyAssessment.count > 0}
+          ({$companyAssessment.count} Оценок)
+          {:else}
+          (Пока нет оценок)
+          {/if}
+        </span>
+      </div>
+      <div class="row">
         <h4>Отзывы о компании</h4>
         {#if $companyReviews?.message}
           <p>{$companyReviews?.message}</p>
@@ -111,8 +112,8 @@
           {/each}
         {/if}
       </div>
-      <RequestForm company={company.slug}>
-        <h4>Оцените работу компании написав отзыв</h4>
+      <RequestForm company={company.company_name}>
+        <h4>Оцените работу компании</h4>
       </RequestForm>
     {/if}
   </section>
@@ -127,7 +128,7 @@
     display: block;
     width: 100%;
     padding: 20px 0;
-    margin: -20px 0 20px;
+    margin: -20px 0 0;
     height: 250px;
     overflow: hidden;
     background: #fefefe;

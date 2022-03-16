@@ -101,15 +101,20 @@ export const retryFetch = async (url, options, user) => {
 
   while (retry) {
       result = await fetch(url, opts).then(response => response.json())
-
-    if (result.assets === "retrieve") {
+      // debugger
+      // console.group(`RetryFetch to ${url}`)
+      // console.log("Need to retry: ", !!result.assets)
+      // console.log("Retry status:", retry)
+      // console.log("Current step:", count+1)
+      // console.groupEnd(`RetryFetch to ${url}`)
+    if (!!result.assets && result.assets === "retrieve") {
       let resign = await retrieveSession()
 
       if (!!resign.user) {
         retry = true
         setUserInStorage({...usr, ...resign.user}, remembered())
         user.set(getUserFromStorage())
-        opts.access_token = usr.access_token
+        opts.headers.Authorization = `Bearer ${resign.user.access_token}`
       }
 
       if (resign.assets === "unauthorize") {

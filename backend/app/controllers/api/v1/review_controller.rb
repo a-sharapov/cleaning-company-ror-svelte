@@ -3,6 +3,7 @@ class Api::V1::ReviewController < ApplicationController
   before_action :set_reviews_search_query, only: [:index] 
   before_action :get_tokens, only: [:update] 
   before_action :get_review, only: [:show, :update] 
+  before_action :get_user_by_login, only: [:new] 
 
   def index
     begin
@@ -35,14 +36,12 @@ class Api::V1::ReviewController < ApplicationController
 
   def new
     begin
-      user = prepare_user!
-      escape_with!(:reviews, :already_exist, :ok) if Review.find_by(customer: user.login)
+      escape_with!(:reviews, :self, :ok) if review_parameters[:company_name] == @user.company_profile.company_name
+      escape_with!(:reviews, :already_exist, :ok) if Review.find_by({customer: review_parameters[:customer], company_name: review_parameters[:company_name]})
       review = Review.new(review_parameters)
-      review.customer = user ? user.login : "Anonymous"
       company = CompanyProfile.find_by(company_name: review_parameters[:company_name])
-      escape_with!(:profiles, :not_exist, :ok, review.errors.full_messages) unless company
+      escape_with!(:profiles, :not_exist, :ok) unless company
       review.company_profile = company
-      escape_with!(:reviews, :already_exist, :ok) if Review.find_by(customer: user.login, company_name: review_parameters[:company_name])
       escape_with!(:api, :invalid_request, :ok, review.errors.full_messages) unless review.valid? && review.save()
       render_data(review)
     rescue ApiError => e
@@ -104,6 +103,13 @@ class Api::V1::ReviewController < ApplicationController
   def get_review
     @slug = params[:slug]
     @review = Review.find_by(slug: @slug)
+  end
+
+  def get_user_by_login
+    login = review_parameters[:customer]
+    @user = User.find_by(:login => login)
+    @user = User.find_by(:email => login) unless @user
+    @user = User.find_by(:phone => login) unless @user
   end
 
   def set_reviews_search_query

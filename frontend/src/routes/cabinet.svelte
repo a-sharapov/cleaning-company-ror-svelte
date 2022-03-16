@@ -156,7 +156,7 @@
       <hr />
       <p>Вы создали аккаунт: <br /><strong>{new Date($user.created_at).toLocaleDateString("ru-RU")} в {new Date($user.created_at).toLocaleTimeString("ru-RU")}</strong></p>
       {#if $user.created_at !== $user.updated_at}
-      <p>И последний раз обновили данные: <br /><strong>{new Date($user.updated_at).toLocaleDateString("ru-RU")} в {new Date($user.updated_at).toLocaleTimeString("ru-RU")}</strong></p>
+      <p>И последний раз авторизаовались: <br /><strong>{new Date($user.updated_at).toLocaleDateString("ru-RU")} в {new Date($user.updated_at).toLocaleTimeString("ru-RU")}</strong></p>
       {/if}
       {#if $user.banned}<p>Заблокирован до: <br /><strong>{new Date($user.blocked_until).toLocaleDateString("ru-RU")}, {new Date($user.blocked_until).toLocaleTimeString("ru-RU")}</strong></p>{/if}
       </aside>
