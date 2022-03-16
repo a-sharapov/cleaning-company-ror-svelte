@@ -107,25 +107,4 @@
   .company-prices-header {
     font-weight: bold;
   }
-  .company-assessment {
-    display: block;
-    margin: 5px auto;
-    padding: 0;
-    font-size: 12px;
-    color: #00000070;
-  }
-  .company-assessment > span {
-    font-weight: bold;
-    font-size: 16px;
-    color: #211;
-  }
-  .company-assessment > span:before {
-    display: inline-block;
-    content: "";
-    width: 16px;
-    height: 16px;
-    margin: 0 4px -2px 0;
-    background: url(/i/star.svg) no-repeat center center;
-    background-size: contain;
-  }
 </style>

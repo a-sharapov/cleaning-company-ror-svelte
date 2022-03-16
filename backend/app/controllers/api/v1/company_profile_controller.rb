@@ -26,7 +26,7 @@ class Api::V1::CompanyProfileController < ApplicationController
 
   def show
     begin
-      escape_with!(:profiles, :not_exist, :ok) unless @profile
+      escape_with!(:profiles, :not_exist, :not_found) unless @profile
       render_data(@profile)
     rescue ApiError => e
       render_api_error(e)

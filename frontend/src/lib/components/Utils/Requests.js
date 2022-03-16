@@ -115,8 +115,8 @@ export const getCompanyEvents = async (user, subscriber, company) => {
   return output
 }
 
-export const getCompanyReviews = async (user, subscriber, company) => {
-  let output = await retryApiRequest(`reviews/?company_name=${company}`, user, subscriber)
+export const getCompanyReviews = async (company) => {
+  let output = await ApiRequest(`reviews/?company_name=${company}`)
   return output
 }
 

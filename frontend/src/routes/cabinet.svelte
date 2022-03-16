@@ -204,11 +204,11 @@
       <div class="tab" data-tab="9">
         <UserPasswordForm>
           <h3>Изменть пароль:</h3>
-          <div slot="after">
+          <svelte:fragment slot="after">
             <hr />
             <p>Пароль пользователя также может быть изменён в любой момент с помощью <a href="/restore">фомы восстановления доступа</a>, однако вам необходимо иметь уникальный код из письма активации.</p>
             <p>В этом случае новый пароль будет сгенерирован автоматически и отправлен по SMS/email.</p>
-          </div>
+          </svelte:fragment>
         </UserPasswordForm>
       </div>
       <div class="tab" data-tab="3">
