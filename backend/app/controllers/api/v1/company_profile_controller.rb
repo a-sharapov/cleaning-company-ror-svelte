@@ -1,6 +1,6 @@
 class Api::V1::CompanyProfileController < ApplicationController
   before_action :set_paging, only: [:index] 
-  before_action :get_company_profile, only: [:show, :update, :logotype] 
+  before_action :get_company_profile, only: [:show, :update, :logotype, :services] 
   before_action :set_profiles_search_query, only: [:index] 
   before_action :get_tokens, only: [:new, :update, :destroy] 
 
@@ -82,14 +82,21 @@ class Api::V1::CompanyProfileController < ApplicationController
     begin
       search_query = /.*#{param_to_search(params[:q])}.*/
       profiles = CompanyProfile.full_text_search(search_query)
-      # profiles = CompanyProfile.all_of(company_name: search_query)
-      # profiles = CompanyProfile.all_of(slug: search_query) unless profiles.any?
-
       escape_with!(:profiles, :not_found, :ok) unless profiles.any?
       output = []
       profiles.map do |profile|
         output << profile.company_name
       end
+      render json: output, status: :ok and return
+    rescue ApiError => e
+      render_api_error(e)
+    end
+  end
+
+  def services
+    begin
+      escape_with!(:profiles, :not_found, :ok) unless @profile.present?
+      output = @profile.service_types
       render json: output, status: :ok and return
     rescue ApiError => e
       render_api_error(e)

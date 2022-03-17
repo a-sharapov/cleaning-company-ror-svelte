@@ -113,7 +113,7 @@
           {/each}
         {/if}
       </div>
-      <RequestForm company={company.company_name}>
+      <RequestForm company={company.company_name} companySlug={company.slug}>
         <h4>Оставьте заявку на проведение уборки</h4>
       </RequestForm>
       <ReviewForm company={company.company_name}>

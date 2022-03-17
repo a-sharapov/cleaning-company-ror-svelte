@@ -19,11 +19,9 @@
 
 <slot></slot>
 <span class="star-input" on:mouseleave="{handleOnMouseLeave}">
-  <i class="star" data-value="1" on:mouseenter="{handleOnMouseOver}"></i>
-  <i class="star" data-value="2" on:mouseenter="{handleOnMouseOver}"></i>
-  <i class="star" data-value="3" on:mouseenter="{handleOnMouseOver}"></i>
-  <i class="star" data-value="4" on:mouseenter="{handleOnMouseOver}"></i>
-  <i class="star" data-value="5" on:mouseenter="{handleOnMouseOver}"></i>
+  {#each [1,2,3,4,5] as i }
+  <i class="star" data-value="{i}" on:mouseenter="{handleOnMouseOver}"></i>
+  {/each }
   <input type="hidden" name="{name}" value="{$assessment}" />
 </span>
 

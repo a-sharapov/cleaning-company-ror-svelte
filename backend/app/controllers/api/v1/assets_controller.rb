@@ -279,7 +279,7 @@ class Api::V1::AssetsController < ApplicationController
           "Зимбабве",
         ]
       })
-      render json: {message: "Assets created successfully"}, status: :ok and return
+      render json: {message: "Все начальные данные были успешно установлены"}, status: :ok and return
     rescue ApiError => e
       render_api_error(e)
     end

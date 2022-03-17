@@ -45,15 +45,19 @@
   <form method="post" enctype="multipart/form-data" on:submit="{handleOnSubmit}">
     <FormAlert {message} />
     <slot></slot>
-    <label data-width="full">
-      Оцените компанию: <StarInput name={"assessment"} />
-    </label>
     <label data-width="half">
+      Пользователь:<br />
       <input type="text" name="customer" placeholder="Отображемое имя" readonly={$readonly} bind:value={$customer} />
     </label><label data-width="half">
+      Компания:<br />
       <input type="text" name="company_name" placeholder="Название компании" readonly={$readonly} bind:value={$companyName} />
     </label>
+    <hr />
+    <label data-width="full" data-align="center">
+      Поставьте оценку: <StarInput name={"assessment"} />
+    </label>
     <label data-width="full">
+      Отзыв:<br />
       <textarea name="description" rows="3" placeholder="Напишите ваш отзыв"></textarea>
     </label>
     <label data-width="full">

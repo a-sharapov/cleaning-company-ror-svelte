@@ -201,6 +201,7 @@ label {
   padding: 0 5px;
   vertical-align: top;
   margin-bottom: 10px;
+  text-align: left;
 }
 
 label[data-width='full'] {
