@@ -3,7 +3,7 @@
   import { browser } from '$app/env'
   import Loader from "$lib/components/UI/Loader.svelte"
   import FormAlert from "$lib/components/Forms/FormAlert.svelte"
-  import { getServices } from "$lib/components/Utils/Requests.js" //setEvent
+  import { getCompanyPartial } from "$lib/components/Utils/Requests.js" //setEvent
   import { 
     messageProcessor, 
     message, 
@@ -12,23 +12,29 @@
   import SearchInput from './SearchInput.svelte'
 
   export let company = null
-  export let companySlug = null
   let loading = writable(true)
   let customer = writable("Anonymous")
   let companyName = writable(null)
   let readonly = writable(false)
-  let services = writable(null)
+  let services = writable([])
+  let prices = writable({})
 
   $user.login && customer.set($user.login)
   company && (companyName.set(company), readonly.set(true))
 
   const handleOnSubmit = async (event) => {
     event.preventDefault()
+
   }
+
   browser && (new Promise(async (res) => {
-    let result = await getServices(companySlug)
-    res(result)
-  })).then(data => services.set(data))
+    let services = await getCompanyPartial(company, "service_types")
+    let prices = await getCompanyPartial(company, "prices")
+    res({services, prices})
+  }).then(data => {
+    services.set(data.services)
+    prices.set(data.prices)
+  }))
   browser && loading.set(false)
 </script>
 
@@ -41,20 +47,42 @@
     <slot></slot>
     <label data-width="half">
       Пользователь:<br />
-      <input type="text" name="customer" placeholder="Отображемое имя" readonly={$readonly} bind:value={$customer} />
+      <input type="text" name="customer" placeholder="Отображемое имя" readonly={$readonly} bind:value={$customer} required />
     </label><label data-width="half">
       Компания:<br />
       {#if $companyName}
-      <input type="text" name="company_name" readonly="readonly" placeholder="Название компании" value="{$companyName}"/>
+      <input type="text" name="company_name" readonly="readonly" placeholder="Название компании" value="{$companyName}" required />
       {:else}
-      <SearchInput name="company_name" placeholder="Начните вводить название компании" />
+      <SearchInput name="company_name" placeholder="Начните вводить название компании" {services} {prices} />
       {/if}
     </label>
-    {#if $services}
-      {#each $services as service}
-        <label data-width="half"><input type="checkbox" name="services[]" value="{service}" />&nbsp;{service}</label>
-      {/each}
+    {#if $services.length > 0}
+      <div class="form-row">
+        <hr />
+        <h5>Выберите необходимые услуги:</h5>
+        {#each $services as service}
+          <label data-width="half"><input type="checkbox" name="services[]" value="{service}" />&nbsp;{service}</label>
+        {/each}
+        <hr />
+      </div>
     {/if}
+    <div class="form-row">
+    <h5>Информация об обьекте:</h5>
+    <label data-width="third">
+      Комнаты до 20 м<sup>2</sup>:<br />
+      <input type="number" name="assets[standard]" data-price={$prices?.standard} value="1" min="0" max="100" />
+    </label><label data-width="third">
+      Комнаты от 20 м<sup>2</sup>:<br />
+      <input type="number" name="assets[large]" data-price={$prices?.large} value="0" min="0" max="100" />
+    </label><label data-width="third">
+      Санузлы:<br />
+      <input type="number" name="assets[restroom]" data-price={$prices?.restroom} value="0" min="0" max="100" />
+    </label>
+    </div>
+    
+    <label data-width="full" data-align="center">
+      <button type="submit">Заказать уборку</button>
+    </label>
   </form>
 </div>
 
@@ -70,5 +98,9 @@
     display: block;
     max-width: 600px;
     margin: 0 auto;
+  }
+
+  form .form-row {
+    text-align: left;
   }
 </style>

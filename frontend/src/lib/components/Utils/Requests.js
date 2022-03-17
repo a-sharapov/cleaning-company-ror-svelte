@@ -212,8 +212,8 @@ export const setReview = async (body) => {
   return output
 }
 
-export const getServices = async (company_slug) => {
-  let output = await ApiRequest(`company/${company_slug}/services/`)
+export const getCompanyPartial = async (company_slug, partial) => {
+  let output = await ApiRequest(`company_partial/${company_slug}/?type=${partial}`)
   return output
 }
 

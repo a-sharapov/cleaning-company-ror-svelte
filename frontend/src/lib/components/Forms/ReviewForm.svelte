@@ -60,7 +60,7 @@
       Отзыв:<br />
       <textarea name="description" rows="3" placeholder="Напишите ваш отзыв"></textarea>
     </label>
-    <label data-width="full">
+    <label data-width="full" data-align="center">
       <button type="submit">Оставить отзыв</button>
     </label>
   </form>

@@ -27,6 +27,7 @@
   import Article from "$lib/components/Chunks/Article.svelte"
   import CompanyItem from "$lib/components/Chunks/CompanyItem.svelte"
   import ReviewItem from "$lib/components/Chunks/ReviewItem.svelte"
+  import RequestForm from "$lib/components/Forms/RequestForm.svelte"
   import Loader from "$lib/components/UI/Loader.svelte"
 
   export let companies
@@ -96,6 +97,11 @@
     {:else}
       <Loader />
     {/if}
+  </section>
+  <section id="request-event">
+    <RequestForm>
+      <h4>Оставьте заявку на проведение уборки</h4>
+    </RequestForm>
   </section>
 </Article>
 

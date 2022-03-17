@@ -82,6 +82,8 @@
         {/if}
       </div><div class="row half-row">
         <h4>Стоимость услуг</h4>
+        <p class="light small">Обратите внимание, что стоимость уборки каждого типа комнат – фиксированная, не зависимо от метража и пропорциональна затраченному на неё времени.</p>
+        <hr />
         {#if company.prices?.standard > 0 && company.prices?.standard !== ""}
         <ul class="company-prices">
           <li>Помещение до 20 м<sup>2</sup> &ndash; {company.prices.standard} <span class="price-bulk">BYN / час</span></li>
@@ -89,7 +91,7 @@
           <li>Санузлы &ndash; {company.prices.restroom} <span class="price-bulk">BYN / час</span></li>
         </ul>
         {:else}
-        <p>Компание ещё не установила стоимость своих услуг</p>
+        <p>Компание ещё не определила стоимость своих услуг, стоимость будет оговрена индивидуально</p>
         {/if}
       </div>
       <div class="row">
@@ -113,7 +115,7 @@
           {/each}
         {/if}
       </div>
-      <RequestForm company={company.company_name} companySlug={company.slug}>
+      <RequestForm company={company.company_name}>
         <h4>Оставьте заявку на проведение уборки</h4>
       </RequestForm>
       <ReviewForm company={company.company_name}>

@@ -103,7 +103,13 @@ class Api::V1::CleaningEventController < ApplicationController
         :city, 
         :state, 
         :street
-      ]
+      ],
+      assets: {
+        :standard,
+        :large,
+        :restroom,
+        :invoice
+      }
     )
   end
 

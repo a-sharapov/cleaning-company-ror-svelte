@@ -212,6 +212,10 @@ label[data-width='half'] {
   width: 50%;
 }
 
+label[data-width='third'] {
+  width: calc(100% / 3);
+}
+
 label[data-align='left'] {
   text-align: left;
 }

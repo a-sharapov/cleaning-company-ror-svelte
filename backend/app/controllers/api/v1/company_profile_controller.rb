@@ -1,6 +1,6 @@
 class Api::V1::CompanyProfileController < ApplicationController
   before_action :set_paging, only: [:index] 
-  before_action :get_company_profile, only: [:show, :update, :logotype, :services] 
+  before_action :get_company_profile, only: [:show, :update, :logotype, :partial] 
   before_action :set_profiles_search_query, only: [:index] 
   before_action :get_tokens, only: [:new, :update, :destroy] 
 
@@ -93,11 +93,12 @@ class Api::V1::CompanyProfileController < ApplicationController
     end
   end
 
-  def services
+  def partial
     begin
       escape_with!(:profiles, :not_found, :ok) unless @profile.present?
-      output = @profile.service_types
-      render json: output, status: :ok and return
+      type = params[:type]
+      safety = except_data! @profile
+      render json: safety[type], status: :ok and return
     rescue ApiError => e
       render_api_error(e)
     end
@@ -124,6 +125,7 @@ class Api::V1::CompanyProfileController < ApplicationController
   def get_company_profile
     @slug = params[:slug]
     @profile = CompanyProfile.find_by(slug: @slug)
+    @profile = CompanyProfile.find_by(company_name: @slug) unless @profile
   end
 
   def set_profiles_search_query

@@ -1,11 +1,13 @@
 <script>
   import { writable } from 'svelte/store'
-  import { getCompaniesByName } from "$lib/components/Utils/Requests.js"
+  import { getCompaniesByName, getCompanyPartial } from "$lib/components/Utils/Requests.js"
   import { debounce } from "$lib/components/Utils/Custom.js"
 
   export let name
   export let searchin = "company"
   export let placeholder = name
+  export let services
+  export let prices
   let selected = writable("")
   let list = writable(null)
 
@@ -21,19 +23,21 @@
     } else {
       list.set(result)
     }
+    (event.target.value === "") && (list.set(null), services.set([]))
   }, 7e2)
 
-  const handleOnClick = (event) => {
+  const handleOnClick = async (event) => {
     let value = event.target.getAttribute("data-item")
-    console.log(value)
     selected.set(value)
     list.set(null)
+    services.set(await getCompanyPartial(value, "service_types")), 
+    prices.set(await getCompanyPartial(value, "prices"))
   }
 </script>
 
 <span class="search-input-wrapper">
-  <input type="hidden" name="{name}" bind:value="{$selected}" />
-  <input type="text" name="search-input-handler" placeholder="{placeholder}" bind:value="{$selected}" on:input="{handleOnInput}" />
+  <input type="hidden" name="{name}" bind:value="{$selected}" required />
+  <input type="text" name="search-input-handler" placeholder="{placeholder}" bind:value="{$selected}" on:input="{handleOnInput}" required />
   <span class="result-list">
     {#if Array.isArray($list)}
       {#each $list as item}
@@ -68,6 +72,7 @@
     padding: 0;
     opacity: 1;
     transition: all .2s linear;
+    z-index: 10;
     box-shadow: 0px 4.1px 10px rgb(0 0 0 / 9%), 0px 33px 80px rgb(0 0 0 / 19%);
   }
   :global(.search-input-wrapper .result-list:empty) {
