@@ -2,6 +2,7 @@ class CompanyProfile
   include Mongoid::Document
   include Mongoid::Paperclip
   include Mongoid::Timestamps
+  include Mongoid::Search
   
   belongs_to :user
   has_many :review, validate: false
@@ -22,4 +23,6 @@ class CompanyProfile
 
   has_mongoid_attached_file :logotype
   validates_attachment :logotype, content_type: { content_type: ["image/jpg", "image/jpeg", "image/png", "image/gif"] }
+
+  search_in :slug, :company_name
 end

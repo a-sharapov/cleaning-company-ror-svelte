@@ -9,6 +9,7 @@
     message, 
     user, 
   } from '$lib/components/Hooks/Custom.js'
+import SearchInput from './SearchInput.svelte'
 
   export let company = null
   let loading = writable(true)
@@ -33,7 +34,9 @@
   <form method="post" enctype="multipart/form-data" on:submit="{handleOnSubmit}">
     <FormAlert {message} />
     <slot></slot>
-  
+    <label data-width="full">
+      <SearchInput name="company_name" placeholder="Начните вводить название компании" />
+    </label>
   </form>
 </div>
 

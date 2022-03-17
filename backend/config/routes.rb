@@ -22,6 +22,7 @@ Rails.application.routes.draw do
       get "company/:slug", to: "company_profile#show"
       get 'logotype/:slug', to: "company_profile#logotype"
       put "company/:slug", to: "company_profile#update"
+      get "companies/search", to: "company_profile#search"
 
       get "reviews", to: "review#index"
       post "reviews", to: "review#new"

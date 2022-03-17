@@ -211,3 +211,8 @@ export const setReview = async (body) => {
   })
   return output
 }
+
+export const getCompaniesByName = async (name) => {
+  let output = await ApiRequest(`companies/search/?q=${name}`)
+  return output
+}

@@ -740,7 +740,6 @@ main#app article#page-content {
 }
 
 article > section {
-  max-width: 1400px;
   margin: 0 auto; 
 }
 

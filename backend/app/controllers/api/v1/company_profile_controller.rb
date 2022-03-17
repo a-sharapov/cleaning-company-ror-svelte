@@ -78,6 +78,24 @@ class Api::V1::CompanyProfileController < ApplicationController
     end
   end
 
+  def search
+    begin
+      search_query = /.*#{param_to_search(params[:q])}.*/
+      profiles = CompanyProfile.full_text_search(search_query)
+      # profiles = CompanyProfile.all_of(company_name: search_query)
+      # profiles = CompanyProfile.all_of(slug: search_query) unless profiles.any?
+
+      escape_with!(:profiles, :not_found, :ok) unless profiles.any?
+      output = []
+      profiles.map do |profile|
+        output << profile.company_name
+      end
+      render json: output, status: :ok and return
+    rescue ApiError => e
+      render_api_error(e)
+    end
+  end
+
   private
   def company_profile_parameters
     params.permit(
