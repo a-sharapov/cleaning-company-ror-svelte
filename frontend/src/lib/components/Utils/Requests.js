@@ -11,7 +11,7 @@ const joinOpts = (opts) => {
 
   if (opts) {
     o = Object.keys(opts).map((val) => {
-      return encodeURIComponent("${val}=${opts[val]}")
+      return encodeURIComponent(`${val}=${opts[val]}`)
     })
     query = "?" + o.join("&")
   }

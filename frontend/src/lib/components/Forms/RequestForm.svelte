@@ -69,17 +69,15 @@
     <div class="form-row">
     <h5>Информация об обьекте:</h5>
     <label data-width="third">
-      Комнаты до 20 м<sup>2</sup>:<br />
-      <input type="number" name="assets[standard]" data-price={$prices?.standard} value="1" min="0" max="100" />
+      Комнаты до 20 м<sup>2</sup>:<br /><input type="number" name="assets[standard]" data-price={$prices?.standard} value="1" min="0" max="100" />
     </label><label data-width="third">
-      Комнаты от 20 м<sup>2</sup>:<br />
-      <input type="number" name="assets[large]" data-price={$prices?.large} value="0" min="0" max="100" />
+      Комнаты от 20 м<sup>2</sup>:<br /><input type="number" name="assets[large]" data-price={$prices?.large} value="0" min="0" max="100" />
     </label><label data-width="third">
-      Санузлы:<br />
-      <input type="number" name="assets[restroom]" data-price={$prices?.restroom} value="0" min="0" max="100" />
+      Санузлы:<br /><input type="number" name="assets[restroom]" data-price={$prices?.restroom} value="0" min="0" max="100" />
     </label>
     </div>
     
+    <hr />
     <label data-width="full" data-align="center">
       <button type="submit">Заказать уборку</button>
     </label>
@@ -91,7 +89,7 @@
     display: block;
     clear: both;
     padding: 50px 0;
-    background: var(--mf-darkgray)
+    background: var(--mf-gray)
   }
 
   .event-request-form-wrapper form {
@@ -100,7 +98,17 @@
     margin: 0 auto;
   }
 
-  form .form-row {
+  .event-request-form-wrapper form .form-row {
     text-align: left;
+  }
+
+  .event-request-form-wrapper form button[type="submit"] {
+    height: 50px;
+    font-weight: bold;
+    padding: 0 25px;
+    letter-spacing: 3px;
+    border: 5px solid #fff;
+    border-radius: 30px;
+    box-shadow: 0px 6.8px 3.4px -19px rgb(0 0 0 / 2%), 0px 10.1px 7.5px -19px rgb(0 0 0 / 2%), 0px 11.3px 13px -19px rgb(0 0 0 / 2%), 0px 11.3px 22.3px -19px rgb(0 0 0 / 3%), 0px 11.1px 42px -19px rgb(0 0 0 / 5%), 0px 15px 164px -19px rgb(0 0 0 / 7%);
   }
 </style>

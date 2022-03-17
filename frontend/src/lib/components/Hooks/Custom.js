@@ -85,6 +85,16 @@ export const messageProcessor = (result) => {
   return message
 }
 
+export const redirectToMain = () => {
+  setTimeout(async () => { 
+    goto("/")
+  }, 5e2)
+}
+
+const checkRetrive = (result) => {
+  return (!!result.assets && result.assets === "retrieve")
+}
+
 export const retryFetch = async (url, options, user) => {
   let count = 0,
       maxTries = 3,
@@ -100,14 +110,8 @@ export const retryFetch = async (url, options, user) => {
   })
 
   while (retry) {
-      result = await fetch(url, opts).then(response => response.json())
-      // debugger
-      // console.group(`RetryFetch to ${url}`)
-      // console.log("Need to retry: ", !!result.assets)
-      // console.log("Retry status:", retry)
-      // console.log("Current step:", count+1)
-      // console.groupEnd(`RetryFetch to ${url}`)
-    if (!!result.assets && result.assets === "retrieve") {
+    result = await fetch(url, opts).then(response => response.json())
+    if (checkRetrive(result)) {
       let resign = await retrieveSession()
 
       if (!!resign.user) {
@@ -120,9 +124,7 @@ export const retryFetch = async (url, options, user) => {
       if (resign.assets === "unauthorize") {
         removeUserFromStorage()
         user.set(null)
-        setTimeout(async () => { 
-          goto("/")
-        }, 5e2)
+        redirectToMain()
       }
 
       if (++count == maxTries) {
