@@ -87,20 +87,25 @@
     {:else}
       <Loader />
     {/if}
+    <hr />
+    <p>В разделе &laquo;Компании&raquo; вы можете рассмотреть все предложения и подобрать подходящую компанию по параметрам</p>
+    <p><a href="/companies" class="button">Перейти в раздел</a></p>
   </section>
   <section id="reviews">
     <h2>Отзывы:</h2>
     {#if reviews?.data?.message}
       <p class="ligher">{reviews.data.message}</p>
     {:else if !reviews?.data?.message && reviews.data}
-      <Reviews data={reviews.data} short={true} />
+      {#each reviews.data.data as item}
+        <ReviewItem {item} />
+      {/each}
     {:else}
       <Loader />
     {/if}
   </section>
   <section id="request-event">
     <RequestForm>
-      <h4>Оставьте заявку на проведение уборки</h4>
+      <h4>Знаете название компании? Оставьте заявку прямо в этой форме:</h4>
     </RequestForm>
   </section>
 </Article>

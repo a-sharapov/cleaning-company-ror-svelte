@@ -36,13 +36,12 @@ class Api::V1::CleaningEventController < ApplicationController
   def new
     begin
       user = prepare_user!
-      escape_with!(:events, :already_exist, :ok) if Review.find_by(customer: user.login)
       event = CleaningEvent.new(event_parameters)
       event.customer = user ? user.login : "Anonymous"
       company = CompanyProfile.find_by(company_name: event_parameters[:company_name])
       escape_with!(:profiles, :not_exist, :ok, review.errors.full_messages) unless company
       event.company_profile = company
-      escape_with!(:events, :already_exist, :ok) if CleaningEvent.find_by(customer: user.login, company_profile: company)
+      escape_with!(:events, :already_exist, :ok) if CleaningEvent.find_by(customer: user.login, company_profile: company.company_name, planed_at: event_parameters[:planed_at])
       escape_with!(:api, :invalid_request, :ok, event.errors.full_messages) unless event.valid? && event.save()
       if event_parameters[:attachments].present?
         event_parameters[:attachments].map { |attachment_data| 
@@ -90,6 +89,7 @@ class Api::V1::CleaningEventController < ApplicationController
   def event_parameters 
     params.permit(
       :customer,
+      :company_name,
       :type,
       :description,
       :schedule,
@@ -104,12 +104,13 @@ class Api::V1::CleaningEventController < ApplicationController
         :state, 
         :street
       ],
-      assets: {
+      assets: [
         :standard,
         :large,
         :restroom,
-        :invoice
-      }
+        :amount,
+        :contact
+      ]
     )
   end
 

@@ -36,14 +36,19 @@ class Api::V1::ReviewController < ApplicationController
 
   def new
     begin
-      escape_with!(:reviews, :self, :ok) if review_parameters[:company_name] == @user.company_profile.company_name
+      if @user
+        escape_with!(:reviews, :self, :ok) if @user.company_profile.company_name.eql?(review_parameters[:company_name])
+      end
       escape_with!(:reviews, :already_exist, :ok) if Review.find_by({customer: review_parameters[:customer], company_name: review_parameters[:company_name]})
       review = Review.new(review_parameters)
       company = CompanyProfile.find_by(company_name: review_parameters[:company_name])
       escape_with!(:profiles, :not_exist, :ok) unless company
       review.company_profile = company
       escape_with!(:api, :invalid_request, :ok, review.errors.full_messages) unless review.valid? && review.save()
-      render_data(review)
+      render json: {
+        message: ApiError::MESSAGES[:reviews][:created],
+        review: render_data(review)
+      }, status: :ok and return
     rescue ApiError => e
       render_api_error(e)
     end
@@ -91,6 +96,7 @@ class Api::V1::ReviewController < ApplicationController
   private
   def review_parameters
     params.permit(
+      :customer,
       :company_name,
       :description,
       :assessment,
@@ -107,9 +113,9 @@ class Api::V1::ReviewController < ApplicationController
 
   def get_user_by_login
     login = review_parameters[:customer]
-    @user = User.find_by(:login => login)
-    @user = User.find_by(:email => login) unless @user
-    @user = User.find_by(:phone => login) unless @user
+    @user = User.find_by(login: login)
+    @user = User.find_by(email: login) unless @user
+    @user = User.find_by(phone: login) unless @user
   end
 
   def set_reviews_search_query
@@ -117,7 +123,7 @@ class Api::V1::ReviewController < ApplicationController
 
     case true
       when !params[:company_name].nil?
-        @search_query[:company_name] = /.*#{param_to_search(params[:company_name])}.*/
+        @search_query[:company_name] = /.*#{param_to_search(params[:company])}.*/
       when !params[:customer].nil?
         @search_query[:customer] = /.*#{param_to_search(params[:customer])}.*/
       when !params[:assessment].nil?
