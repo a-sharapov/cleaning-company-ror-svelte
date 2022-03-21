@@ -7,6 +7,7 @@ class Api::V1::CompanyProfileController < ApplicationController
   def index
     begin
       profiles = CompanyProfile.all_of(@search_query).limit(@limit).offset(@offset).asc(:id)
+      profiles = profiles.where(service_types: {'$in': params[:service_types]}) if params[:service_types].present?
       escape_with!(:profiles, :not_found, :ok) unless profiles.any?
       data = except_all(profiles)
       records = profiles.count
@@ -134,10 +135,10 @@ class Api::V1::CompanyProfileController < ApplicationController
     case true
       when !params[:company_name].nil?
         @search_query[:company_name] = /.*#{param_to_search(params[:company_name])}.*/
-      when !params[:service_types].nil?
-        @search_query[:service_types] = /.*#{param_to_search(params[:service_types])}.*/
-      when !params[:prices].nil?
-        @search_query[:prices] = /.*#{param_to_search(params[:prices])}.*/
+      when !params[:street].nil?
+        @search_query[:'address.street'] = /.*#{param_to_search(params[:street])}.*/
+      when !params[:city].nil?
+        @search_query[:'address.city'] = /.*#{param_to_search(params[:city])}.*/
     end
   end
 end

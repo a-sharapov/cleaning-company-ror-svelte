@@ -6,11 +6,11 @@ const fetchOpts = {
   cache: 'no-cache',
 }
 
-const joinOpts = (opts) => {
+export const joinOpts = (opts) => {
   let query = ""
 
   if (opts) {
-    o = Object.keys(opts).map((val) => {
+    let o = Object.keys(opts).map((val) => {
       return encodeURIComponent(`${val}=${opts[val]}`)
     })
     query = "?" + o.join("&")
@@ -209,6 +209,11 @@ export const setReview = async (body) => {
     method: "post",
     body,
   })
+  return output
+}
+
+export const getCompanies = async (opts) => {
+  let output = await ApiRequest(`companies/${opts}`)
   return output
 }
 

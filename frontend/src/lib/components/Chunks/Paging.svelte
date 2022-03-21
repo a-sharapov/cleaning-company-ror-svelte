@@ -2,21 +2,61 @@
   export let current = 1
   export let total
   export let processor
-
+  export let maxPages = 6
+  
+  let halfMax = Math.floor(maxPages / 2)
   let pages = []
-  let counter = 1
-  while (counter <= total) {
-    pages.push(counter)
-    counter++
+  let i = 1
+
+  switch (true) {
+    case (current >= 1 && current < maxPages):
+      i = 1
+      while (i <= total) {
+        pages.push(i)
+        i++
+      }
+      break
+    case (current >= 1 && current <= halfMax + 1 && current >= maxPages):
+      i = 1
+      while (i <= maxPages - 1) {
+        pages.push(i)
+        i++
+      }
+      pages.push("...")
+      pages.push(total)
+      break
+    case (current > 1 && current > halfMax+1 && current <= (total - maxPages)):
+      pages.push(1)
+      pages.push("...")
+      i = current - halfMax
+      while (i <= current + halfMax) {
+        pages.push(i)
+        i++
+      }
+      pages.push("...")
+      pages.push(total)
+      break
+    case (current <= total && current > (total - maxPages)):
+      pages.push(1)
+      pages.push("...")
+      i = total - maxPages
+      while (i <= total) {
+        pages.push(i)
+        i++
+      }
+      break
   }
 </script>
 
+{#if total > 1}
 <nav aria-label="pagination">
   {#if current > 1 && current <= total}
     <span class="page previous" data-page="{current-1}" on:click="{processor}">Предыдущая</span>
   {/if}
   {#each pages as page}
-    {#if page === current}
+    {#if page === "..."} 
+      <span class="paging-delimeter">{page}</span>
+    {:else if page === current && typeof page === "number"}
       <span class="page active">{page}</span>
     {:else}
       <span class="page" data-page="{page}" on:click="{processor}">{page}</span>
@@ -26,6 +66,7 @@
     <span class="page next" data-page="{current+1}" on:click="{processor}">Следующая</span>
   {/if}
 </nav>
+{/if}
 
 <style>
   nav[aria-label="pagination"] {

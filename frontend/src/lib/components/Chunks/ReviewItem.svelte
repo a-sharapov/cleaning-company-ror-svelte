@@ -43,7 +43,7 @@
     padding: 10px;
     border-radius: 3px;
     border-bottom: 3px solid var(--mf-darkgray);
-    box-shadow: 0px 5px 10px rgb(20 0 0 / 5%), 0px 25px 80px rgb(20 0 0 / 10%);
+    box-shadow: 0px 5px 10px rgb(20 0 0 / 2%), 0px 15px 50px rgb(20 0 0 / 5%);
   }
 
   .review-body:before,
