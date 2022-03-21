@@ -1,6 +1,8 @@
 <script>
   import { browser } from '$app/env'
   import Loader from "$lib/components/UI/Loader.svelte"
+  import ReviewItem from "$lib/components/Chunks/ReviewItem.svelte"
+  import Paging from "$lib/components/Chunks/Paging.svelte"
   import { getCompanyReviews, getCompanyProfile } from "$lib/components/Utils/Requests.js"
   import { 
     messageProcessor,
@@ -11,6 +13,13 @@
 
   let userCompanyReviews = writable(null)
   let loading = writable(true)
+
+  const handleOnMore = async (event) => {
+    let companyProfile = await getCompanyProfile($user, user)
+    let next = event.target.getAttribute("data-page")
+    let result = await getCompanyReviews(companyProfile.company_name, next)
+    userCompanyReviews.set(result)
+  }
 
   browser && new Promise(async (res) => {
     let companyProfile = await getCompanyProfile($user, user)
@@ -33,6 +42,9 @@
 {#if $userCompanyReviews?.message}
   <p>{$userCompanyReviews?.message}</p>
 {/if}
-{#if Array.isArray($userCompanyReviews)}
-
+{#if $userCompanyReviews?.data?.length > 0}
+  {#each $userCompanyReviews.data as item}
+  <ReviewItem {item} width={"full"} />
+  {/each}
+  <Paging total="{$userCompanyReviews.total_pages}" current="{$userCompanyReviews.current_page}" processor="{handleOnMore}" />
 {/if}

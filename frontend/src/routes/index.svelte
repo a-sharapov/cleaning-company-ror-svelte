@@ -102,6 +102,8 @@
     {:else}
       <Loader />
     {/if}
+    <hr />
+    <p><a href="/reviews" class="button">Читать больше отзывов</a></p>
   </section>
   <section id="request-event">
     <RequestForm>

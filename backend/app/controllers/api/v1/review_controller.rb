@@ -38,8 +38,9 @@ class Api::V1::ReviewController < ApplicationController
     begin
       if @user
         escape_with!(:reviews, :self, :ok) if @user.company_profile.company_name.eql?(review_parameters[:company_name])
+        escape_with!(:reviews, :already_exist, :ok) if Review.find_by({customer: review_parameters[:customer], company_name: review_parameters[:company_name]})
       end
-      escape_with!(:reviews, :already_exist, :ok) if Review.find_by({customer: review_parameters[:customer], company_name: review_parameters[:company_name]})
+      escape_with!(:reviews, :already_exist, :ok) if Review.find_by(description: review_parameters[:description])
       review = Review.new(review_parameters)
       company = CompanyProfile.find_by(company_name: review_parameters[:company_name])
       escape_with!(:profiles, :not_exist, :ok) unless company
@@ -47,7 +48,7 @@ class Api::V1::ReviewController < ApplicationController
       escape_with!(:api, :invalid_request, :ok, review.errors.full_messages) unless review.valid? && review.save()
       render json: {
         message: ApiError::MESSAGES[:reviews][:created],
-        review: render_data(review)
+        review: except_data!(review)
       }, status: :ok and return
     rescue ApiError => e
       render_api_error(e)
@@ -76,7 +77,7 @@ class Api::V1::ReviewController < ApplicationController
         reviews.each do |review|
           assessment += review.assessment.to_i
         end
-        average = (assessment.to_i/records.to_i).ceil
+        average = (assessment.to_f/records.to_f).ceil(2)
         message = {
           count: records,
           assessment: average

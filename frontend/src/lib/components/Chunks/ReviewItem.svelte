@@ -3,11 +3,12 @@
   import { browser } from '$app/env'
 
   export let item
+  export let width = "normal"
 </script>
 
-<div class="review-item" data-id="{item.slug}">
+<div class="review-item" data-id="{item.slug}" data-width={width}>
   <span class="review-body">
-    <span class="review-to-company">Отзвы о компании &laquo;{item.company_name}&raquo;</span>
+    <span class="review-to-company">Отзыв о компании &laquo;{item.company_name}&raquo;</span>
     <span class="review-assessment" data-assessment="{item.assessment}">
       {item.assessment}
     </span>
@@ -27,6 +28,11 @@
     margin: 0 10px 10px;
     width: calc(100% / 5 - 20px);
     text-align: left;
+    vertical-align: top;
+  }
+
+  .review-item[data-width="full"] {
+    width: calc(100% - 20px);
   }
 
   .review-body {
@@ -37,6 +43,7 @@
     padding: 10px;
     border-radius: 3px;
     border-bottom: 3px solid var(--mf-darkgray);
+    box-shadow: 0px 5px 10px rgb(20 0 0 / 5%), 0px 25px 80px rgb(20 0 0 / 10%);
   }
 
   .review-body:before,
@@ -98,7 +105,7 @@
   }
 
   :global(.review-assessment:after) {
-    filter: grayscale(1);
+    filter: grayscale(1) brightness(1.2);
   }
 
   .review-assessment[data-assessment="5"]:before {
@@ -160,6 +167,7 @@
     border-radius: 16px;
     background: #fff;
     margin: 0 5px 0 0;
+    box-shadow: 0 1px 5px #00000030;
   }
 
   .review-smile[data-assessment="5"],
