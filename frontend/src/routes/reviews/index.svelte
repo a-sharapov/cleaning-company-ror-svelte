@@ -68,7 +68,18 @@
   <aside id="reviews-filter">
     <form id="page-content-filter" action="/reviews" method="get" on:submit="{handleOnFilter}">
       <h4>Отфильтровать по параметрам:</h4>
-      <label data-width="half">
+      <label data-width="third">
+        Название комании содержит:<br />
+        <input type="text" name="company_name" value="" placeholder="..." />
+      </label><label data-width="third">
+        Оценки:<br />
+        <select name="review_type">
+          <option value="">Все</option>
+          <option value="5,4">Только положительные</option>
+          <option value="3">Только смешанные</option>
+          <option value="2,1">Только отрицательные</option>
+        </select>
+      </label><label data-width="third">
         Элементов на странице:<br />
         <select name="limit" bind:value="{$limit}">
           {#each [5,10,15,30,50,100] as item}

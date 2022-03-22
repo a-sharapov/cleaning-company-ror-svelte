@@ -8,6 +8,7 @@ class Api::V1::ReviewController < ApplicationController
   def index
     begin
       reviews = Review.all_of(@search_query).limit(@limit).offset(@offset).asc(:id)
+      reviews = reviews.where(assessment: {'$in': params[:review_type].split(',')}) if params[:review_type].present?
       escape_with!(:reviews, :not_found, :ok) unless reviews.any?
       data = except_all(reviews)
       records = reviews.count
@@ -124,11 +125,7 @@ class Api::V1::ReviewController < ApplicationController
 
     case true
       when !params[:company_name].nil?
-        @search_query[:company_name] = /.*#{param_to_search(params[:company])}.*/
-      when !params[:customer].nil?
-        @search_query[:customer] = /.*#{param_to_search(params[:customer])}.*/
-      when !params[:assessment].nil?
-        @search_query[:assessment] = param_to_search(params[:assessment])
+        @search_query[:company_name] = /.*#{param_to_search(params[:company_name])}.*/
     end
   end
 end
