@@ -27,6 +27,7 @@
   import Loader from "$lib/components/UI/Loader.svelte"
   import Head from "$lib/components/Seo/Head.svelte"
   import ReviewItem from "$lib/components/Chunks/ReviewItem.svelte"
+  import Paging from "$lib/components/Chunks/Paging.svelte"
   import ReviewForm from "$lib/components/Forms/ReviewForm.svelte"
   import RequestForm from "$lib/components/Forms/RequestForm.svelte"
   import { browser } from '$app/env'
@@ -42,11 +43,18 @@
   browser && (loading.set(false))
   browser && new Promise(async (res) => {
     let raiting = await getRaiting(company.slug)
-    let reviews = await getCompanyReviews(company.slug)
+    let reviews = await getCompanyReviews(company.company_name)
     companyAssessment.set(raiting)
     companyReviews.set(reviews)
     res()
   })
+
+  const handleOnPaging = async (event) => {
+    event.preventDefault()
+    let page = event.target.getAttribute("data-page")
+    let result = await getCompanyReviews(company.company_name, page)
+    companyReviews.set(result)
+  }
 </script>
 
 <Head {title} metaDescription={null} metaKeywords={null} metaRobots={"noindex, nofollow"} />
@@ -113,6 +121,7 @@
           {#each $companyReviews.data as item}
           <ReviewItem {item} />
           {/each}
+          <Paging total="{$companyReviews.total_pages}" current="{$companyReviews.current_page}" processor="{handleOnPaging}" />
         {/if}
       </div>
       <RequestForm company={company.company_name}>
