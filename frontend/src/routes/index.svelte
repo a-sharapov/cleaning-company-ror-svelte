@@ -77,33 +77,37 @@
     </ul>
   </section>
   <section id="companies">
-    <h2>Компании:</h2>
-    {#if companies?.data?.message}
-      <p class="ligher">{companies.data.message}</p>
-    {:else if !companies?.data?.message && companies.data}
-      {#each companies.data.data as item}
-        <CompanyItem {item} />
-      {/each}
-    {:else}
-      <Loader />
-    {/if}
-    <hr />
-    <p>В разделе &laquo;Компании&raquo; вы можете рассмотреть все предложения и подобрать подходящую компанию по параметрам</p>
-    <p><a href="/companies" class="button">Перейти в раздел</a></p>
+    <div class="row">
+      <h2>Компании:</h2>
+      {#if companies?.data?.message}
+        <p class="ligher">{companies.data.message}</p>
+      {:else if !companies?.data?.message && companies.data}
+        {#each companies.data.data as item}
+          <CompanyItem {item} />
+        {/each}
+      {:else}
+        <Loader />
+      {/if}
+      <hr />
+      <p>В разделе &laquo;Компании&raquo; вы можете рассмотреть все предложения и подобрать подходящую компанию по параметрам</p>
+      <p><a href="/companies" class="button">Перейти в раздел</a></p>
+    </div>
   </section>
   <section id="reviews">
-    <h2>Отзывы:</h2>
-    {#if reviews?.data?.message}
-      <p class="ligher">{reviews.data.message}</p>
-    {:else if !reviews?.data?.message && reviews.data}
-      {#each reviews.data.data as item}
-        <ReviewItem {item} />
-      {/each}
-    {:else}
-      <Loader />
-    {/if}
-    <hr />
-    <p><a href="/reviews" class="button">Читать больше отзывов</a></p>
+    <div class="row">
+      <h2>Отзывы:</h2>
+      {#if reviews?.data?.message}
+        <p class="ligher">{reviews.data.message}</p>
+      {:else if !reviews?.data?.message && reviews.data}
+        {#each reviews.data.data as item}
+          <ReviewItem {item} />
+        {/each}
+      {:else}
+        <Loader />
+      {/if}
+      <hr />
+      <p><a href="/reviews" class="button">Читать больше отзывов</a></p>
+    </div>
   </section>
   <section id="request-event">
     <RequestForm>
@@ -137,6 +141,13 @@
     display: inline-block;
     width: 600px;
     vertical-align: bottom;
+  }
+
+  section#companies .row, 
+  section#reviews .row {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
   }
 
   section#banner .row h1:first-of-type {

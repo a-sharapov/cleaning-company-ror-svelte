@@ -8,9 +8,10 @@
   let pages = []
   let i = 1
 
-  switch (true) {
+  $: switch (true) {
     case (current >= 1 && current < maxPages):
       i = 1
+      pages = []
       while (i <= total) {
         pages.push(i)
         i++
@@ -18,6 +19,7 @@
       break
     case (current >= 1 && current <= halfMax + 1 && current >= maxPages):
       i = 1
+      pages = []
       while (i <= maxPages - 1) {
         pages.push(i)
         i++
@@ -26,6 +28,7 @@
       pages.push(total)
       break
     case (current > 1 && current > halfMax+1 && current <= (total - maxPages)):
+      pages = []
       pages.push(1)
       pages.push("...")
       i = current - halfMax
@@ -37,6 +40,7 @@
       pages.push(total)
       break
     case (current <= total && current > (total - maxPages)):
+      pages = []
       pages.push(1)
       pages.push("...")
       i = total - maxPages
@@ -73,6 +77,7 @@
     display: block;
     width: 100%;
     padding: 10px;
+    user-select: none;
   }
 
   nav > span {

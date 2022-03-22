@@ -41,16 +41,30 @@
   let title = "Наши партнёры"
 
   browser && (loading.set(false))
-  
-  const handleOnFilter = async (event) => {
-    event.preventDefault()
-    let data = new FormData(event.target)
+
+  const getCompaniesWithData = async (data, appendix = "") => {
+    loading.set(true)
     let getOpts = "?" + new URLSearchParams(prepareFormData(data, {
       company_name: "",
       city: "",
       street: ""
     })).toString()
-    let result = await getCompanies(getOpts)
+    let result = await getCompanies(getOpts + appendix).then(loading.set(false))
+    return result
+  }
+  
+  const handleOnFilter = async (event) => {
+    event.preventDefault()
+    let data = new FormData(event.target)
+    let result = await getCompaniesWithData(data)
+    companies = result
+  }
+
+  const handleOnPaging = async (event) => {
+    event.preventDefault()
+    let next = event.target.getAttribute("data-page")
+    let data = new FormData(document.getElementById("page-content-filter"))
+    let result = await getCompaniesWithData(data, `&page=${next}`)
     companies = result
   }
 </script>
@@ -89,19 +103,21 @@
       </label>
     </form>
   </aside>
-  <session id="companies-wrapper" data-loading="{$loading}">
-    {#if $loading}
+  <section id="companies-wrapper" data-loading="{$loading}">
+    <div class="row">
+      {#if $loading}
       <Loader />
-    {/if}
-    {#if companies.message}
-      <p>{companies.message}</p>
-    {:else if companies.data}
-      {#each companies.data as item}
-        <CompanyItem {item} />
-      {/each}
-      <Paging total="{companies.total_pages}" current="{companies.current_page}" processor="{handleOnFilter}"/>
-    {/if}
-  </session>
+      {/if}
+      {#if companies?.message}
+        <p>{companies.message}</p>
+      {:else if companies?.data}
+        {#each companies.data as item}
+          <CompanyItem {item} />
+        {/each}
+        <Paging total="{companies.total_pages}" current="{companies.current_page}" processor="{handleOnPaging}" />
+      {/if}
+    </div>
+  </section>
 </article>
 
 <style>
@@ -121,6 +137,13 @@
 
   #page-content-filter {
     width: 700px;
+    margin: 0 auto;
+  }
+
+  .row {
+    display: block;
+    width: 100%;
+    max-width: 1400px;
     margin: 0 auto;
   }
 </style>

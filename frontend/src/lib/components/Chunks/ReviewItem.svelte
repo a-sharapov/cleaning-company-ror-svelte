@@ -26,7 +26,7 @@
   .review-item {
     display: inline-block;
     margin: 0 10px 10px;
-    width: calc(100% / 5 - 20px);
+    width: calc(100% / 3 - 20px);
     text-align: left;
     vertical-align: top;
   }

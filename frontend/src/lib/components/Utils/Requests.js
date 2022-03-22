@@ -217,6 +217,11 @@ export const getCompanies = async (opts) => {
   return output
 }
 
+export const getReviews = async (opts) => {
+  let output = await ApiRequest(`reviews/${opts}`)
+  return output
+}
+
 export const getCompanyPartial = async (company_slug, partial) => {
   let output = await ApiRequest(`company_partial/${company_slug}/?type=${partial}`)
   return output
